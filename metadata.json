@@ -1,0 +1,6 @@
+{
+  "name": "Theprescription",
+  "description": "Theprescription - AI clinical handwriting decryption, doctor prescription deciphering, precision dosage timing, and patient medication safety.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
