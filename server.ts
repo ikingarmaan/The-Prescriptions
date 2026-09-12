@@ -8,6 +8,9 @@ import { postProcessPrescriptionResultWithNLP } from "./src/utils/smartNlpEngine
 dotenv.config();
 
 function getGenAIClient(): GoogleGenAI {
+  if (!process.env.GEMINI_API_KEY) {
+    dotenv.config({ override: true });
+  }
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY environment variable is missing.");
@@ -367,6 +370,9 @@ async function startServer() {
 
   // API Health Check
   app.get("/api/health", (_req: Request, res: Response) => {
+    if (!process.env.GEMINI_API_KEY) {
+      dotenv.config({ override: true });
+    }
     res.json({
       status: "ok",
       hasGeminiKey: Boolean(process.env.GEMINI_API_KEY),
