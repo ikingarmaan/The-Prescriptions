@@ -315,13 +315,13 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
         })}
       </div>
 
-      {/* Homepage specific: Clear Call-To-Action to View All 26 Questions */}
+      {/* Homepage specific: Clear Call-To-Action to View All Questions */}
       {variant === 'homepage' && (
         <div className="w-full mx-auto mt-6 bg-slate-900 text-white p-5 rounded-2xl shadow-md flex flex-col sm:flex-row items-center justify-between gap-4 border border-slate-800">
           <div className="text-center sm:text-left space-y-1">
             <div className="text-xs font-extrabold uppercase tracking-wider text-emerald-400 flex items-center justify-center sm:justify-start gap-1.5">
               <BookOpen className="w-3.5 h-3.5" />
-              <span>Showing 4 of 26 Medical FAQs</span>
+              <span>Showing 4 of {FAQ_DATABASE.length} Medical FAQs</span>
             </div>
             <p className="text-xs text-slate-300 font-medium">
               Have questions about drug interactions, pediatric doses, Latin codes, or e-prescriptions?
@@ -335,7 +335,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
                 onClick={() => onNavigateToTab('faq')}
                 className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-xs transition-colors shadow-sm cursor-pointer flex items-center gap-2"
               >
-                <span>View All 26 Questions</span>
+                <span>View All {FAQ_DATABASE.length} Questions</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             ) : (
@@ -344,7 +344,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
                 onClick={() => setHomepageShowAll(!homepageShowAll)}
                 className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-xs transition-colors shadow-sm cursor-pointer flex items-center gap-2"
               >
-                <span>{homepageShowAll ? 'Show 4 FAQs' : 'Expand All 26 FAQs'}</span>
+                <span>{homepageShowAll ? 'Show 4 FAQs' : `Expand All ${FAQ_DATABASE.length} FAQs`}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             )}
