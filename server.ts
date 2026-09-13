@@ -1,17 +1,70 @@
 import express, { type Request, type Response } from "express";
 import path from "path";
 import fs from "fs";
+import os from "node:os";
+import net from "node:net";
+import dns from "node:dns";
 import dotenv from "dotenv";
 import nodemailer, { type SendMailOptions } from "nodemailer";
-import dns from "node:dns";
 import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
 import { postProcessPrescriptionResultWithNLP } from "./src/utils/smartNlpEngine";
 
-// Force IPv4 first across all DNS lookups to eliminate IPv6 ENETUNREACH errors in Docker/Railway containers
+// 1. Force IPv4 first across Node DNS lookups to eliminate IPv6 ENETUNREACH in Docker/Railway
 try {
   dns.setDefaultResultOrder?.("ipv4first");
 } catch {
   // Graceful fallback on older Node runtimes
+}
+
+// 2. Monkey-patch os.networkInterfaces to filter out IPv6 on Railway/Docker containers
+try {
+  const origNetworkInterfaces = os.networkInterfaces;
+  os.networkInterfaces = () => {
+    const interfaces = origNetworkInterfaces.call(os);
+    const filtered: Record<string, os.NetworkInterfaceInfo[]> = {};
+    for (const [name, addrs] of Object.entries(interfaces as Record<string, os.NetworkInterfaceInfo[] | undefined>)) {
+      if (Array.isArray(addrs)) {
+        filtered[name] = addrs.filter((addr) => addr.family === "IPv4" || (addr as any).family === 4);
+      }
+    }
+    return filtered;
+  };
+} catch {
+  // Graceful fallback
+}
+
+// 3. Patch Nodemailer's internal resolveHostname to filter out all IPv6 addresses
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const shared = require("nodemailer/lib/shared");
+  if (shared && typeof shared.resolveHostname === "function") {
+    const origResolve = shared.resolveHostname;
+    shared.resolveHostname = (options: any, callback: any) => {
+      origResolve(options, (err: any, res: any) => {
+        if (res && res._addresses && Array.isArray(res._addresses)) {
+          res._addresses = res._addresses.filter((a: any) => typeof a === "string" && !a.includes(":"));
+          if (res.host && typeof res.host === "string" && res.host.includes(":")) {
+            res.host = res._addresses[0] || null;
+          }
+        }
+        if (!res?.host || !res?._addresses?.length) {
+          dns.lookup(options?.host || "smtp.gmail.com", { family: 4 }, (lookupErr, address) => {
+            if (!lookupErr && address) {
+              if (!res) res = { servername: options?.host || "smtp.gmail.com", cached: false };
+              res.host = address;
+              res._addresses = [address];
+              return callback(null, res);
+            }
+            return callback(err, res);
+          });
+          return;
+        }
+        callback(err, res);
+      });
+    };
+  }
+} catch {
+  // Graceful fallback
 }
 
 dotenv.config();
@@ -25,7 +78,22 @@ function escapeHtml(str: string): string {
     .replace(/'/g, "&#039;");
 }
 
-function getMailTransporter(preferredPort: number = 465) {
+async function resolveIpv4Host(hostname: string): Promise<string> {
+  if (net.isIP(hostname)) {
+    return hostname;
+  }
+  try {
+    const lookupRes = await dns.promises.lookup(hostname, { family: 4 });
+    if (lookupRes?.address) {
+      return lookupRes.address;
+    }
+  } catch (e) {
+    console.warn(`[DNS] Direct IPv4 lookup fallback for ${hostname}:`, e);
+  }
+  return hostname;
+}
+
+async function getMailTransporter(preferredPort: number = 465) {
   const user = process.env.EMAIL_USER || process.env.GMAIL_USER || "Theprescriptionn@gmail.com";
   const pass = (
     process.env.EMAIL_APP_PASSWORD ||
@@ -39,36 +107,20 @@ function getMailTransporter(preferredPort: number = 465) {
     return null;
   }
 
-  // Custom SMTP host if user provided one
-  if (process.env.SMTP_HOST) {
-    const port = parseInt(process.env.SMTP_PORT || String(preferredPort), 10);
-    return nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port,
-      secure: port === 465,
-      family: 4, // Force IPv4
-      auth: {
-        user,
-        pass,
-      },
-      tls: {
-        rejectUnauthorized: false,
-      },
-    } as any);
-  }
-
-  // Default: Gmail SMTP with explicit IPv4 family flag to bypass Railway IPv6 ENETUNREACH
+  const baseHost = process.env.SMTP_HOST || "smtp.gmail.com";
   const port = parseInt(process.env.SMTP_PORT || String(preferredPort), 10);
+  const resolvedIpv4 = await resolveIpv4Host(baseHost);
+
   return nodemailer.createTransport({
-    host: "smtp.gmail.com",
+    host: resolvedIpv4,
     port,
     secure: port === 465, // SSL on 465, STARTTLS on 587
-    family: 4, // CRITICAL: Forces IPv4, prevents IPv6 ENETUNREACH on Railway/Docker
     auth: {
       user,
       pass,
     },
     tls: {
+      servername: baseHost, // Ensures SSL/TLS cert validates against smtp.gmail.com
       rejectUnauthorized: false,
     },
     connectionTimeout: 10000,
@@ -84,7 +136,7 @@ async function sendMailWithFallback(mailOptions: SendMailOptions) {
 
   for (const port of portsToTry) {
     try {
-      const transporter = getMailTransporter(port);
+      const transporter = await getMailTransporter(port);
       if (!transporter) return null;
       return await transporter.sendMail(mailOptions);
     } catch (err: any) {
@@ -653,7 +705,7 @@ async function startServer() {
       const cleanMessage = message.trim();
       const adminEmail = process.env.EMAIL_USER || "Theprescriptionn@gmail.com";
 
-      const transporter = getMailTransporter();
+      const transporter = await getMailTransporter();
 
       if (!transporter) {
         console.warn(
@@ -785,7 +837,7 @@ async function startServer() {
   app.get("/api/test-email", async (_req: Request, res: Response) => {
     try {
       const adminEmail = process.env.EMAIL_USER || "Theprescriptionn@gmail.com";
-      const transporter = getMailTransporter();
+      const transporter = await getMailTransporter();
       if (!transporter) {
         res.status(400).json({
           success: false,
