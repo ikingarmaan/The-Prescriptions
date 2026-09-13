@@ -20,9 +20,12 @@ import { FaqSection } from './components/FaqSection';
 import { ThePrescriptionLogo } from './components/ThePrescriptionLogo';
 import { HowItWorksGuide } from './components/HowItWorksGuide';
 import { Footer } from './components/Footer';
+import { HomeSeoArticle } from './components/HomeSeoArticle';
+import { useSeoMetadata } from './utils/seo';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<AppNavTab>('prescription');
+  useSeoMetadata(activeTab);
   const [analysisResult, setAnalysisResult] = useState<PrescriptionAnalysisResult | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [analyzingImage, setAnalyzingImage] = useState<string | null>(null);
@@ -420,6 +423,9 @@ export default function App() {
                     </button>
                   </div>
                 </div>
+
+                {/* Comprehensive SEO & Patient Health Literacy Guide (1,800+ Words) */}
+                <HomeSeoArticle onNavigateToTab={(tab) => setActiveTab(tab as AppNavTab)} />
               </>
             ) : (
               <PrescriptionResultView
