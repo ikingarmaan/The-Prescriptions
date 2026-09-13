@@ -7,19 +7,92 @@ import { postProcessPrescriptionResultWithNLP } from "./src/utils/smartNlpEngine
 
 dotenv.config();
 
-function getGenAIClient(): GoogleGenAI {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    throw new Error("GEMINI_API_KEY environment variable is missing.");
+function getGeminiApiKeys(): string[] {
+  const keys: string[] = [];
+
+  // 1. GEMINI_API_KEY (supports comma or semicolon separated keys: key1,key2)
+  if (process.env.GEMINI_API_KEY) {
+    for (const k of process.env.GEMINI_API_KEY.split(/[,;]+/)) {
+      const trimmed = k.trim();
+      if (trimmed && !keys.includes(trimmed)) {
+        keys.push(trimmed);
+      }
+    }
   }
-  return new GoogleGenAI({
-    apiKey,
-    httpOptions: {
-      headers: {
-        "User-Agent": "aistudio-build",
+
+  // 2. GEMINI_API_KEY_1, GEMINI_API_KEY_2, etc.
+  for (let i = 1; i <= 10; i++) {
+    const k = process.env[`GEMINI_API_KEY_${i}`];
+    if (k && k.trim() && !keys.includes(k.trim())) {
+      keys.push(k.trim());
+    }
+  }
+
+  // 3. GEMINI_API_KEYS (plural name support)
+  if (process.env.GEMINI_API_KEYS) {
+    for (const k of process.env.GEMINI_API_KEYS.split(/[,;]+/)) {
+      const trimmed = k.trim();
+      if (trimmed && !keys.includes(trimmed)) {
+        keys.push(trimmed);
+      }
+    }
+  }
+
+  return keys;
+}
+
+// Client instances cache per key
+const clientCache = new Map<string, GoogleGenAI>();
+
+function getClientForKey(apiKey: string): GoogleGenAI {
+  let client = clientCache.get(apiKey);
+  if (!client) {
+    client = new GoogleGenAI({
+      apiKey,
+      httpOptions: {
+        headers: {
+          "User-Agent": "the-prescription-multi-key",
+        },
       },
-    },
-  });
+    });
+    clientCache.set(apiKey, client);
+  }
+  return client;
+}
+
+let keyRoundRobinIndex = 0;
+
+function getOrderedApiKeys(): string[] {
+  const allKeys = getGeminiApiKeys();
+  if (allKeys.length === 0) {
+    throw new Error(
+      "GEMINI_API_KEY environment variable is missing. Please add GEMINI_API_KEY (and optionally GEMINI_API_KEY_2) in your Railway project Variables."
+    );
+  }
+  if (allKeys.length === 1) {
+    return allKeys;
+  }
+
+  // Round-robin start index so requests are evenly distributed across keys
+  const startIndex = keyRoundRobinIndex % allKeys.length;
+  keyRoundRobinIndex = (keyRoundRobinIndex + 1) % allKeys.length;
+
+  const ordered: string[] = [];
+  for (let i = 0; i < allKeys.length; i++) {
+    ordered.push(allKeys[(startIndex + i) % allKeys.length]);
+  }
+  return ordered;
+}
+
+function cleanAndParseJson(raw: string): any {
+  if (!raw || typeof raw !== "string") {
+    throw new Error("Empty response received from AI model.");
+  }
+  let cleaned = raw.trim();
+  if (cleaned.startsWith("```")) {
+    cleaned = cleaned.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
+  }
+  return JSON.parse(cleaned);
 }
 
 const analysisSchema = {
@@ -310,51 +383,91 @@ async function callGeminiWithRetry(params: {
   config: any;
   primaryModel?: string;
 }): Promise<string> {
-  const ai = getGenAIClient();
+  const orderedKeys = getOrderedApiKeys();
   const modelsToTry = [
-    params.primaryModel || "gemini-3.8-flash",
-    "gemini-3.1-flash-lite",
-    "gemini-flash-latest",
+    params.primaryModel || "gemini-2.5-flash",
+    "gemini-2.5-flash-lite",
+    "gemini-2.0-flash",
   ];
   let lastError: any = null;
 
-  for (const model of modelsToTry) {
-    for (let attempt = 1; attempt <= 2; attempt++) {
-      try {
-        const config = { ...params.config };
-        // ThinkingLevel is only supported on Gemini 3 series models
-        if (!model.startsWith("gemini-3") && config.thinkingConfig) {
-          delete config.thinkingConfig;
-        }
-        const response = await ai.models.generateContent({
-          model,
-          contents: params.contents,
-          config,
-        });
-        const text = response.text;
-        if (text) {
-          return text;
-        }
-      } catch (err: any) {
-        lastError = err;
-        const errMsg = err?.message || String(err);
-        const isTransient =
-          errMsg.includes("503") ||
-          errMsg.includes("UNAVAILABLE") ||
-          errMsg.includes("high demand") ||
-          errMsg.includes("429") ||
-          errMsg.includes("RESOURCE_EXHAUSTED");
+  for (let keyIdx = 0; keyIdx < orderedKeys.length; keyIdx++) {
+    const apiKey = orderedKeys[keyIdx];
+    const ai = getClientForKey(apiKey);
+    const keyLabel = `Key #${keyIdx + 1} (…${apiKey.slice(-4)})`;
 
-        if (isTransient && attempt < 2) {
-          // Backoff before retry
-          await new Promise((resolve) => setTimeout(resolve, 1500 * attempt));
-          continue;
+    for (const model of modelsToTry) {
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          const config = { ...params.config };
+          // Thinking config adaptation across Gemini models
+          if (!model.startsWith("gemini-3") && config.thinkingConfig) {
+            if (model.startsWith("gemini-2.5")) {
+              config.thinkingConfig = { thinkingBudget: 1024 };
+            } else {
+              delete config.thinkingConfig;
+            }
+          }
+
+          const response = await ai.models.generateContent({
+            model,
+            contents: params.contents,
+            config,
+          });
+          const text = response.text;
+          if (text) {
+            return text;
+          }
+        } catch (err: any) {
+          lastError = err;
+          const errMsg = err?.message || String(err);
+          const isRateLimitOrQuota =
+            errMsg.includes("429") ||
+            errMsg.includes("RESOURCE_EXHAUSTED") ||
+            errMsg.includes("quota") ||
+            errMsg.includes("rate limit") ||
+            errMsg.includes("RateLimitError");
+
+          if (isRateLimitOrQuota) {
+            console.warn(
+              `[Gemini API] ${keyLabel} hit rate limit / quota exhaustion (HTTP 429).`
+            );
+            if (keyIdx < orderedKeys.length - 1) {
+              const nextKey = orderedKeys[keyIdx + 1];
+              console.log(
+                `[Gemini API] Auto-failover: Switching immediately to Key #${keyIdx + 2} (…${nextKey.slice(-4)}) to retry request seamlessly...`
+              );
+              break; // Break attempt loop to move to next key immediately
+            }
+          }
+
+          const isTransient =
+            errMsg.includes("503") ||
+            errMsg.includes("UNAVAILABLE") ||
+            errMsg.includes("high demand");
+
+          if (isTransient && attempt < 2) {
+            await new Promise((resolve) => setTimeout(resolve, 1200 * attempt));
+            continue;
+          }
         }
+      }
+
+      // If quota was exhausted on this key and we broke out of attempts, stop trying other models on the dead key
+      const errMsg = lastError?.message || String(lastError);
+      if (
+        (errMsg.includes("429") ||
+          errMsg.includes("RESOURCE_EXHAUSTED") ||
+          errMsg.includes("quota") ||
+          errMsg.includes("rate limit")) &&
+        keyIdx < orderedKeys.length - 1
+      ) {
+        break; // Break model loop to advance to next key in outer loop
       }
     }
   }
 
-  throw lastError || new Error("Failed to generate content from AI model.");
+  throw lastError || new Error("Failed to generate content from AI model across all available API keys.");
 }
 
 async function startServer() {
@@ -367,9 +480,12 @@ async function startServer() {
 
   // API Health Check
   app.get("/api/health", (_req: Request, res: Response) => {
+    const keys = getGeminiApiKeys();
     res.json({
       status: "ok",
-      hasGeminiKey: Boolean(process.env.GEMINI_API_KEY),
+      hasGeminiKey: keys.length > 0,
+      activeKeysCount: keys.length,
+      multiKeyEnabled: keys.length > 1,
       timestamp: new Date().toISOString(),
     });
   });
@@ -564,7 +680,7 @@ Provide clear dietary instructions (probiotics/yogurt, hydration, foods to avoid
         },
       });
 
-      const parsedData = JSON.parse(responseText.trim());
+      const parsedData = cleanAndParseJson(responseText);
       // Apply Smart NLP Post-Processing layer (RapidFuzz, Brand->Generic, Dictionary, Confidence Scoring)
       const enrichedData = postProcessPrescriptionResultWithNLP(parsedData);
       if (preprocessingReport) {
@@ -605,7 +721,7 @@ Include its generic name, primary uses, mechanism of action, typical dosage form
         },
       });
 
-      const parsedData = JSON.parse(responseText.trim());
+      const parsedData = cleanAndParseJson(responseText);
       res.json({ success: true, data: parsedData });
     } catch (err: any) {
       console.error("Error checking medicine:", err);
