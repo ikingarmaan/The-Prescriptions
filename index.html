@@ -98,10 +98,16 @@
     }
     </script>
 
-    <!-- Google Analytics 4 (GA4) -->
-    <!-- Set your measurement ID here or configure VITE_GA_MEASUREMENT_ID in Railway/Environment -->
+    <!-- Google Analytics 4 (GA4): gtag.js -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-2ESSBNEX33"></script>
     <script>
-      window.GA_MEASUREMENT_ID = "G-XXXXXXXXXX";
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      window.gtag = gtag;
+      gtag('js', new Date());
+      // SPA pageviews managed via src/utils/analytics.ts & src/utils/seo.ts
+      gtag('config', 'G-2ESSBNEX33', { send_page_view: false });
+      window.GA_MEASUREMENT_ID = 'G-2ESSBNEX33';
     </script>
   </head>
   <body>
