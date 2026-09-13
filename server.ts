@@ -2,10 +2,56 @@ import express, { type Request, type Response } from "express";
 import path from "path";
 import fs from "fs";
 import dotenv from "dotenv";
+import nodemailer from "nodemailer";
 import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
 import { postProcessPrescriptionResultWithNLP } from "./src/utils/smartNlpEngine";
 
 dotenv.config();
+
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function getMailTransporter() {
+  const user = process.env.EMAIL_USER || process.env.GMAIL_USER || "Theprescriptionn@gmail.com";
+  const pass = (
+    process.env.EMAIL_APP_PASSWORD ||
+    process.env.GMAIL_APP_PASSWORD ||
+    process.env.EMAIL_PASSWORD ||
+    process.env.SMTP_PASS ||
+    ""
+  ).replace(/\s+/g, "");
+
+  if (!pass) {
+    return null;
+  }
+
+  if (process.env.SMTP_HOST) {
+    const port = parseInt(process.env.SMTP_PORT || "465", 10);
+    return nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port,
+      secure: port === 465,
+      auth: {
+        user,
+        pass,
+      },
+    });
+  }
+
+  return nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user,
+      pass,
+    },
+  });
+}
 
 function getGeminiApiKeys(): string[] {
   const keys: string[] = [];
@@ -521,6 +567,175 @@ async function startServer() {
       })),
       timestamp: new Date().toISOString(),
     });
+  });
+
+  // Contact Form Status Endpoint (verify if email sending is enabled)
+  app.get("/api/contact-status", (_req: Request, res: Response) => {
+    const hasPassword = Boolean(
+      (
+        process.env.EMAIL_APP_PASSWORD ||
+        process.env.GMAIL_APP_PASSWORD ||
+        process.env.EMAIL_PASSWORD ||
+        process.env.SMTP_PASS ||
+        ""
+      ).trim()
+    );
+    res.json({
+      configured: hasPassword,
+      targetEmail: process.env.EMAIL_USER || "Theprescriptionn@gmail.com",
+    });
+  });
+
+  // Contact Form Submission Endpoint
+  app.post("/api/contact", async (req: Request, res: Response) => {
+    try {
+      const { name, email, subject, message } = req.body || {};
+
+      if (!name || typeof name !== "string" || !name.trim()) {
+        res.status(400).json({ success: false, error: "Please provide your name." });
+        return;
+      }
+      if (!email || typeof email !== "string" || !email.includes("@")) {
+        res.status(400).json({ success: false, error: "Please provide a valid email address." });
+        return;
+      }
+      if (!message || typeof message !== "string" || !message.trim()) {
+        res.status(400).json({ success: false, error: "Please provide your message." });
+        return;
+      }
+
+      const cleanName = name.trim();
+      const cleanEmail = email.trim();
+      const cleanSubject = (typeof subject === "string" && subject.trim()) || "General Prescription Inquiry";
+      const cleanMessage = message.trim();
+      const adminEmail = process.env.EMAIL_USER || "Theprescriptionn@gmail.com";
+
+      const transporter = getMailTransporter();
+
+      if (!transporter) {
+        console.warn(
+          `[Contact Form] Received message from ${cleanName} (${cleanEmail}) regarding "${cleanSubject}":\n"${cleanMessage}"\n` +
+          `[Contact Form] NOTE: EMAIL_APP_PASSWORD is not set on Railway. To receive emails directly in Gmail and send confirmations, add EMAIL_APP_PASSWORD to your Railway project Variables.`
+        );
+
+        res.json({
+          success: true,
+          delivered: false,
+          message: "Message received! (Operating in offline mode until EMAIL_APP_PASSWORD is set on Railway).",
+        });
+        return;
+      }
+
+      const safeName = escapeHtml(cleanName);
+      const safeEmail = escapeHtml(cleanEmail);
+      const safeSubject = escapeHtml(cleanSubject);
+      const safeMessage = escapeHtml(cleanMessage).replace(/\n/g, "<br/>");
+      const timestamp = new Date().toUTCString();
+
+      // 1. Email to Admin (Theprescriptionn@gmail.com)
+      const adminMailOptions = {
+        from: `"Theprescription Contact" <${adminEmail}>`,
+        to: adminEmail,
+        replyTo: `"${cleanName}" <${cleanEmail}>`,
+        subject: `[New Inquiry] ${cleanSubject} - from ${cleanName}`,
+        html: `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.04);">
+            <div style="background: linear-gradient(135deg, #0f172a 0%, #064e3b 100%); padding: 24px; color: #ffffff;">
+              <h2 style="margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.5px;">New Prescription Contact Form Submission</h2>
+              <p style="margin: 4px 0 0 0; font-size: 13px; color: #a7f3d0;">Theprescription Web Platform</p>
+            </div>
+            <div style="padding: 24px; color: #334155; font-size: 14px; line-height: 1.6;">
+              <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <tr>
+                  <td style="padding: 6px 0; width: 120px; color: #64748b; font-weight: 600;">Sender Name:</td>
+                  <td style="padding: 6px 0; color: #0f172a; font-weight: bold;">${safeName}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #64748b; font-weight: 600;">Sender Email:</td>
+                  <td style="padding: 6px 0;"><a href="mailto:${safeEmail}" style="color: #059669; text-decoration: none; font-weight: bold;">${safeEmail}</a></td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #64748b; font-weight: 600;">Category:</td>
+                  <td style="padding: 6px 0; color: #0f172a;">${safeSubject}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #64748b; font-weight: 600;">Received At:</td>
+                  <td style="padding: 6px 0; color: #64748b; font-size: 12px;">${timestamp}</td>
+                </tr>
+              </table>
+
+              <div style="background: #f8fafc; border-left: 4px solid #10b981; padding: 16px; border-radius: 8px; margin: 16px 0;">
+                <strong style="display: block; color: #0f172a; margin-bottom: 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Submitted Message:</strong>
+                <div style="color: #1e293b; font-size: 14px; line-height: 1.6;">${safeMessage}</div>
+              </div>
+
+              <div style="margin-top: 24px; padding: 12px 16px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; font-size: 12px; color: #065f46;">
+                💡 <strong>One-Click Reply:</strong> Click <em>"Reply"</em> directly in Gmail to write back to <strong>${safeName}</strong> at <strong>${safeEmail}</strong>.
+              </div>
+            </div>
+          </div>
+        `,
+      };
+
+      // 2. Automated Confirmation Email to Visitor
+      const visitorMailOptions = {
+        from: `"Theprescription" <${adminEmail}>`,
+        to: cleanEmail,
+        replyTo: adminEmail,
+        subject: `Thank you for contacting Theprescription - Message Received`,
+        html: `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.04);">
+            <div style="background: linear-gradient(135deg, #064e3b 0%, #0f172a 100%); padding: 24px; color: #ffffff;">
+              <h2 style="margin: 0; font-size: 22px; font-weight: 800;">The<span style="color: #34d399;">prescription</span></h2>
+              <p style="margin: 4px 0 0 0; font-size: 13px; color: #a7f3d0;">Healthcare Accessibility &amp; Medication Literacy</p>
+            </div>
+            <div style="padding: 24px; color: #334155; font-size: 14px; line-height: 1.6;">
+              <p style="font-size: 16px; font-weight: 600; color: #0f172a; margin-top: 0;">Hello ${safeName},</p>
+              <p>
+                Thank you for contacting <strong>Theprescription</strong> team. We have received your inquiry regarding <strong>"${safeSubject}"</strong>.
+              </p>
+              <p>
+                Our clinical informatics and software advisory team reviews submissions on an ongoing basis. If your message requires a personalized reply, we typically respond within <strong>24 to 48 business hours</strong>.
+              </p>
+
+              <div style="background: #f8fafc; border-left: 4px solid #10b981; padding: 14px 16px; border-radius: 8px; margin: 20px 0;">
+                <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; display: block; margin-bottom: 6px;">Summary of Your Submission:</span>
+                <div style="color: #334155; font-size: 13px; font-style: italic; line-height: 1.5;">${safeMessage}</div>
+              </div>
+
+              <div style="background: #fef2f2; border: 1px solid #fecaca; padding: 14px; border-radius: 8px; font-size: 12px; color: #991b1b; margin-top: 24px;">
+                <strong>⚠️ Urgent Safety Notice:</strong> This inbox is dedicated to health literacy feedback and software inquiries. It is <strong>NOT</strong> monitored for acute patient medical emergencies. If you are experiencing sudden adverse drug reactions, severe allergies, or symptoms of overdose, immediately contact <strong>911 / 112 / 999</strong> or your nearest hospital emergency department.
+              </div>
+
+              <p style="margin-top: 28px; margin-bottom: 4px; font-size: 13px; color: #64748b;">
+                With warm regards,<br/>
+                <strong style="color: #0f172a;">Theprescription Team</strong><br/>
+                <a href="https://theprescriptions.up.railway.app/" style="color: #059669; text-decoration: none; font-weight: 500;">theprescriptions.up.railway.app</a>
+              </p>
+            </div>
+          </div>
+        `,
+      };
+
+      await Promise.all([
+        transporter.sendMail(adminMailOptions),
+        transporter.sendMail(visitorMailOptions),
+      ]);
+
+      console.log(`[Contact Form] Successfully delivered emails: ${cleanEmail} <-> ${adminEmail}`);
+
+      res.json({
+        success: true,
+        delivered: true,
+        message: "Your message has been received and a confirmation email has been dispatched.",
+      });
+    } catch (err: any) {
+      console.error("[Contact Form] Failed to send email:", err);
+      res.status(500).json({
+        success: false,
+        error: err.message || "Failed to dispatch email. Please try again or write directly to Theprescriptionn@gmail.com.",
+      });
+    }
   });
 
   // API Endpoint: Live-test all configured keys & failover readiness

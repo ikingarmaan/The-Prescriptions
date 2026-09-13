@@ -49,11 +49,32 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ currentPage, onNavigate })
     message: '',
   });
   const [contactSubmitted, setContactSubmitted] = useState(false);
+  const [isSubmittingContact, setIsSubmittingContact] = useState(false);
+  const [contactError, setContactError] = useState<string | null>(null);
 
-  const handleContactSubmit = (e: React.FormEvent) => {
+  const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!contactForm.name || !contactForm.email || !contactForm.message) return;
-    setContactSubmitted(true);
+    setIsSubmittingContact(true);
+    setContactError(null);
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(contactForm),
+      });
+      const data = await res.json();
+      if (!res.ok || data.success === false) {
+        throw new Error(data.error || 'Failed to deliver message.');
+      }
+      setContactSubmitted(true);
+    } catch (err: any) {
+      console.error('Contact form error:', err);
+      setContactError(err.message || 'Unable to deliver message at this moment. You can also write directly to Theprescriptionn@gmail.com.');
+    } finally {
+      setIsSubmittingContact(false);
+    }
   };
 
   return (
@@ -808,21 +829,24 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ currentPage, onNavigate })
             <div className="lg:col-span-7">
               <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm">
                 {contactSubmitted ? (
-                  <div className="py-12 text-center space-y-4 animate-in fade-in">
-                    <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
+                  <div className="py-10 text-center space-y-4 animate-in fade-in">
+                    <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-xs">
                       <CheckCircle2 className="w-8 h-8" />
                     </div>
                     <h3 className="text-xl font-bold text-slate-900">Message Successfully Dispatched!</h3>
                     <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
-                      Thank you for contacting Theprescription team. Your feedback helps us improve our cursive recognition algorithms and clinical safety data. Our informatics team will review your inquiry and respond shortly.
+                      Thank you for contacting Theprescription team. Your message has been routed directly to our inbox at <strong className="text-slate-900 font-semibold">Theprescriptionn@gmail.com</strong>.
                     </p>
+                    <div className="p-3.5 bg-emerald-50 border border-emerald-200/80 rounded-xl text-xs text-emerald-950 max-w-md mx-auto leading-relaxed">
+                      <span>An automated confirmation receipt has also been sent to <strong className="font-semibold text-emerald-900">{contactForm.email}</strong>. Our clinical and software advisory team will review your inquiry shortly.</span>
+                    </div>
                     <button
                       type="button"
                       onClick={() => {
                         setContactSubmitted(false);
                         setContactForm({ name: '', email: '', subject: 'Prescription Feedback', message: '' });
                       }}
-                      className="mt-4 px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition-colors cursor-pointer"
+                      className="mt-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition-colors cursor-pointer shadow-xs"
                     >
                       Send Another Message
                     </button>
@@ -882,12 +906,37 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ currentPage, onNavigate })
                       />
                     </div>
 
+                    {contactError && (
+                      <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 flex items-start gap-2">
+                        <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                        <div>
+                          <strong className="block font-bold">Message Notice</strong>
+                          <span>{contactError}</span>
+                          <div className="mt-1">
+                            <a href="mailto:Theprescriptionn@gmail.com" className="underline font-semibold hover:text-rose-950">
+                              Write to us directly at Theprescriptionn@gmail.com
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     <button
                       type="submit"
-                      className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-colors cursor-pointer"
+                      disabled={isSubmittingContact}
+                      className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 disabled:opacity-60 text-white font-bold rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer disabled:cursor-not-allowed"
                     >
-                      <Send className="w-4 h-4" />
-                      <span>Transmit Message to Informatics Team</span>
+                      {isSubmittingContact ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>Dispatching Message &amp; Sending Confirmation...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4" />
+                          <span>Transmit Message to Informatics Team</span>
+                        </>
+                      )}
                     </button>
                   </form>
                 )}
@@ -905,9 +954,9 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ currentPage, onNavigate })
               If our neural vision engine struggled to decipher a prescription slip you encountered, we welcome your feedback to refine our future models. To protect patient dignity and adhere strictly to global healthcare privacy regulations (such as HIPAA and GDPR), please follow these simple submission rules:
             </p>
             <ul className="space-y-1.5 text-xs sm:text-sm text-slate-700 list-disc pl-5">
-              <li>Always redact, black out, or digitally crop out patient identifying information (full legal name, residential address, insurance ID number, social security/national identity numbers).</li>
-              <li>Ensure the image capture is well-lit with the paper lying flat to minimize perspective distortion and shadows.</li>
-              <li>Include the confirmed medicine name as verified by your dispensing pharmacist so our engineering team can audit the exact stroke ligature confusion.</li>
+              <li>Always redact or crop out patient identifying details (names, addresses, insurance numbers).</li>
+              <li>Ensure the image capture is well-lit with the paper lying flat to minimize shadows.</li>
+              <li>Include the confirmed medicine name from your pharmacist so our team can review the stroke confusion.</li>
             </ul>
           </section>
 
@@ -918,7 +967,7 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ currentPage, onNavigate })
               The Pharmacist &amp; Healthcare Provider Collaboration Network
             </h2>
             <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-              Community pharmacists are on the front lines of patient safety every day. If you practice pharmacy or medicine in an area where local pharmaceutical brand names, regional generic manufacturers, or unique clinic shorthand abbreviations are not yet fully indexed in our directory, we invite you to join our clinical contributor network.
+              Pharmacists protect patient safety every day. If regional drug brands or clinic shorthand abbreviations in your area are missing from our database, we invite you to join our contributor network.
             </p>
             <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
               Contributing regional formulary data helps protect thousands of patients in your geographical region from prescription misinterpretation. We review all submitted brand-to-generic mappings against national pharmacopeias before integrating them into our directory. Reach our clinical team directly at <a href="mailto:Theprescriptionn@gmail.com?subject=Formulary%20Contribution" className="font-mono text-purple-700 font-semibold hover:underline">Theprescriptionn@gmail.com</a>.
