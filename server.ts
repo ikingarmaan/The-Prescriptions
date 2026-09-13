@@ -148,6 +148,166 @@ async function sendMailWithFallback(mailOptions: SendMailOptions) {
   throw lastError || new Error("Failed to deliver email through all SMTP ports.");
 }
 
+interface EmailDispatchPayload {
+  to: string;
+  subject: string;
+  html: string;
+  replyTo?: string;
+  fromName?: string;
+}
+
+interface DispatchResult {
+  provider: string;
+  success: boolean;
+}
+
+// 1. Resend API (HTTPS port 443 - Recommended, zero port blocks, 100 free/day)
+async function sendViaResend(params: EmailDispatchPayload, apiKey: string): Promise<void> {
+  const fromEmail = process.env.RESEND_FROM || "onboarding@resend.dev";
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: `${params.fromName || "Theprescription"} <${fromEmail}>`,
+      to: [params.to],
+      reply_to: params.replyTo,
+      subject: params.subject,
+      html: params.html,
+    }),
+  });
+
+  if (!res.ok) {
+    const errorJson = (await res.json().catch(() => ({}))) as Record<string, any>;
+    throw new Error(`Resend API HTTP ${res.status}: ${errorJson.message || JSON.stringify(errorJson)}`);
+  }
+}
+
+// 2. SendGrid API (HTTPS port 443 - 100 free/day)
+async function sendViaSendGrid(params: EmailDispatchPayload, apiKey: string): Promise<void> {
+  const fromEmail = process.env.SENDGRID_FROM || process.env.EMAIL_USER || "Theprescriptionn@gmail.com";
+  const res = await fetch("https://api.sendgrid.com/v3/mail/send", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      personalizations: [
+        {
+          to: [{ email: params.to }],
+        },
+      ],
+      from: {
+        email: fromEmail,
+        name: params.fromName || "Theprescription",
+      },
+      reply_to: params.replyTo ? { email: params.replyTo } : undefined,
+      subject: params.subject,
+      content: [
+        {
+          type: "text/html",
+          value: params.html,
+        },
+      ],
+    }),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text().catch(() => "");
+    throw new Error(`SendGrid API HTTP ${res.status}: ${errorText}`);
+  }
+}
+
+// 3. Brevo API (HTTPS port 443 - 300 free/day)
+async function sendViaBrevo(params: EmailDispatchPayload, apiKey: string): Promise<void> {
+  const fromEmail = process.env.BREVO_FROM || process.env.EMAIL_USER || "Theprescriptionn@gmail.com";
+  const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+      "api-key": apiKey,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      sender: {
+        name: params.fromName || "Theprescription",
+        email: fromEmail,
+      },
+      to: [{ email: params.to }],
+      replyTo: params.replyTo ? { email: params.replyTo } : undefined,
+      subject: params.subject,
+      htmlContent: params.html,
+    }),
+  });
+
+  if (!res.ok) {
+    const errorJson = (await res.json().catch(() => ({}))) as Record<string, any>;
+    throw new Error(`Brevo API HTTP ${res.status}: ${errorJson.message || JSON.stringify(errorJson)}`);
+  }
+}
+
+function getActiveEmailProvider(): { name: string; type: "resend" | "sendgrid" | "brevo" | "smtp" | "none"; key?: string } {
+  const resendKey = (process.env.RESEND_API_KEY || process.env.RESEND_KEY || "").trim();
+  if (resendKey) {
+    return { name: "Resend (HTTPS API)", type: "resend", key: resendKey };
+  }
+
+  const sendgridKey = (process.env.SENDGRID_API_KEY || process.env.SENDGRID_KEY || "").trim();
+  if (sendgridKey) {
+    return { name: "SendGrid (HTTPS API)", type: "sendgrid", key: sendgridKey };
+  }
+
+  const brevoKey = (process.env.BREVO_API_KEY || process.env.BREVO_KEY || "").trim();
+  if (brevoKey) {
+    return { name: "Brevo (HTTPS API)", type: "brevo", key: brevoKey };
+  }
+
+  const hasSmtp = Boolean((process.env.EMAIL_APP_PASSWORD || process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS || "").trim());
+  if (hasSmtp) {
+    return { name: "Gmail SMTP (Nodemailer)", type: "smtp" };
+  }
+
+  return { name: "None", type: "none" };
+}
+
+async function dispatchEmail(payload: EmailDispatchPayload): Promise<DispatchResult> {
+  const provider = getActiveEmailProvider();
+
+  if (provider.type === "resend") {
+    await sendViaResend(payload, provider.key!);
+    return { provider: provider.name, success: true };
+  }
+
+  if (provider.type === "sendgrid") {
+    await sendViaSendGrid(payload, provider.key!);
+    return { provider: provider.name, success: true };
+  }
+
+  if (provider.type === "brevo") {
+    await sendViaBrevo(payload, provider.key!);
+    return { provider: provider.name, success: true };
+  }
+
+  if (provider.type === "smtp") {
+    const adminEmail = process.env.EMAIL_USER || "Theprescriptionn@gmail.com";
+    await sendMailWithFallback({
+      from: `"${payload.fromName || "Theprescription"}" <${adminEmail}>`,
+      to: payload.to,
+      replyTo: payload.replyTo,
+      subject: payload.subject,
+      html: payload.html,
+    });
+    return { provider: provider.name, success: true };
+  }
+
+  throw new Error(
+    "No email service configured on Railway. Please add RESEND_API_KEY or SENDGRID_API_KEY to your Railway Variables tab."
+  );
+}
+
 function getGeminiApiKeys(): string[] {
   const keys: string[] = [];
 
@@ -664,19 +824,12 @@ async function startServer() {
     });
   });
 
-  // Contact Form Status Endpoint (verify if email sending is enabled)
+  // Contact Form Status Endpoint (verify which email provider is active)
   app.get("/api/contact-status", (_req: Request, res: Response) => {
-    const hasPassword = Boolean(
-      (
-        process.env.EMAIL_APP_PASSWORD ||
-        process.env.GMAIL_APP_PASSWORD ||
-        process.env.EMAIL_PASSWORD ||
-        process.env.SMTP_PASS ||
-        ""
-      ).trim()
-    );
+    const provider = getActiveEmailProvider();
     res.json({
-      configured: hasPassword,
+      configured: provider.type !== "none",
+      activeProvider: provider.name,
       targetEmail: process.env.EMAIL_USER || "Theprescriptionn@gmail.com",
     });
   });
@@ -705,18 +858,19 @@ async function startServer() {
       const cleanMessage = message.trim();
       const adminEmail = process.env.EMAIL_USER || "Theprescriptionn@gmail.com";
 
-      const transporter = await getMailTransporter();
+      const provider = getActiveEmailProvider();
 
-      if (!transporter) {
+      if (provider.type === "none") {
         console.warn(
           `[Contact Form] Received message from ${cleanName} (${cleanEmail}) regarding "${cleanSubject}":\n"${cleanMessage}"\n` +
-          `[Contact Form] NOTE: EMAIL_APP_PASSWORD is not set on Railway. To receive emails directly in Gmail and send confirmations, add EMAIL_APP_PASSWORD to your Railway project Variables.`
+          `[Contact Form] NOTE: No email API key (RESEND_API_KEY or SENDGRID_API_KEY) is set on Railway. Message logged safely.`
         );
 
         res.json({
           success: true,
           delivered: false,
-          message: "Message received! (Operating in offline mode until EMAIL_APP_PASSWORD is set on Railway).",
+          provider: "Offline",
+          message: "Message received! (Operating in offline mode until RESEND_API_KEY or SENDGRID_API_KEY is configured on Railway).",
         });
         return;
       }
@@ -728,101 +882,107 @@ async function startServer() {
       const timestamp = new Date().toUTCString();
 
       // 1. Email to Admin (Theprescriptionn@gmail.com)
-      const adminMailOptions = {
-        from: `"Theprescription Contact" <${adminEmail}>`,
-        to: adminEmail,
-        replyTo: `"${cleanName}" <${cleanEmail}>`,
-        subject: `[New Inquiry] ${cleanSubject} - from ${cleanName}`,
-        html: `
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.04);">
-            <div style="background: linear-gradient(135deg, #0f172a 0%, #064e3b 100%); padding: 24px; color: #ffffff;">
-              <h2 style="margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.5px;">New Prescription Contact Form Submission</h2>
-              <p style="margin: 4px 0 0 0; font-size: 13px; color: #a7f3d0;">Theprescription Web Platform</p>
+      const adminHtml = `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.04);">
+          <div style="background: linear-gradient(135deg, #0f172a 0%, #064e3b 100%); padding: 24px; color: #ffffff;">
+            <h2 style="margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.5px;">New Prescription Contact Form Submission</h2>
+            <p style="margin: 4px 0 0 0; font-size: 13px; color: #a7f3d0;">Theprescription Web Platform</p>
+          </div>
+          <div style="padding: 24px; color: #334155; font-size: 14px; line-height: 1.6;">
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+              <tr>
+                <td style="padding: 6px 0; width: 120px; color: #64748b; font-weight: 600;">Sender Name:</td>
+                <td style="padding: 6px 0; color: #0f172a; font-weight: bold;">${safeName}</td>
+              </tr>
+              <tr>
+                <td style="padding: 6px 0; color: #64748b; font-weight: 600;">Sender Email:</td>
+                <td style="padding: 6px 0;"><a href="mailto:${safeEmail}" style="color: #059669; text-decoration: none; font-weight: bold;">${safeEmail}</a></td>
+              </tr>
+              <tr>
+                <td style="padding: 6px 0; color: #64748b; font-weight: 600;">Category:</td>
+                <td style="padding: 6px 0; color: #0f172a;">${safeSubject}</td>
+              </tr>
+              <tr>
+                <td style="padding: 6px 0; color: #64748b; font-weight: 600;">Received At:</td>
+                <td style="padding: 6px 0; color: #64748b; font-size: 12px;">${timestamp}</td>
+              </tr>
+            </table>
+
+            <div style="background: #f8fafc; border-left: 4px solid #10b981; padding: 16px; border-radius: 8px; margin: 16px 0;">
+              <strong style="display: block; color: #0f172a; margin-bottom: 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Submitted Message:</strong>
+              <div style="color: #1e293b; font-size: 14px; line-height: 1.6;">${safeMessage}</div>
             </div>
-            <div style="padding: 24px; color: #334155; font-size: 14px; line-height: 1.6;">
-              <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-                <tr>
-                  <td style="padding: 6px 0; width: 120px; color: #64748b; font-weight: 600;">Sender Name:</td>
-                  <td style="padding: 6px 0; color: #0f172a; font-weight: bold;">${safeName}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 6px 0; color: #64748b; font-weight: 600;">Sender Email:</td>
-                  <td style="padding: 6px 0;"><a href="mailto:${safeEmail}" style="color: #059669; text-decoration: none; font-weight: bold;">${safeEmail}</a></td>
-                </tr>
-                <tr>
-                  <td style="padding: 6px 0; color: #64748b; font-weight: 600;">Category:</td>
-                  <td style="padding: 6px 0; color: #0f172a;">${safeSubject}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 6px 0; color: #64748b; font-weight: 600;">Received At:</td>
-                  <td style="padding: 6px 0; color: #64748b; font-size: 12px;">${timestamp}</td>
-                </tr>
-              </table>
 
-              <div style="background: #f8fafc; border-left: 4px solid #10b981; padding: 16px; border-radius: 8px; margin: 16px 0;">
-                <strong style="display: block; color: #0f172a; margin-bottom: 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Submitted Message:</strong>
-                <div style="color: #1e293b; font-size: 14px; line-height: 1.6;">${safeMessage}</div>
-              </div>
-
-              <div style="margin-top: 24px; padding: 12px 16px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; font-size: 12px; color: #065f46;">
-                💡 <strong>One-Click Reply:</strong> Click <em>"Reply"</em> directly in Gmail to write back to <strong>${safeName}</strong> at <strong>${safeEmail}</strong>.
-              </div>
+            <div style="margin-top: 24px; padding: 12px 16px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; font-size: 12px; color: #065f46;">
+              💡 <strong>One-Click Reply:</strong> Click <em>"Reply"</em> directly in Gmail to write back to <strong>${safeName}</strong> at <strong>${safeEmail}</strong>.
             </div>
           </div>
-        `,
-      };
+        </div>
+      `;
 
       // 2. Automated Confirmation Email to Visitor
-      const visitorMailOptions = {
-        from: `"Theprescription" <${adminEmail}>`,
-        to: cleanEmail,
-        replyTo: adminEmail,
-        subject: `Thank you for contacting Theprescription - Message Received`,
-        html: `
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.04);">
-            <div style="background: linear-gradient(135deg, #064e3b 0%, #0f172a 100%); padding: 24px; color: #ffffff;">
-              <h2 style="margin: 0; font-size: 22px; font-weight: 800;">The<span style="color: #34d399;">prescription</span></h2>
-              <p style="margin: 4px 0 0 0; font-size: 13px; color: #a7f3d0;">Healthcare Accessibility &amp; Medication Literacy</p>
-            </div>
-            <div style="padding: 24px; color: #334155; font-size: 14px; line-height: 1.6;">
-              <p style="font-size: 16px; font-weight: 600; color: #0f172a; margin-top: 0;">Hello ${safeName},</p>
-              <p>
-                Thank you for contacting <strong>Theprescription</strong> team. We have received your inquiry regarding <strong>"${safeSubject}"</strong>.
-              </p>
-              <p>
-                Our clinical informatics and software advisory team reviews submissions on an ongoing basis. If your message requires a personalized reply, we typically respond within <strong>24 to 48 business hours</strong>.
-              </p>
-
-              <div style="background: #f8fafc; border-left: 4px solid #10b981; padding: 14px 16px; border-radius: 8px; margin: 20px 0;">
-                <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; display: block; margin-bottom: 6px;">Summary of Your Submission:</span>
-                <div style="color: #334155; font-size: 13px; font-style: italic; line-height: 1.5;">${safeMessage}</div>
-              </div>
-
-              <div style="background: #fef2f2; border: 1px solid #fecaca; padding: 14px; border-radius: 8px; font-size: 12px; color: #991b1b; margin-top: 24px;">
-                <strong>⚠️ Urgent Safety Notice:</strong> This inbox is dedicated to health literacy feedback and software inquiries. It is <strong>NOT</strong> monitored for acute patient medical emergencies. If you are experiencing sudden adverse drug reactions, severe allergies, or symptoms of overdose, immediately contact <strong>911 / 112 / 999</strong> or your nearest hospital emergency department.
-              </div>
-
-              <p style="margin-top: 28px; margin-bottom: 4px; font-size: 13px; color: #64748b;">
-                With warm regards,<br/>
-                <strong style="color: #0f172a;">Theprescription Team</strong><br/>
-                <a href="https://theprescriptions.up.railway.app/" style="color: #059669; text-decoration: none; font-weight: 500;">theprescriptions.up.railway.app</a>
-              </p>
-            </div>
+      const visitorHtml = `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.04);">
+          <div style="background: linear-gradient(135deg, #064e3b 0%, #0f172a 100%); padding: 24px; color: #ffffff;">
+            <h2 style="margin: 0; font-size: 22px; font-weight: 800;">The<span style="color: #34d399;">prescription</span></h2>
+            <p style="margin: 4px 0 0 0; font-size: 13px; color: #a7f3d0;">Healthcare Accessibility &amp; Medication Literacy</p>
           </div>
-        `,
-      };
+          <div style="padding: 24px; color: #334155; font-size: 14px; line-height: 1.6;">
+            <p style="font-size: 16px; font-weight: 600; color: #0f172a; margin-top: 0;">Hello ${safeName},</p>
+            <p>
+              Thank you for contacting <strong>Theprescription</strong> team. We have received your inquiry regarding <strong>"${safeSubject}"</strong>.
+            </p>
+            <p>
+              Our clinical informatics and software advisory team reviews submissions on an ongoing basis. If your message requires a personalized reply, we typically respond within <strong>24 to 48 business hours</strong>.
+            </p>
 
-      await Promise.all([
-        sendMailWithFallback(adminMailOptions),
-        sendMailWithFallback(visitorMailOptions),
-      ]);
+            <div style="background: #f8fafc; border-left: 4px solid #10b981; padding: 14px 16px; border-radius: 8px; margin: 20px 0;">
+              <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; display: block; margin-bottom: 6px;">Summary of Your Submission:</span>
+              <div style="color: #334155; font-size: 13px; font-style: italic; line-height: 1.5;">${safeMessage}</div>
+            </div>
 
-      console.log(`[Contact Form] Successfully delivered emails: ${cleanEmail} <-> ${adminEmail}`);
+            <div style="background: #fef2f2; border: 1px solid #fecaca; padding: 14px; border-radius: 8px; font-size: 12px; color: #991b1b; margin-top: 24px;">
+              <strong>⚠️ Urgent Safety Notice:</strong> This inbox is dedicated to health literacy feedback and software inquiries. It is <strong>NOT</strong> monitored for acute patient medical emergencies. If you are experiencing sudden adverse drug reactions, severe allergies, or symptoms of overdose, immediately contact <strong>911 / 112 / 999</strong> or your nearest hospital emergency department.
+            </div>
+
+            <p style="margin-top: 28px; margin-bottom: 4px; font-size: 13px; color: #64748b;">
+              With warm regards,<br/>
+              <strong style="color: #0f172a;">Theprescription Team</strong><br/>
+              <a href="https://theprescriptions.up.railway.app/" style="color: #059669; text-decoration: none; font-weight: 500;">theprescriptions.up.railway.app</a>
+            </p>
+          </div>
+        </div>
+      `;
+
+      // 1. Deliver to Admin (Theprescriptionn@gmail.com) - Critical
+      const dispatchResult = await dispatchEmail({
+        to: adminEmail,
+        replyTo: cleanEmail,
+        subject: `[New Inquiry] ${cleanSubject} - from ${cleanName}`,
+        html: adminHtml,
+        fromName: "Theprescription Contact Form",
+      });
+
+      // 2. Deliver Automated Confirmation Receipt to Visitor (Best effort)
+      try {
+        await dispatchEmail({
+          to: cleanEmail,
+          replyTo: adminEmail,
+          subject: "Thank you for contacting Theprescription - Message Received",
+          html: visitorHtml,
+          fromName: "Theprescription",
+        });
+      } catch (receiptErr: any) {
+        console.warn("[Contact Form] Visitor confirmation receipt skipped/unsupported by provider:", receiptErr?.message);
+      }
+
+      console.log(`[Contact Form] Successfully delivered inquiry via ${dispatchResult.provider}: ${cleanEmail} -> ${adminEmail}`);
 
       res.json({
         success: true,
         delivered: true,
-        message: "Your message has been received and a confirmation email has been dispatched.",
+        provider: dispatchResult.provider,
+        message: "Your message has been received and delivered successfully.",
       });
     } catch (err: any) {
       console.error("[Contact Form] Failed to send email:", err);
@@ -833,36 +993,48 @@ async function startServer() {
     }
   });
 
-  // Diagnostic Test Endpoint: verify Gmail SMTP connectivity from Railway
+  // Diagnostic Test Endpoint: verify active email provider connectivity from Railway
   app.get("/api/test-email", async (_req: Request, res: Response) => {
     try {
       const adminEmail = process.env.EMAIL_USER || "Theprescriptionn@gmail.com";
-      const transporter = await getMailTransporter();
-      if (!transporter) {
+      const provider = getActiveEmailProvider();
+
+      if (provider.type === "none") {
         res.status(400).json({
           success: false,
-          error: "EMAIL_APP_PASSWORD environment variable is not configured on Railway.",
+          error: "No email service configured on Railway. Please add RESEND_API_KEY or SENDGRID_API_KEY to your Railway Variables.",
+          guidance: [
+            "Option 1 (Recommended): Add RESEND_API_KEY from https://resend.com (Free, takes 30 seconds)",
+            "Option 2: Add SENDGRID_API_KEY from https://sendgrid.com (Free tier 100 emails/day)",
+            "Option 3: Add BREVO_API_KEY from https://brevo.com (Free tier 300 emails/day)",
+          ],
         });
         return;
       }
 
-      await sendMailWithFallback({
-        from: `"Theprescription System" <${adminEmail}>`,
+      const result = await dispatchEmail({
         to: adminEmail,
-        subject: "[Diagnostic] Theprescription Email Delivery Active",
-        text: `Diagnostic verification passed! Your Railway server is successfully connected to Gmail via IPv4 SMTP.\nTime: ${new Date().toUTCString()}`,
+        subject: `[Diagnostic] Theprescription Email Delivery Active (${provider.name})`,
+        html: `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 20px; color: #0f172a;">
+            <h3 style="color: #059669; margin-top: 0;">🎉 Diagnostic Email Verification Passed!</h3>
+            <p>Your Railway backend is successfully connected via <strong>${provider.name}</strong> over HTTPS (port 443).</p>
+            <p style="color: #64748b; font-size: 13px;">Timestamp: ${new Date().toUTCString()}</p>
+          </div>
+        `,
+        fromName: "Theprescription System",
       });
 
       res.json({
         success: true,
-        message: `Diagnostic test email sent successfully to ${adminEmail}! Check your inbox.`,
+        provider: result.provider,
+        message: `Diagnostic test email sent successfully to ${adminEmail} via ${result.provider}! Check your inbox.`,
       });
     } catch (err: any) {
       console.error("[Test Email] Error:", err);
       res.status(500).json({
         success: false,
         error: err?.message || String(err),
-        code: err?.code,
       });
     }
   });
