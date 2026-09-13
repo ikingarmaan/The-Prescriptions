@@ -19,6 +19,7 @@ import {
   Globe,
   AlertTriangle,
   ExternalLink,
+  Newspaper,
 } from 'lucide-react';
 import { ThePrescriptionLogo } from './ThePrescriptionLogo';
 import { AppNavTab } from './Navbar';
@@ -235,6 +236,26 @@ export const Footer: React.FC<FooterProps> = ({ activeTab, setActiveTab, onOpenP
                     <span className="flex items-center gap-1.5 truncate">
                       <BookOpen className="w-3.5 h-3.5 text-purple-400 shrink-0" />
                       <span className="truncate">Latin Codes (BD, 1-0-1)</span>
+                    </span>
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-500 hidden sm:inline-block group-hover:translate-x-0.5 transition-transform" />
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveTab('blog');
+                      scrollToTop();
+                    }}
+                    className={`w-full text-left font-semibold p-1 sm:p-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-between group ${
+                      activeTab === 'blog'
+                        ? 'bg-teal-500/15 text-teal-300 border border-teal-500/30'
+                        : 'text-slate-300 hover:text-white hover:bg-slate-850'
+                    }`}
+                  >
+                    <span className="flex items-center gap-1.5 truncate">
+                      <Newspaper className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+                      <span className="truncate">Articles & Guides (17)</span>
                     </span>
                     <ChevronRight className="w-3.5 h-3.5 text-slate-500 hidden sm:inline-block group-hover:translate-x-0.5 transition-transform" />
                   </button>

@@ -33,6 +33,14 @@ export const SEO_METADATA_BY_TAB: Record<AppNavTab, PageSeoMetadata> = {
       'doctor prescription abbreviations, 1-0-1 meaning, BD OD TDS medical meaning, Latin Rx shorthand dictionary, AC PC food timing, medical abbreviations decoder, prescription codes explained',
     canonicalUrl: 'https://theprescriptions.up.railway.app/#abbreviations',
   },
+  blog: {
+    title: 'Clinical Blog & Prescription Guides - 17 In-Depth Health Articles | Theprescription',
+    description:
+      'Explore 17 comprehensive, human-researched clinical guides on deciphering doctor handwriting, generic vs. brand drugs, prescription Latin codes (OD, BD, 1-0-1), dangerous food-drug interactions, pediatric dosing, and patient safety.',
+    keywords:
+      'prescription blog, doctor handwriting mystery, generic vs brand drugs, Latin prescription codes, drug food interactions, 1-0-1 dosage meaning, LASA drugs, antibiotic resistance, chronotherapy, empty stomach medicine, pediatric dosing safety, polypharmacy elderly, healthcare AI OCR',
+    canonicalUrl: 'https://theprescriptions.up.railway.app/#blog',
+  },
   about: {
     title: 'About Our Mission - Health Literacy & Prescription Safety | Theprescription',
     description:

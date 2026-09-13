@@ -13,6 +13,7 @@ import {
   FileCheck,
   Menu,
   X,
+  Newspaper,
 } from 'lucide-react';
 import { ThePrescriptionLogo } from './ThePrescriptionLogo';
 
@@ -20,6 +21,7 @@ export type AppNavTab =
   | 'prescription'
   | 'lookup'
   | 'abbreviations'
+  | 'blog'
   | 'about'
   | 'faq'
   | 'contact'
@@ -155,6 +157,26 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <span>Doctor Codes</span>
               </button>
 
+              <button
+                id="nav-blog"
+                type="button"
+                onClick={() => setActiveTab('blog')}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-bold transition-all min-h-[40px] cursor-pointer ${
+                  activeTab === 'blog'
+                    ? 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white shadow-sm shadow-teal-600/25 ring-1 ring-teal-500/30'
+                    : 'text-slate-600 hover:text-teal-700 hover:bg-teal-50/70'
+                }`}
+              >
+                <div
+                  className={`w-6 h-6 rounded-lg flex items-center justify-center transition-colors ${
+                    activeTab === 'blog' ? 'bg-white/20 text-white' : 'bg-teal-100 text-teal-700'
+                  }`}
+                >
+                  <Newspaper className="w-3.5 h-3.5" />
+                </div>
+                <span>Articles & Guides</span>
+              </button>
+
               {/* Pages Dropdown (About, FAQ, Disclaimer, Contact, Privacy, Terms) */}
               <div className="relative" ref={dropdownRef}>
                 <button
@@ -257,19 +279,19 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Mobile Full Menu Dropdown */}
         {isMobileMenuOpen && (
           <div className="md:hidden bg-white border-b border-slate-200 p-4 space-y-4 animate-in slide-in-from-top-2 duration-150">
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-4 gap-1.5">
               <button
                 type="button"
                 onClick={() => {
                   setActiveTab('prescription');
                   setIsMobileMenuOpen(false);
                 }}
-                className={`p-2.5 rounded-xl text-center flex flex-col items-center gap-1 text-xs font-bold ${
+                className={`p-2 rounded-xl text-center flex flex-col items-center gap-1 text-[11px] font-bold ${
                   activeTab === 'prescription' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-700'
                 }`}
               >
                 <FileText className="w-4 h-4" />
-                <span>Prescription</span>
+                <span className="truncate">Scan</span>
               </button>
 
               <button
@@ -278,12 +300,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                   setActiveTab('lookup');
                   setIsMobileMenuOpen(false);
                 }}
-                className={`p-2.5 rounded-xl text-center flex flex-col items-center gap-1 text-xs font-bold ${
+                className={`p-2 rounded-xl text-center flex flex-col items-center gap-1 text-[11px] font-bold ${
                   activeTab === 'lookup' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700'
                 }`}
               >
                 <Search className="w-4 h-4" />
-                <span>Lookup</span>
+                <span className="truncate">Lookup</span>
               </button>
 
               <button
@@ -292,12 +314,26 @@ export const Navbar: React.FC<NavbarProps> = ({
                   setActiveTab('abbreviations');
                   setIsMobileMenuOpen(false);
                 }}
-                className={`p-2.5 rounded-xl text-center flex flex-col items-center gap-1 text-xs font-bold ${
+                className={`p-2 rounded-xl text-center flex flex-col items-center gap-1 text-[11px] font-bold ${
                   activeTab === 'abbreviations' ? 'bg-purple-600 text-white' : 'bg-slate-100 text-slate-700'
                 }`}
               >
                 <BookOpen className="w-4 h-4" />
-                <span>Doctor Codes</span>
+                <span className="truncate">Codes</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab('blog');
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`p-2 rounded-xl text-center flex flex-col items-center gap-1 text-[11px] font-bold ${
+                  activeTab === 'blog' ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-700'
+                }`}
+              >
+                <Newspaper className="w-4 h-4" />
+                <span className="truncate">Articles</span>
               </button>
             </div>
 
@@ -368,14 +404,28 @@ export const Navbar: React.FC<NavbarProps> = ({
             id="mobile-nav-abbreviations"
             type="button"
             onClick={() => setActiveTab('abbreviations')}
-            className={`flex flex-col items-center justify-center min-w-[70px] min-h-[48px] py-1.5 px-2 rounded-xl transition-all ${
+            className={`flex flex-col items-center justify-center min-w-[55px] min-h-[48px] py-1.5 px-1 rounded-xl transition-all ${
               activeTab === 'abbreviations'
                 ? 'text-purple-700 font-bold bg-purple-50 border border-purple-200/80'
                 : 'text-slate-500 font-medium hover:text-slate-800'
             }`}
           >
             <BookOpen className={`w-5 h-5 mb-0.5 ${activeTab === 'abbreviations' ? 'text-purple-600' : 'text-slate-400'}`} />
-            <span className="text-[11px] leading-tight">Codes</span>
+            <span className="text-[10px] leading-tight">Codes</span>
+          </button>
+
+          <button
+            id="mobile-nav-blog"
+            type="button"
+            onClick={() => setActiveTab('blog')}
+            className={`flex flex-col items-center justify-center min-w-[55px] min-h-[48px] py-1.5 px-1 rounded-xl transition-all ${
+              activeTab === 'blog'
+                ? 'text-teal-700 font-bold bg-teal-50 border border-teal-200/80'
+                : 'text-slate-500 font-medium hover:text-slate-800'
+            }`}
+          >
+            <Newspaper className={`w-5 h-5 mb-0.5 ${activeTab === 'blog' ? 'text-teal-600' : 'text-slate-400'}`} />
+            <span className="text-[10px] leading-tight">Articles</span>
           </button>
 
           <button

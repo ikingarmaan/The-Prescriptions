@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navbar, AppNavTab } from './components/Navbar';
 import { PrescriptionUploader } from './components/PrescriptionUploader';
 import { PrescriptionResultView } from './components/PrescriptionResultView';
@@ -9,7 +9,7 @@ import { InteractiveMedicalBackground } from './components/InteractiveMedicalBac
 import { GlowingCursor } from './components/GlowingCursor';
 import { SamplePrescription, SAMPLE_PRESCRIPTIONS } from './data/medicalData';
 import { PrescriptionAnalysisResult, ImagePreprocessingReport, MedicineDetail } from './types';
-import { ShieldCheck, Stethoscope, Heart, AlertCircle, Sparkles, AlertTriangle, ArrowRight, Lock, BookOpen, Search, FileText, PhoneCall } from 'lucide-react';
+import { ShieldCheck, Stethoscope, Heart, AlertCircle, Sparkles, AlertTriangle, ArrowRight, Lock, BookOpen, Search, FileText, PhoneCall, Newspaper } from 'lucide-react';
 import { postProcessPrescriptionResultWithNLP } from './utils/smartNlpEngine';
 import { createSamplePreprocessingReport } from './utils/imagePreprocessing';
 import { getLearnedCorrections } from './utils/hitlLearningEngine';
@@ -21,6 +21,7 @@ import { ThePrescriptionLogo } from './components/ThePrescriptionLogo';
 import { HowItWorksGuide } from './components/HowItWorksGuide';
 import { Footer } from './components/Footer';
 import { HomeSeoArticle } from './components/HomeSeoArticle';
+import { BlogSection } from './components/BlogSection';
 import { useSeoMetadata } from './utils/seo';
 
 export default function App() {
@@ -31,6 +32,31 @@ export default function App() {
   const [analyzingImage, setAnalyzingImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState<boolean>(false);
+
+  // Synchronize activeTab with URL hash (#blog, #lookup, #abbreviations, etc.)
+  useEffect(() => {
+    const handleHash = () => {
+      const h = window.location.hash.toLowerCase();
+      if (h.startsWith('#blog')) {
+        setActiveTab('blog');
+      } else if (h.includes('lookup')) {
+        setActiveTab('lookup');
+      } else if (h.includes('abbreviation') || h.includes('codes')) {
+        setActiveTab('abbreviations');
+      } else if (['about', 'faq', 'contact', 'disclaimer', 'privacy', 'terms'].some((p) => h.includes(p))) {
+        for (const p of ['about', 'faq', 'contact', 'disclaimer', 'privacy', 'terms'] as const) {
+          if (h.includes(p)) {
+            setActiveTab(p);
+            break;
+          }
+        }
+      }
+    };
+
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
 
   // Helper to determine if prescription analysis resulted in completely ununderstood prescription
   // ONLY show when completely unable to identify ANY medicine name on the prescription
@@ -350,7 +376,7 @@ export default function App() {
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     {/* Tool 1: Medicine Lookup */}
                     <button
                       type="button"
@@ -362,10 +388,10 @@ export default function App() {
                           <Search className="w-5 h-5" />
                         </div>
                         <h4 className="font-black text-slate-900 text-base group-hover:text-blue-700 transition-colors">
-                          Medicine & Salt Directory
+                          Medicine Directory
                         </h4>
                         <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                          Search 5,000+ brand names, active pharmacological molecules, side effects, and safe timing.
+                          Search 5,000+ brand names, active pharmacological molecules, side effects, and safe food timing.
                         </p>
                       </div>
                       <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-1 text-xs font-black text-blue-700">
@@ -397,7 +423,30 @@ export default function App() {
                       </div>
                     </button>
 
-                    {/* Tool 3: Sample Prescriptions Test */}
+                    {/* Tool 3: Articles & Health Guides */}
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('blog')}
+                      className="p-5 rounded-2xl bg-white border-2 border-slate-200 hover:border-teal-500 shadow-sm hover:shadow-md transition-all text-left group cursor-pointer flex flex-col justify-between"
+                    >
+                      <div className="space-y-2">
+                        <div className="w-10 h-10 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center font-bold group-hover:scale-105 transition-transform">
+                          <Newspaper className="w-5 h-5" />
+                        </div>
+                        <h4 className="font-black text-slate-900 text-base group-hover:text-teal-700 transition-colors">
+                          Clinical Articles (17)
+                        </h4>
+                        <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                          In-depth patient guides to doctor handwriting, generic drugs, food interactions, and dosing safety.
+                        </p>
+                      </div>
+                      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-1 text-xs font-black text-teal-700">
+                        <span>Read Guides</span>
+                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </button>
+
+                    {/* Tool 4: Sample Prescriptions Test */}
                     <button
                       type="button"
                       onClick={() => {
@@ -410,7 +459,7 @@ export default function App() {
                           <FileText className="w-5 h-5" />
                         </div>
                         <h4 className="font-black text-slate-900 text-base group-hover:text-emerald-700 transition-colors">
-                          Check Cursive Handwriting
+                          Check Handwriting
                         </h4>
                         <p className="text-xs text-slate-600 leading-relaxed font-medium">
                           Upload a photo or choose from 6 realistic doctor clinic samples to see real-time AI transcription.
@@ -441,6 +490,10 @@ export default function App() {
         {activeTab === 'lookup' && <MedicineLookup />}
 
         {activeTab === 'abbreviations' && <AbbreviationDictionary />}
+
+        {activeTab === 'blog' && (
+          <BlogSection onNavigateToScanner={() => setActiveTab('prescription')} />
+        )}
 
         {/* Informational, Legal, and Contact Pages */}
         {['about', 'faq', 'contact', 'disclaimer', 'privacy', 'terms'].includes(activeTab) && (
