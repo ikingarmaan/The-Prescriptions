@@ -324,6 +324,19 @@ export const Footer: React.FC<FooterProps> = ({ activeTab, setActiveTab, onOpenP
                   <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:translate-x-0.5 transition-transform" />
                 </button>
               </li>
+              <li className="pt-1">
+                <a
+                  href="mailto:Theprescriptionn@gmail.com"
+                  className="w-full text-left font-mono text-[11px] px-2 py-1.5 rounded-xl text-emerald-400 hover:text-emerald-300 hover:bg-slate-800/80 transition-all flex items-center justify-between border border-emerald-500/20 group"
+                  title="Direct Email Support"
+                >
+                  <span className="flex items-center gap-2 truncate">
+                    <Mail className="w-3 h-3 text-emerald-400 shrink-0" />
+                    <span className="truncate">Theprescriptionn@gmail.com</span>
+                  </span>
+                  <ExternalLink className="w-3 h-3 text-slate-500 group-hover:text-emerald-400 shrink-0 transition-colors" />
+                </a>
+              </li>
             </ul>
           </div>
 

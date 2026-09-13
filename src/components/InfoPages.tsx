@@ -765,7 +765,7 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ currentPage, onNavigate })
                   <Mail className="w-4 h-4" />
                   <span>General Support &amp; Feedback</span>
                 </div>
-                <div className="text-xs font-mono text-slate-900 font-semibold">support@theprescription.ai</div>
+                <a href="mailto:Theprescriptionn@gmail.com?subject=General%20Support" className="text-xs font-mono text-blue-700 font-semibold hover:underline block">Theprescriptionn@gmail.com</a>
                 <p className="text-[11px] text-slate-500">
                   For patient inquiries, user assistance, and general feedback. Typical response time is within 24 business hours.
                 </p>
@@ -776,7 +776,7 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ currentPage, onNavigate })
                   <Stethoscope className="w-4 h-4" />
                   <span>Pharmacist &amp; Clinical Advisory Network</span>
                 </div>
-                <div className="text-xs font-mono text-slate-900 font-semibold">clinical@theprescription.ai</div>
+                <a href="mailto:Theprescriptionn@gmail.com?subject=Clinical%20Advisory" className="text-xs font-mono text-purple-700 font-semibold hover:underline block">Theprescriptionn@gmail.com</a>
                 <p className="text-[11px] text-slate-500">
                   Dedicated communication channel for licensed pharmacists, medical doctors, and clinical pharmacologists submitting regional brand data or reporting ambiguous shorthand terms.
                 </p>
@@ -787,7 +787,7 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ currentPage, onNavigate })
                   <Terminal className="w-4 h-4" />
                   <span>Engineering &amp; Developer Inquiries</span>
                 </div>
-                <div className="text-xs font-mono text-slate-900 font-semibold">dev@theprescription.ai</div>
+                <a href="mailto:Theprescriptionn@gmail.com?subject=Developer%20Inquiry" className="text-xs font-mono text-emerald-700 font-semibold hover:underline block">Theprescriptionn@gmail.com</a>
                 <p className="text-[11px] text-slate-500">
                   Technical inquiries regarding optical character recognition architectures, multimodal vision fine-tuning, and open-source contributions.
                 </p>
@@ -921,7 +921,7 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ currentPage, onNavigate })
               Community pharmacists are on the front lines of patient safety every day. If you practice pharmacy or medicine in an area where local pharmaceutical brand names, regional generic manufacturers, or unique clinic shorthand abbreviations are not yet fully indexed in our directory, we invite you to join our clinical contributor network.
             </p>
             <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-              Contributing regional formulary data helps protect thousands of patients in your geographical region from prescription misinterpretation. We review all submitted brand-to-generic mappings against national pharmacopeias before integrating them into our directory. Reach our clinical team directly at <span className="font-mono text-purple-700 font-semibold">clinical@theprescription.ai</span>.
+              Contributing regional formulary data helps protect thousands of patients in your geographical region from prescription misinterpretation. We review all submitted brand-to-generic mappings against national pharmacopeias before integrating them into our directory. Reach our clinical team directly at <a href="mailto:Theprescriptionn@gmail.com?subject=Formulary%20Contribution" className="font-mono text-purple-700 font-semibold hover:underline">Theprescriptionn@gmail.com</a>.
             </p>
           </section>
 
@@ -1032,7 +1032,7 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ currentPage, onNavigate })
             <div className="space-y-2.5 text-xs text-slate-700">
               <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
                 <strong className="text-slate-900 block font-bold mb-0.5">Why does my uploaded prescription show &quot;Unable to decipher&quot;?</strong>
-                Our neural vision pipeline enforces a high confidence safety threshold. If paper wrinkling, heavy motion blur, or ink bleeding makes letterforms ambiguous, our algorithm refuses to fabricate a guess. Simply retake the photo in brighter daylight or enter the legible letters manually.
+                Our vision pipeline enforces a strict safety threshold. When motion blur or ink bleeding makes strokes ambiguous, we refuse to guess. Simply retake the photo in clear daylight.
               </div>
               <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
                 <strong className="text-slate-900 block font-bold mb-0.5">Can I upload PDF digital hospital discharge summaries?</strong>
@@ -1059,7 +1059,7 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ currentPage, onNavigate })
               Members of the news media, healthcare journalists, podcast hosts, and medical conference organizers are welcome to reach out to our communications liaison. We regularly discuss health literacy, the future of artificial intelligence in outpatient safety, and the elimination of medication errors.
             </p>
             <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-              For interviews, background briefings, high-resolution brand assets, or conference speaking engagements, please send an email with the subject line <strong>&quot;Media Inquiry&quot;</strong> to <span className="font-mono text-emerald-700 font-semibold">press@theprescription.ai</span> including your publication name, interview format, and deadline.
+              For interviews, background briefings, high-resolution brand assets, or conference speaking engagements, please send an email with the subject line <strong>&quot;Media Inquiry&quot;</strong> to <a href="mailto:Theprescriptionn@gmail.com?subject=Media%20Inquiry" className="font-mono text-emerald-700 font-semibold hover:underline">Theprescriptionn@gmail.com</a> including your publication name, interview format, and deadline.
             </p>
           </section>
 
@@ -1115,7 +1115,7 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ currentPage, onNavigate })
               </div>
             </div>
             <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-              If you are an assisted-living facility coordinator or geriatric social worker seeking customized printable templates for your community residents, contact our community outreach liaison at <span className="font-mono text-rose-700 font-semibold">community@theprescription.ai</span>.
+              If you are an assisted-living facility coordinator or geriatric social worker seeking customized printable templates for your community residents, contact our community outreach liaison at <a href="mailto:Theprescriptionn@gmail.com?subject=Community%20Outreach" className="font-mono text-rose-700 font-semibold hover:underline">Theprescriptionn@gmail.com</a>.
             </p>
           </section>
 
@@ -1143,7 +1143,7 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ currentPage, onNavigate })
               Response Time Guarantees &amp; Community Standards
             </h2>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Our support team strives to respond to patient inquiries and technical support tickets within twenty-four to forty-eight business hours (Monday through Friday, 9:00 AM to 6:00 PM UTC). Inquiries regarding clinical drug database expansions are reviewed weekly by our medical advisory contributors.
+              Our team responds to patient and technical support tickets within 24 to 48 business hours (Monday through Friday). Drug database expansions are reviewed weekly by our medical contributors.
             </p>
             <div className="p-4 rounded-xl bg-white/10 border border-white/15 text-xs text-slate-200">
               We are deeply grateful for your feedback, patience, and shared commitment to enhancing healthcare literacy for patients worldwide.
@@ -1384,11 +1384,10 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ currentPage, onNavigate })
               Under international privacy statutes (including the EU General Data Protection Regulation, the California Consumer Privacy Act / CPRA, and equivalent national data privacy acts), individuals possess rights regarding their personal data, including the right of access, rectification, and the &quot;right to be forgotten&quot; (erasure).
             </p>
             <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-              Because our architecture is completely zero-storage, we do not possess databases of your past searches or uploaded documents. We cannot &quot;hand over&quot; a file of your past prescription records because no such file exists. Similarly, erasure occurs automatically and instantly upon completion of every HTTP response cycle. If you have questions regarding our architecture or wish to audit our technical data flow, you may reach our privacy team at <span className="font-mono text-emerald-700 font-semibold">privacy@theprescription.ai</span>.
+              Because our architecture is completely zero-storage, we do not possess databases of your past searches or uploaded documents. We cannot &quot;hand over&quot; a file of your past prescription records because no such file exists. Similarly, erasure occurs automatically and instantly upon completion of every HTTP response cycle. If you have questions regarding our architecture or wish to audit our technical data flow, you may reach our privacy team at <a href="mailto:Theprescriptionn@gmail.com?subject=Privacy%20Audit" className="font-mono text-emerald-700 font-semibold hover:underline">Theprescriptionn@gmail.com</a>.
             </p>
           </section>
 
-          
           {/* Section 14: Incident Response & Threat Modeling */}
           <section className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-3">
             <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
@@ -1413,36 +1412,7 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ currentPage, onNavigate })
               We believe that trust in healthcare software is earned through radical transparency rather than opaque corporate marketing. We actively invite independent security researchers, university health informatics departments, and privacy advocates to review our network transmission topologies and memory lifecycle policies.
             </p>
             <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-              If your academic institution, hospital ethics committee, or patient advocacy association wishes to conduct a formal technical privacy assessment or audit of our ephemeral data pipeline, our team will provide complete architectural diagrams and technical documentation upon request. Contact our compliance liaison at <span className="font-mono text-emerald-700 font-semibold">compliance@theprescription.ai</span>.
-            </p>
-          </section>
-
-          
-          {/* Section 14: Incident Response & Threat Modeling */}
-          <section className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-            <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-              <ShieldAlert className="w-5 h-5 text-emerald-600" />
-              14. Cybersecurity Threat Modeling &amp; Zero-Leakage Architecture
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-              In traditional database architectures, the greatest threat to patient confidentiality is the risk of a centralized database breach — where unauthorized actors penetrate persistent cloud storage and exfiltrate millions of records in bulk. By eliminating persistent databases entirely, Theprescription fundamentally eliminates this attack vector.
-            </p>
-            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-              Even in the hypothetical event of an unauthorized physical server breach or container compromise, an adversary finds zero accumulated medical archives, zero saved prescription images, and zero patient identity tables. Security is not an afterthought layered on top of a leaky storage model; it is fundamentally engineered into our zero-retention foundation.
-            </p>
-          </section>
-
-          {/* Section 15: Transparency & Clinical Auditing */}
-          <section className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-            <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-              <Globe className="w-5 h-5 text-emerald-600" />
-              15. Architectural Transparency &amp; Medical Informatics Auditing
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-              We believe that trust in healthcare software is earned through radical transparency rather than opaque corporate marketing. We actively invite independent security researchers, university health informatics departments, and privacy advocates to review our network transmission topologies and memory lifecycle policies.
-            </p>
-            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-              If your academic institution, hospital ethics committee, or patient advocacy association wishes to conduct a formal technical privacy assessment or audit of our ephemeral data pipeline, our team will provide complete architectural diagrams and technical documentation upon request. Contact our compliance liaison at <span className="font-mono text-emerald-700 font-semibold">compliance@theprescription.ai</span>.
+              If your academic institution, hospital ethics committee, or patient advocacy association wishes to conduct a formal technical privacy assessment or audit of our ephemeral data pipeline, our team will provide complete architectural diagrams and technical documentation upon request. Contact our compliance liaison at <a href="mailto:Theprescriptionn@gmail.com?subject=Compliance%20Assessment" className="font-mono text-emerald-700 font-semibold hover:underline">Theprescriptionn@gmail.com</a>.
             </p>
           </section>
 
@@ -1675,7 +1645,7 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ currentPage, onNavigate })
               YOU EXPLICITLY WAIVE ANY RIGHT TO COMMENCE OR PARTICIPATE IN ANY CLASS ACTION, COLLECTIVE PROCEEDING, OR REPRESENTATIVE LAWSUIT AGAINST THEPRESCRIPTION OR ITS CREATORS.
             </p>
             <div className="p-4 rounded-xl bg-white/10 border border-white/15 text-xs text-slate-200">
-              For formal legal notices or regulatory inquiries, contact our administrative department at <span className="font-mono text-emerald-400">legal@theprescription.ai</span>.
+              For formal legal notices or regulatory inquiries, contact our administrative department at <a href="mailto:Theprescriptionn@gmail.com?subject=Legal%20Notice" className="font-mono text-emerald-400 hover:underline">Theprescriptionn@gmail.com</a>.
             </div>
           </section>
         </div>
