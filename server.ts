@@ -2,9 +2,17 @@ import express, { type Request, type Response } from "express";
 import path from "path";
 import fs from "fs";
 import dotenv from "dotenv";
-import nodemailer from "nodemailer";
+import nodemailer, { type SendMailOptions } from "nodemailer";
+import dns from "node:dns";
 import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
 import { postProcessPrescriptionResultWithNLP } from "./src/utils/smartNlpEngine";
+
+// Force IPv4 first across all DNS lookups to eliminate IPv6 ENETUNREACH errors in Docker/Railway containers
+try {
+  dns.setDefaultResultOrder?.("ipv4first");
+} catch {
+  // Graceful fallback on older Node runtimes
+}
 
 dotenv.config();
 
@@ -17,7 +25,7 @@ function escapeHtml(str: string): string {
     .replace(/'/g, "&#039;");
 }
 
-function getMailTransporter() {
+function getMailTransporter(preferredPort: number = 465) {
   const user = process.env.EMAIL_USER || process.env.GMAIL_USER || "Theprescriptionn@gmail.com";
   const pass = (
     process.env.EMAIL_APP_PASSWORD ||
@@ -31,26 +39,61 @@ function getMailTransporter() {
     return null;
   }
 
+  // Custom SMTP host if user provided one
   if (process.env.SMTP_HOST) {
-    const port = parseInt(process.env.SMTP_PORT || "465", 10);
+    const port = parseInt(process.env.SMTP_PORT || String(preferredPort), 10);
     return nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port,
       secure: port === 465,
+      family: 4, // Force IPv4
       auth: {
         user,
         pass,
       },
-    });
+      tls: {
+        rejectUnauthorized: false,
+      },
+    } as any);
   }
 
+  // Default: Gmail SMTP with explicit IPv4 family flag to bypass Railway IPv6 ENETUNREACH
+  const port = parseInt(process.env.SMTP_PORT || String(preferredPort), 10);
   return nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port,
+    secure: port === 465, // SSL on 465, STARTTLS on 587
+    family: 4, // CRITICAL: Forces IPv4, prevents IPv6 ENETUNREACH on Railway/Docker
     auth: {
       user,
       pass,
     },
-  });
+    tls: {
+      rejectUnauthorized: false,
+    },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
+  } as any);
+}
+
+async function sendMailWithFallback(mailOptions: SendMailOptions) {
+  // Try port 465 (SSL) first; if network blocked/unreachable, fallback to port 587 (STARTTLS)
+  const portsToTry = [465, 587];
+  let lastError: any = null;
+
+  for (const port of portsToTry) {
+    try {
+      const transporter = getMailTransporter(port);
+      if (!transporter) return null;
+      return await transporter.sendMail(mailOptions);
+    } catch (err: any) {
+      lastError = err;
+      console.warn(`[Mail] Delivery failed via port ${port} (${err?.code || err?.message}), trying fallback port...`);
+    }
+  }
+
+  throw lastError || new Error("Failed to deliver email through all SMTP ports.");
 }
 
 function getGeminiApiKeys(): string[] {
@@ -718,8 +761,8 @@ async function startServer() {
       };
 
       await Promise.all([
-        transporter.sendMail(adminMailOptions),
-        transporter.sendMail(visitorMailOptions),
+        sendMailWithFallback(adminMailOptions),
+        sendMailWithFallback(visitorMailOptions),
       ]);
 
       console.log(`[Contact Form] Successfully delivered emails: ${cleanEmail} <-> ${adminEmail}`);
@@ -734,6 +777,40 @@ async function startServer() {
       res.status(500).json({
         success: false,
         error: err.message || "Failed to dispatch email. Please try again or write directly to Theprescriptionn@gmail.com.",
+      });
+    }
+  });
+
+  // Diagnostic Test Endpoint: verify Gmail SMTP connectivity from Railway
+  app.get("/api/test-email", async (_req: Request, res: Response) => {
+    try {
+      const adminEmail = process.env.EMAIL_USER || "Theprescriptionn@gmail.com";
+      const transporter = getMailTransporter();
+      if (!transporter) {
+        res.status(400).json({
+          success: false,
+          error: "EMAIL_APP_PASSWORD environment variable is not configured on Railway.",
+        });
+        return;
+      }
+
+      await sendMailWithFallback({
+        from: `"Theprescription System" <${adminEmail}>`,
+        to: adminEmail,
+        subject: "[Diagnostic] Theprescription Email Delivery Active",
+        text: `Diagnostic verification passed! Your Railway server is successfully connected to Gmail via IPv4 SMTP.\nTime: ${new Date().toUTCString()}`,
+      });
+
+      res.json({
+        success: true,
+        message: `Diagnostic test email sent successfully to ${adminEmail}! Check your inbox.`,
+      });
+    } catch (err: any) {
+      console.error("[Test Email] Error:", err);
+      res.status(500).json({
+        success: false,
+        error: err?.message || String(err),
+        code: err?.code,
       });
     }
   });
