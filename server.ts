@@ -820,6 +820,26 @@ async function startServer() {
   const app = express();
   const PORT = parseInt(process.env.PORT || "3000", 10) || 3000;
 
+  // 1. Trust reverse proxies (Railway, Cloudflare, etc.) for correct x-forwarded-proto detection
+  app.set("trust proxy", true);
+
+  // 2. HTTPS Redirection Middleware (Equivalent to FastAPI https_redirect middleware)
+  // Automatically redirects incoming plain HTTP traffic to secure HTTPS on Railway/production
+  app.use((req: Request, res: Response, next) => {
+    const forwardedProto = req.headers["x-forwarded-proto"];
+    if (forwardedProto && forwardedProto === "http") {
+      const host = req.headers.host || req.hostname;
+      return res.redirect(301, `https://${host}${req.url}`);
+    }
+
+    // Add HSTS security header for secure connections
+    if (req.secure || forwardedProto === "https") {
+      res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+    }
+
+    next();
+  });
+
   // Body parser with 25MB limit for high-res prescription photos
   app.use(express.json({ limit: "25mb" }));
   app.use(express.urlencoded({ limit: "25mb", extended: true }));
