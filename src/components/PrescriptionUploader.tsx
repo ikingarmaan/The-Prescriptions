@@ -13,6 +13,7 @@ import {
   Cpu,
   Layers,
   Fingerprint,
+  Smartphone,
 } from 'lucide-react';
 import { CameraCaptureModal } from './CameraCaptureModal';
 import { SAMPLE_PRESCRIPTIONS, SamplePrescription } from '../data/medicalData';
@@ -55,6 +56,7 @@ export const PrescriptionUploader: React.FC<PrescriptionUploaderProps> = ({
   const [preprocessingReport, setPreprocessingReport] = useState<ImagePreprocessingReport | null>(null);
   const [hasConsent, setHasConsent] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const nativeCameraInputRef = useRef<HTMLInputElement | null>(null);
 
   const processLoadedImage = async (dataUrl: string) => {
     setSelectedImage(dataUrl);
@@ -258,6 +260,19 @@ export const PrescriptionUploader: React.FC<PrescriptionUploaderProps> = ({
                       }
                     }}
                   />
+                  <input
+                    ref={nativeCameraInputRef}
+                    type="file"
+                    id="prescription-native-camera-input"
+                    accept="image/*"
+                    capture="environment"
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        handleFileChange(e.target.files[0]);
+                      }
+                    }}
+                  />
                   <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto rounded-2xl bg-emerald-100/70 text-emerald-700 flex items-center justify-center mb-3 sm:mb-4">
                     <Upload className="w-6 h-6 sm:w-7 sm:h-7" />
                   </div>
@@ -275,7 +290,7 @@ export const PrescriptionUploader: React.FC<PrescriptionUploaderProps> = ({
                         e.stopPropagation();
                         setIsCameraOpen(true);
                       }}
-                      className="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 min-h-[48px]"
+                      className="px-5 py-3.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
                     >
                       <Camera className="w-4 h-4" />
                       Take Photo with Camera
@@ -287,10 +302,25 @@ export const PrescriptionUploader: React.FC<PrescriptionUploaderProps> = ({
                         e.stopPropagation();
                         fileInputRef.current?.click();
                       }}
-                      className="px-5 py-3 bg-white border border-slate-300 hover:border-slate-400 text-slate-700 text-xs sm:text-sm font-semibold rounded-xl shadow-2xs hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 min-h-[48px]"
+                      className="px-5 py-3.5 bg-white border border-slate-300 hover:border-slate-400 text-slate-700 text-xs sm:text-sm font-semibold rounded-xl shadow-2xs hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
                     >
                       <Upload className="w-4 h-4 text-slate-500" />
                       Choose from Gallery / Files
+                    </button>
+                  </div>
+
+                  {/* Mobile Direct Phone Camera Helper */}
+                  <div className="pt-2 sm:hidden flex items-center justify-center">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        nativeCameraInputRef.current?.click();
+                      }}
+                      className="text-[11px] text-emerald-700 font-semibold inline-flex items-center gap-1.5 py-1.5 px-3 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors active:scale-95"
+                    >
+                      <Smartphone className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Or snap directly with Phone Camera App</span>
                     </button>
                   </div>
                 </div>
@@ -316,11 +346,11 @@ export const PrescriptionUploader: React.FC<PrescriptionUploaderProps> = ({
                   </div>
 
                   {/* Image Display */}
-                  <div className="relative max-h-64 sm:max-h-80 w-full overflow-hidden rounded-xl border border-slate-200 bg-white p-2 flex items-center justify-center">
+                  <div className="relative max-h-56 sm:max-h-80 w-full overflow-hidden rounded-xl border border-slate-200 bg-white p-2 flex items-center justify-center">
                     <img
                       src={selectedImage}
                       alt="Prescription preview"
-                      className="max-h-60 sm:max-h-72 w-auto rounded-lg shadow-2xs object-contain"
+                      className="max-h-52 sm:max-h-72 w-auto rounded-lg shadow-2xs object-contain"
                     />
                   </div>
 

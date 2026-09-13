@@ -45,3 +45,23 @@
   stroke-dasharray: 200;
   animation: ecgPulse 3.5s linear infinite;
 }
+
+@keyframes scannerLaser {
+  0% {
+    top: 5%;
+    opacity: 0.8;
+  }
+  50% {
+    top: 92%;
+    opacity: 1;
+  }
+  100% {
+    top: 5%;
+    opacity: 0.8;
+  }
+}
+
+.animate-scanner-laser {
+  animation: scannerLaser 2.8s ease-in-out infinite;
+}
+
