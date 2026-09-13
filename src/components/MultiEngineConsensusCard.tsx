@@ -94,7 +94,7 @@ function sanitizeStageData(engine: {
   } else {
     stageTitle = 'Clinical Pharmacopeia Cross-Validation';
     categoryTag = 'Multimodal Clinical Safety Engine';
-    clinicalRole = 'Unifies candidate hypotheses with certified pharmacology, standard therapeutic ranges, and drug interactions';
+    clinicalRole = 'Unifies candidate hypotheses with standard pharmacology, therapeutic ranges, and drug interactions';
     focus = 'Drug interaction safety, therapeutic reasoning, food rules, and diagnostic workup planning';
   }
 
@@ -458,7 +458,7 @@ export const MultiEngineConsensusCard: React.FC<ClinicalAccuracyScoreCardProps> 
 
             <div className="text-[11px] text-slate-500 font-medium flex items-center gap-1">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Certified Pharmacopeia Verified</span>
+              <span>Pharmacopeia Reference Verified</span>
             </div>
           </div>
 
@@ -521,7 +521,7 @@ export const MultiEngineConsensusCard: React.FC<ClinicalAccuracyScoreCardProps> 
                 <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
                 <p className="leading-relaxed text-[11px] sm:text-xs text-emerald-900">
                   {cleanOcrText(ensemble.arbitrationExplanation) ||
-                    'Multi-stage clinical verification cross-referenced handwriting strokes with certified medical pharmacopeia to achieve 98.5% transcription accuracy.'}
+                    'Multi-stage clinical verification cross-referenced handwriting strokes with standard medical pharmacopeia references to achieve high transcription consistency.'}
                 </p>
               </div>
             </div>

@@ -462,7 +462,7 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ currentPage, onNavigate })
           <section className="space-y-2">
             <h2 className="text-base font-bold text-slate-900">3. User Responsibility & Verification</h2>
             <p>
-              You agree that you are solely responsible for reviewing all transcribed outputs with a licensed healthcare practitioner or certified dispensing pharmacist. Do not start, discontinue, or alter dosages of any medication based on software interpretations.
+              You agree that you are solely responsible for reviewing all transcribed outputs with a licensed healthcare practitioner or licensed dispensing pharmacist. Do not start, discontinue, or alter dosages of any medication based on software interpretations.
             </p>
           </section>
 

@@ -291,7 +291,7 @@ export default function App() {
             </span>
           </div>
           <span className="text-[11px] text-emerald-300/80 hidden md:inline shrink-0">
-            Certified Clinical Pharmacopeia Guidance
+            Clinical Reference & Safety Guidance
           </span>
         </div>
       </div>

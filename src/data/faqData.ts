@@ -26,7 +26,7 @@ export const FAQ_DATABASE: FAQItem[] = [
     id: 'faq-1',
     question: 'How does Theprescription decipher messy doctor handwriting?',
     answer:
-      'Theprescription employs a specialized 5-stage clinical handwriting recognition pipeline. Rather than treating a prescription as generic text, our neural pipeline analyzes cursive pen stroke ligatures, document layout geometry, Latin frequency shorthand (like 1-0-1 or BD), and metric dosage boundaries. The decoded tokens are cross-validated against certified pharmacopeias to reconcile handwritten ambiguities with real drug catalogs.',
+      'Theprescription employs a specialized 5-stage clinical handwriting recognition pipeline. Rather than treating a prescription as generic text, our neural pipeline analyzes cursive pen stroke ligatures, document layout geometry, Latin frequency shorthand (like 1-0-1 or BD), and metric dosage boundaries. The decoded tokens are cross-referenced against standard pharmacopeias and drug databases to reconcile handwritten ambiguities.',
     category: 'Technology & Recognition',
     popular: true,
     tags: ['handwriting', 'ocr', 'ai', 'cursive', 'technology'],
@@ -35,7 +35,7 @@ export const FAQ_DATABASE: FAQItem[] = [
     id: 'faq-2',
     question: 'How does the system distinguish between brand names and active generic salts?',
     answer:
-      'Doctors frequently write commercial trade names (e.g. Augmentin, Lipitor, Pan 40, Glycomet) rather than chemical salts. Our built-in pharmaceutical ontology automatically detects brand names, maps them to their certified generic active chemical molecules (e.g. Amoxicillin + Clavulanic Acid, Atorvastatin, Pantoprazole, Metformin), and identifies therapeutic equivalents to promote informed patient awareness.',
+      'Doctors frequently write commercial trade names (e.g. Augmentin, Lipitor, Pan 40, Glycomet) rather than chemical salts. Our built-in pharmaceutical ontology automatically detects brand names, maps them to their standard generic active chemical molecules (e.g. Amoxicillin + Clavulanic Acid, Atorvastatin, Pantoprazole, Metformin), and identifies therapeutic equivalents to promote informed patient awareness.',
     category: 'Technology & Recognition',
     popular: true,
     tags: ['generic', 'brand', 'molecules', 'salts', 'catalog'],

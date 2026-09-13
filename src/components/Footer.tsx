@@ -18,6 +18,7 @@ import {
   Zap,
   Globe,
   AlertTriangle,
+  ExternalLink,
 } from 'lucide-react';
 import { ThePrescriptionLogo } from './ThePrescriptionLogo';
 import { AppNavTab } from './Navbar';
@@ -139,7 +140,7 @@ export const Footer: React.FC<FooterProps> = ({ activeTab, setActiveTab, onOpenP
             </div>
 
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Clinical decision-support and patient empowerment platform. Decrypts illegible doctor handwriting into certified active generic salts, timing rules, and chronological schedules.
+              AI-powered assistant that deciphers doctor prescriptions into clear medicine names, dosage timings, and structured schedules.
             </p>
 
             {/* Trust Badges */}
@@ -388,6 +389,19 @@ export const Footer: React.FC<FooterProps> = ({ activeTab, setActiveTab, onOpenP
             <span className="inline-flex items-center gap-1 text-emerald-400 font-medium">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               All Systems Operational (30 RPM Engine)
+            </span>
+            <span className="hidden sm:inline">•</span>
+            <span className="text-slate-300">
+              Developed by{' '}
+              <a
+                href="https://mohdarmaan.up.railway.app/#home"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-bold text-emerald-400 hover:text-emerald-300 underline decoration-emerald-500/40 hover:decoration-emerald-300 transition-colors inline-flex items-center gap-1 cursor-pointer"
+              >
+                Mohd Armaan
+                <ExternalLink className="w-3 h-3 inline-block opacity-80" />
+              </a>
             </span>
           </div>
 
