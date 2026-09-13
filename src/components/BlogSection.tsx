@@ -39,6 +39,8 @@ interface BlogSectionProps {
   initialArticleSlug?: string | null;
 }
 
+const getWebpUrl = (url: string) => (url ? url.replace(/\.(png|jpg|jpeg)$/i, '.webp') : url);
+
 export const BlogSection: React.FC<BlogSectionProps> = ({
   onNavigateToScanner,
   initialArticleSlug,
@@ -315,12 +317,19 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
         {/* Hero Image */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
           <div className="rounded-3xl overflow-hidden border border-slate-200/90 shadow-xl bg-slate-900 relative group">
-            <img
-              src={currentArticle.heroImage}
-              alt={currentArticle.heroImageAlt}
-              className="w-full aspect-video object-cover group-hover:scale-[1.01] transition-transform duration-500"
-              loading="eager"
-            />
+            <picture>
+              <source srcSet={getWebpUrl(currentArticle.heroImage)} type="image/webp" />
+              <img
+                src={currentArticle.heroImage}
+                alt={currentArticle.heroImageAlt}
+                width={1376}
+                height={768}
+                className="w-full aspect-video object-cover group-hover:scale-[1.01] transition-transform duration-500"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+              />
+            </picture>
             <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-slate-950/80 via-slate-950/40 to-transparent p-4 text-xs text-slate-200">
               {currentArticle.heroImageAlt}
             </div>
@@ -560,12 +569,18 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
                     className="group cursor-pointer rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col"
                   >
                     <div className="aspect-video w-full overflow-hidden bg-slate-100">
-                      <img
-                        src={rel.heroImage}
-                        alt={rel.heroImageAlt}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        loading="lazy"
-                      />
+                      <picture>
+                        <source srcSet={getWebpUrl(rel.heroImage)} type="image/webp" />
+                        <img
+                          src={rel.heroImage}
+                          alt={rel.heroImageAlt}
+                          width={1376}
+                          height={768}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </picture>
                     </div>
                     <div className="p-4 flex-1 flex flex-col justify-between space-y-2">
                       <div>
@@ -673,11 +688,19 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
             className="group cursor-pointer rounded-3xl bg-white border border-slate-200/90 shadow-lg hover:shadow-xl transition-all overflow-hidden grid grid-cols-1 md:grid-cols-12 gap-0"
           >
             <div className="md:col-span-7 aspect-video md:aspect-auto overflow-hidden bg-slate-900 relative">
-              <img
-                src={ALL_ARTICLES[0].heroImage}
-                alt={ALL_ARTICLES[0].heroImageAlt}
-                className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
-              />
+              <picture>
+                <source srcSet={getWebpUrl(ALL_ARTICLES[0].heroImage)} type="image/webp" />
+                <img
+                  src={ALL_ARTICLES[0].heroImage}
+                  alt={ALL_ARTICLES[0].heroImageAlt}
+                  width={1376}
+                  height={768}
+                  className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                />
+              </picture>
               <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-teal-600 text-white text-[11px] font-bold uppercase tracking-wider shadow-md">
                 Featured Spotlight
               </div>
@@ -753,12 +776,18 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
                   <div>
                     {/* Thumbnail Image */}
                     <div className="aspect-video w-full overflow-hidden bg-slate-900 relative">
-                      <img
-                        src={article.heroImage}
-                        alt={article.heroImageAlt}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        loading="lazy"
-                      />
+                      <picture>
+                        <source srcSet={getWebpUrl(article.heroImage)} type="image/webp" />
+                        <img
+                          src={article.heroImage}
+                          alt={article.heroImageAlt}
+                          width={1376}
+                          height={768}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </picture>
                       <div className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-white/90 backdrop-blur-xs text-slate-800 text-[10px] font-extrabold uppercase tracking-wider shadow-xs">
                         {article.categoryLabel}
                       </div>

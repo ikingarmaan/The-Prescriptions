@@ -2,9 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Navbar, AppNavTab } from './components/Navbar';
 import { PrescriptionUploader } from './components/PrescriptionUploader';
 import { PrescriptionResultView } from './components/PrescriptionResultView';
-import { MedicineLookup } from './components/MedicineLookup';
-import { AbbreviationDictionary } from './components/AbbreviationDictionary';
-import { PrintableMedicationCard } from './components/PrintableMedicationCard';
 import { InteractiveMedicalBackground } from './components/InteractiveMedicalBackground';
 import { GlowingCursor } from './components/GlowingCursor';
 import { SamplePrescription, SAMPLE_PRESCRIPTIONS } from './data/medicalData';
@@ -15,14 +12,30 @@ import { createSamplePreprocessingReport } from './utils/imagePreprocessing';
 import { getLearnedCorrections } from './utils/hitlLearningEngine';
 import { UnunderstoodMedicinePopup } from './components/UnunderstoodMedicinePopup';
 import { PrescriptionAnalyzingInteractiveModal } from './components/PrescriptionAnalyzingInteractiveModal';
-import { InfoPages, InfoPageType } from './components/InfoPages';
+import type { InfoPageType } from './components/InfoPages';
 import { FaqSection } from './components/FaqSection';
 import { ThePrescriptionLogo } from './components/ThePrescriptionLogo';
 import { HowItWorksGuide } from './components/HowItWorksGuide';
 import { Footer } from './components/Footer';
 import { HomeSeoArticle } from './components/HomeSeoArticle';
-import { BlogSection } from './components/BlogSection';
 import { useSeoMetadata } from './utils/seo';
+
+// Lazy-load non-critical tabs and heavy PDF generation bundles to minimize initial load time
+const MedicineLookup = React.lazy(() => import('./components/MedicineLookup').then((m) => ({ default: m.MedicineLookup })));
+const AbbreviationDictionary = React.lazy(() => import('./components/AbbreviationDictionary').then((m) => ({ default: m.AbbreviationDictionary })));
+const PrintableMedicationCard = React.lazy(() => import('./components/PrintableMedicationCard').then((m) => ({ default: m.PrintableMedicationCard })));
+const InfoPages = React.lazy(() => import('./components/InfoPages').then((m) => ({ default: m.InfoPages })));
+const BlogSection = React.lazy(() => import('./components/BlogSection').then((m) => ({ default: m.BlogSection })));
+
+const TabLoadingFallback = () => (
+  <div className="flex flex-col items-center justify-center min-h-[360px] py-16 px-4">
+    <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center animate-pulse">
+      <Sparkles className="w-6 h-6 text-emerald-600 animate-spin" style={{ animationDuration: '3s' }} />
+    </div>
+    <p className="mt-4 text-sm font-semibold text-slate-700">Loading section...</p>
+    <p className="text-xs text-slate-400 mt-1">Fetching resources safely</p>
+  </div>
+);
 import {
   initGA,
   trackPrescriptionAnalysis,
@@ -511,21 +524,23 @@ export default function App() {
           </div>
         )}
 
-        {activeTab === 'lookup' && <MedicineLookup />}
+        <React.Suspense fallback={<TabLoadingFallback />}>
+          {activeTab === 'lookup' && <MedicineLookup />}
 
-        {activeTab === 'abbreviations' && <AbbreviationDictionary />}
+          {activeTab === 'abbreviations' && <AbbreviationDictionary />}
 
-        {activeTab === 'blog' && (
-          <BlogSection onNavigateToScanner={() => setActiveTab('prescription')} />
-        )}
+          {activeTab === 'blog' && (
+            <BlogSection onNavigateToScanner={() => setActiveTab('prescription')} />
+          )}
 
-        {/* Informational, Legal, and Contact Pages */}
-        {['about', 'faq', 'contact', 'disclaimer', 'privacy', 'terms'].includes(activeTab) && (
-          <InfoPages
-            currentPage={activeTab as InfoPageType}
-            onNavigate={(page) => setActiveTab(page as AppNavTab)}
-          />
-        )}
+          {/* Informational, Legal, and Contact Pages */}
+          {['about', 'faq', 'contact', 'disclaimer', 'privacy', 'terms'].includes(activeTab) && (
+            <InfoPages
+              currentPage={activeTab as InfoPageType}
+              onNavigate={(page) => setActiveTab(page as AppNavTab)}
+            />
+          )}
+        </React.Suspense>
       </main>
 
       {/* Interactive HUD during Prescription Analysis */}
@@ -536,10 +551,12 @@ export default function App() {
 
       {/* Printable Medication Card Modal */}
       {isPrintModalOpen && analysisResult && (
-        <PrintableMedicationCard
-          prescription={analysisResult}
-          onClose={() => setIsPrintModalOpen(false)}
-        />
+        <React.Suspense fallback={null}>
+          <PrintableMedicationCard
+            prescription={analysisResult}
+            onClose={() => setIsPrintModalOpen(false)}
+          />
+        </React.Suspense>
       )}
 
       {/* Modern Interactive Clinical Footer */}

@@ -1393,8 +1393,21 @@ Include its generic name, primary uses, mechanism of action, typical dosage form
     });
     app.use(vite.middlewares);
   } else {
-    app.use(express.static(distPath));
+    app.use(
+      express.static(distPath, {
+        maxAge: "1y",
+        immutable: true,
+        setHeaders: (res, filePath) => {
+          if (filePath.endsWith(".html")) {
+            res.setHeader("Cache-Control", "public, max-age=0, must-revalidate");
+          } else if (filePath.match(/\.(js|css|webp|png|jpg|jpeg|svg|woff2?|ico)$/i)) {
+            res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+          }
+        },
+      })
+    );
     app.get("*", (_req: Request, res: Response) => {
+      res.setHeader("Cache-Control", "public, max-age=0, must-revalidate");
       res.sendFile(path.join(distPath, "index.html"));
     });
   }
