@@ -103,4 +103,4 @@ In routine clinical practice, active patient engagement represents the single gr
 
 ---
 
-*Medical Disclaimer: Medical Disclaimer: This article is published solely for educational, health literacy, and informational purposes. Theprescription is not a certified medical device and does not dispense medical advice. Patients must never alter, stop, or initiate prescription medications without direct clinical consultation with a licensed physician and dispensing pharmacist. Originally published on [Theprescription](https://www.theprescription.in/#blog/steroid-tapering-schedules-prednisone-safety).*
+*Medical Disclaimer: Medical Disclaimer: This article is published solely for educational, health literacy, and informational purposes. Theprescription is not a certified medical device and does not dispense medical advice. Patients must never alter, stop, or initiate prescription medications without direct clinical consultation with a licensed physician and dispensing pharmacist. Originally published on [Theprescription](https://www.theprescription.in/article/steroid-tapering-schedules-prednisone-safety).*

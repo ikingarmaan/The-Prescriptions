@@ -106,4 +106,4 @@ Pharmacists and primary care physicians actively welcome constructive dialogue r
 
 ---
 
-*Medical Disclaimer: Medical Disclaimer: This article is published solely for educational, health literacy, and informational purposes. Theprescription is not a certified medical device and does not dispense medical advice. Patients must never alter, stop, or initiate prescription medications without direct clinical consultation with a licensed physician and dispensing pharmacist. Originally published on [Theprescription](https://www.theprescription.in/#blog/why-doctors-prescribe-antacids-ppis-with-antibiotics).*
+*Medical Disclaimer: Medical Disclaimer: This article is published solely for educational, health literacy, and informational purposes. Theprescription is not a certified medical device and does not dispense medical advice. Patients must never alter, stop, or initiate prescription medications without direct clinical consultation with a licensed physician and dispensing pharmacist. Originally published on [Theprescription](https://www.theprescription.in/article/why-doctors-prescribe-antacids-ppis-with-antibiotics).*

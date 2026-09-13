@@ -101,4 +101,4 @@ By empowering patients to take a clear photograph of their paper prescription an
 
 ---
 
-*Medical Disclaimer: Medical Disclaimer: This article is published solely for educational, health literacy, and informational purposes. Theprescription is not a certified medical device and does not dispense medical advice. Patients must never alter, stop, or initiate prescription medications without direct clinical consultation with a licensed physician and dispensing pharmacist. Originally published on [Theprescription](https://www.theprescription.in/#blog/doctor-handwriting-mystery).*
+*Medical Disclaimer: Medical Disclaimer: This article is published solely for educational, health literacy, and informational purposes. Theprescription is not a certified medical device and does not dispense medical advice. Patients must never alter, stop, or initiate prescription medications without direct clinical consultation with a licensed physician and dispensing pharmacist. Originally published on [Theprescription](https://www.theprescription.in/article/doctor-handwriting-mystery).*

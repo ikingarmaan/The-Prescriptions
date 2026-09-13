@@ -106,4 +106,4 @@ Third, leverage modern digital health platforms. Theprescription allows you to c
 
 ---
 
-*Medical Disclaimer: Medical Disclaimer: This article is published solely for educational, health literacy, and informational purposes. Theprescription is not a certified medical device and does not dispense medical advice. Patients must never alter, stop, or initiate prescription medications without direct clinical consultation with a licensed physician and dispensing pharmacist. Originally published on [Theprescription](https://www.theprescription.in/#blog/what-does-1-0-1-mean-prescription-timing).*
+*Medical Disclaimer: Medical Disclaimer: This article is published solely for educational, health literacy, and informational purposes. Theprescription is not a certified medical device and does not dispense medical advice. Patients must never alter, stop, or initiate prescription medications without direct clinical consultation with a licensed physician and dispensing pharmacist. Originally published on [Theprescription](https://www.theprescription.in/article/what-does-1-0-1-mean-prescription-timing).*

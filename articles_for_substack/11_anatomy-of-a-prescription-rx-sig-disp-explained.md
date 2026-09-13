@@ -102,4 +102,4 @@ Furthermore, healthcare systems increasingly recognize that health literacy is a
 
 ---
 
-*Medical Disclaimer: Medical Disclaimer: This article is published solely for educational, health literacy, and informational purposes. Theprescription is not a certified medical device and does not dispense medical advice. Patients must never alter, stop, or initiate prescription medications without direct clinical consultation with a licensed physician and dispensing pharmacist. Originally published on [Theprescription](https://www.theprescription.in/#blog/anatomy-of-a-prescription-rx-sig-disp-explained).*
+*Medical Disclaimer: Medical Disclaimer: This article is published solely for educational, health literacy, and informational purposes. Theprescription is not a certified medical device and does not dispense medical advice. Patients must never alter, stop, or initiate prescription medications without direct clinical consultation with a licensed physician and dispensing pharmacist. Originally published on [Theprescription](https://www.theprescription.in/article/anatomy-of-a-prescription-rx-sig-disp-explained).*
