@@ -324,6 +324,49 @@ async function dispatchEmail(payload: EmailDispatchPayload): Promise<DispatchRes
   );
 }
 
+interface ContactFormData {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  timestamp?: string;
+}
+
+async function saveContactSubmissionToGoogleSheet(data: ContactFormData): Promise<boolean> {
+  const webhookUrl = (process.env.GOOGLE_SHEET_WEBHOOK_URL || process.env.GOOGLE_SHEETS_URL || "").trim();
+  if (!webhookUrl) {
+    return false;
+  }
+
+  try {
+    const res = await fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        timestamp: data.timestamp || new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
+        name: data.name,
+        email: data.email,
+        subject: data.subject,
+        message: data.message,
+      }),
+      redirect: "follow",
+    });
+
+    if (res.ok) {
+      console.log(`[Google Sheets] Contact submission logged to Google Sheet for ${data.email}`);
+      return true;
+    } else {
+      console.warn(`[Google Sheets] Webhook responded with HTTP ${res.status}`);
+      return false;
+    }
+  } catch (err: any) {
+    console.error("[Google Sheets] Error logging to Google Sheet:", err?.message || err);
+    return false;
+  }
+}
+
 function getGeminiApiKeys(): string[] {
   const keys: string[] = [];
 
@@ -894,6 +937,14 @@ async function startServer() {
       const cleanMessage = message.trim();
       const adminEmail = (process.env.EMAIL_USER || "theprescriptionn@gmail.com").trim().toLowerCase();
 
+      // Automatically log every contact form submission to Google Sheets if configured (non-blocking)
+      void saveContactSubmissionToGoogleSheet({
+        name: cleanName,
+        email: cleanEmail,
+        subject: cleanSubject,
+        message: cleanMessage,
+      });
+
       const provider = getActiveEmailProvider();
 
       if (provider.type === "none") {
@@ -1070,6 +1121,49 @@ async function startServer() {
       console.error("[Test Email] Error:", err);
       res.status(500).json({
         success: false,
+        error: err?.message || String(err),
+      });
+    }
+  });
+
+  // Diagnostic Test Endpoint: verify Google Sheet webhook connectivity from Railway
+  app.get("/api/test-google-sheet", async (_req: Request, res: Response) => {
+    const webhookUrl = (process.env.GOOGLE_SHEET_WEBHOOK_URL || process.env.GOOGLE_SHEETS_URL || "").trim();
+    if (!webhookUrl) {
+      res.status(400).json({
+        success: false,
+        configured: false,
+        error: "GOOGLE_SHEET_WEBHOOK_URL variable is not set in Railway Variables.",
+        instructions: "Please add GOOGLE_SHEET_WEBHOOK_URL in your Railway Variables tab with your Google Apps Script Web App URL.",
+      });
+      return;
+    }
+
+    try {
+      const ok = await saveContactSubmissionToGoogleSheet({
+        name: "Test User (Theprescription Verification)",
+        email: "test@theprescription.in",
+        subject: "Diagnostic Verification Test",
+        message: "This is a test entry confirming that contact form submissions are properly recording into your Google Sheet!",
+      });
+
+      if (ok) {
+        res.json({
+          success: true,
+          configured: true,
+          message: "🎉 Success! A test row was appended directly into your Google Sheet. Check your sheet!",
+        });
+      } else {
+        res.status(502).json({
+          success: false,
+          configured: true,
+          error: "Google Apps Script responded with an error or blocked the request. Please check that 'Who has access' is set to 'Anyone' in your deployment settings.",
+        });
+      }
+    } catch (err: any) {
+      res.status(500).json({
+        success: false,
+        configured: true,
         error: err?.message || String(err),
       });
     }
