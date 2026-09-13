@@ -32,6 +32,7 @@ import {
   ThumbsUp,
   Bookmark,
 } from 'lucide-react';
+import { trackBlogArticleView, trackPageView } from '../utils/analytics';
 
 interface BlogSectionProps {
   onNavigateToScanner?: () => void;
@@ -88,6 +89,14 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
     if (!selectedArticleSlug) return null;
     return getArticleBySlug(selectedArticleSlug) || ALL_ARTICLES[0];
   }, [selectedArticleSlug]);
+
+  // Track article views in Google Analytics
+  useEffect(() => {
+    if (currentArticle) {
+      trackBlogArticleView(currentArticle.slug, currentArticle.title);
+      trackPageView(`#blog/${currentArticle.slug}`, `${currentArticle.title} | Theprescription`);
+    }
+  }, [currentArticle?.slug]);
 
   // Filter articles for directory view
   const filteredArticles = useMemo(() => {

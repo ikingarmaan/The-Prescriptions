@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { AppNavTab } from '../components/Navbar';
+import { trackPageView } from './analytics';
 
 interface PageSeoMetadata {
   title: string;
@@ -126,5 +127,11 @@ export function useSeoMetadata(activeTab: AppNavTab) {
       document.head.appendChild(canonical);
     }
     canonical.setAttribute('href', meta.canonicalUrl);
+
+    // Record virtual pageview in Google Analytics
+    trackPageView(
+      window.location.pathname + (activeTab === 'prescription' ? '' : '#' + activeTab),
+      meta.title
+    );
   }, [activeTab]);
 }

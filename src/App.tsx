@@ -23,6 +23,12 @@ import { Footer } from './components/Footer';
 import { HomeSeoArticle } from './components/HomeSeoArticle';
 import { BlogSection } from './components/BlogSection';
 import { useSeoMetadata } from './utils/seo';
+import {
+  initGA,
+  trackPrescriptionAnalysis,
+  trackSamplePrescriptionSelected,
+  trackPrintCardOpened,
+} from './utils/analytics';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<AppNavTab>('prescription');
@@ -35,6 +41,9 @@ export default function App() {
 
   // Synchronize activeTab with URL hash (#blog, #lookup, #abbreviations, etc.)
   useEffect(() => {
+    // Initialize Google Analytics 4
+    initGA();
+
     const handleHash = () => {
       const h = window.location.hash.toLowerCase();
       if (h.startsWith('#blog')) {
@@ -124,6 +133,14 @@ export default function App() {
         enrichedResult.imagePreprocessingReport = payload.preprocessingReport;
       }
       setAnalysisResult(enrichedResult);
+
+      // Track prescription analysis event in Google Analytics
+      trackPrescriptionAnalysis({
+        method: payload.imageBase64 ? 'photo' : 'text',
+        medicinesCount: enrichedResult.medicines?.length || 0,
+        hasPatientContext: Boolean(payload.patientContext),
+      });
+
       // Smooth scroll to top of results
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: any) {
@@ -163,6 +180,10 @@ export default function App() {
       );
     }
     setAnalysisResult(enrichedSample);
+
+    // Track sample selection in Google Analytics
+    trackSamplePrescriptionSelected(resolvedSample.title || 'Sample Prescription');
+
     setActiveTab('prescription');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -305,7 +326,10 @@ export default function App() {
             setError(null);
           }}
           hasResult={Boolean(analysisResult && !isPrescriptionUnunderstood)}
-          onOpenPrintModal={() => setIsPrintModalOpen(true)}
+          onOpenPrintModal={() => {
+            setIsPrintModalOpen(true);
+            trackPrintCardOpened();
+          }}
           hideOtherTabs={isPrescriptionUnunderstood}
         />
       </div>

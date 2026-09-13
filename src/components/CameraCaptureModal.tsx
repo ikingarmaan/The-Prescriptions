@@ -12,6 +12,7 @@ import {
   Upload,
   Info,
 } from 'lucide-react';
+import { trackCameraOpened } from '../utils/analytics';
 
 interface CameraCaptureModalProps {
   isOpen: boolean;
@@ -156,6 +157,7 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
     if (isOpen) {
       setCapturedPhoto(null);
       startCamera(facingMode);
+      trackCameraOpened();
     } else {
       stopCamera();
     }

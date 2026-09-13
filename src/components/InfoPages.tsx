@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { ThePrescriptionLogo } from './ThePrescriptionLogo';
 import { FaqSection } from './FaqSection';
+import { trackContactFormSubmission } from '../utils/analytics';
 
 export type InfoPageType = 'about' | 'faq' | 'contact' | 'disclaimer' | 'privacy' | 'terms';
 
@@ -69,6 +70,7 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ currentPage, onNavigate })
         throw new Error(data.error || 'Failed to deliver message.');
       }
       setContactSubmitted(true);
+      trackContactFormSubmission(contactForm.subject);
     } catch (err: any) {
       console.error('Contact form error:', err);
       setContactError(err.message || 'Unable to deliver message at this moment. You can also write directly to Theprescriptionn@gmail.com.');

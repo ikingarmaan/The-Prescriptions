@@ -16,6 +16,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { crossReferenceMedicine } from '../data/medicineCatalog';
+import { trackMedicineSearch } from '../utils/analytics';
 
 interface MedicineProfile {
   name: string;
@@ -70,6 +71,7 @@ export const MedicineLookup: React.FC = () => {
         throw new Error(data.error || 'Could not find medicine details.');
       }
       setResult(data.data);
+      trackMedicineSearch(medicineName.trim(), data.data ? 1 : 0);
     } catch (err: any) {
       console.error('Lookup error:', err);
       setError(err.message || 'Failed to retrieve information for this medicine.');
