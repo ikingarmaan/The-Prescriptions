@@ -253,19 +253,32 @@ async function sendViaBrevo(params: EmailDispatchPayload, apiKey: string): Promi
 }
 
 function getActiveEmailProvider(): { name: string; type: "resend" | "sendgrid" | "brevo" | "smtp" | "none"; key?: string } {
+  const preferred = (process.env.EMAIL_PROVIDER || "").trim().toLowerCase();
+
+  const brevoKey = (process.env.BREVO_API_KEY || process.env.BREVO_KEY || "").trim();
+  const sendgridKey = (process.env.SENDGRID_API_KEY || process.env.SENDGRID_KEY || "").trim();
   const resendKey = (process.env.RESEND_API_KEY || process.env.RESEND_KEY || "").trim();
-  if (resendKey) {
+
+  // 1. Explicit preference via EMAIL_PROVIDER variable
+  if (preferred === "brevo" && brevoKey) {
+    return { name: "Brevo (HTTPS API)", type: "brevo", key: brevoKey };
+  }
+  if (preferred === "sendgrid" && sendgridKey) {
+    return { name: "SendGrid (HTTPS API)", type: "sendgrid", key: sendgridKey };
+  }
+  if (preferred === "resend" && resendKey) {
     return { name: "Resend (HTTPS API)", type: "resend", key: resendKey };
   }
 
-  const sendgridKey = (process.env.SENDGRID_API_KEY || process.env.SENDGRID_KEY || "").trim();
+  // 2. Auto-detection: Brevo (best for external sending without custom domain) > SendGrid > Resend
+  if (brevoKey) {
+    return { name: "Brevo (HTTPS API)", type: "brevo", key: brevoKey };
+  }
   if (sendgridKey) {
     return { name: "SendGrid (HTTPS API)", type: "sendgrid", key: sendgridKey };
   }
-
-  const brevoKey = (process.env.BREVO_API_KEY || process.env.BREVO_KEY || "").trim();
-  if (brevoKey) {
-    return { name: "Brevo (HTTPS API)", type: "brevo", key: brevoKey };
+  if (resendKey) {
+    return { name: "Resend (HTTPS API)", type: "resend", key: resendKey };
   }
 
   const hasSmtp = Boolean((process.env.EMAIL_APP_PASSWORD || process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS || "").trim());
