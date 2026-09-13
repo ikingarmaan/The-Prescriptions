@@ -5,6 +5,7 @@ export interface ThePrescriptionLogoProps {
   showWordmark?: boolean;
   showBadge?: boolean;
   showSubtitle?: boolean;
+  variant?: 'light' | 'dark';
   className?: string;
   onClick?: () => void;
 }
@@ -14,6 +15,7 @@ export const ThePrescriptionLogo: React.FC<ThePrescriptionLogoProps> = ({
   showWordmark = true,
   showBadge = true,
   showSubtitle = false,
+  variant = 'light',
   className = '',
   onClick,
 }) => {
@@ -156,19 +158,39 @@ export const ThePrescriptionLogo: React.FC<ThePrescriptionLogoProps> = ({
         <div className="flex flex-col leading-none">
           <div className="flex items-center gap-1.5">
             <span className={`font-black tracking-tight ${wordmarkSizeClasses}`}>
-              <span className="text-slate-900">The</span>
-              <span className="text-emerald-600">prescription</span>
+              <span className={variant === 'dark' ? 'text-white drop-shadow-sm' : 'text-slate-900'}>
+                The
+              </span>
+              <span
+                className={
+                  variant === 'dark'
+                    ? 'text-emerald-400 drop-shadow-[0_0_12px_rgba(52,211,153,0.5)]'
+                    : 'text-emerald-600'
+                }
+              >
+                prescription
+              </span>
             </span>
 
             {showBadge && (
-              <span className="px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider rounded-md bg-emerald-100 text-emerald-800 border border-emerald-200">
+              <span
+                className={`px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider rounded-md border shadow-xs ${
+                  variant === 'dark'
+                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-[0_0_8px_rgba(16,185,129,0.25)]'
+                    : 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                }`}
+              >
                 Rx AI
               </span>
             )}
           </div>
 
           {showSubtitle && (
-            <span className="text-[10px] sm:text-xs text-slate-500 font-medium tracking-tight mt-0.5">
+            <span
+              className={`text-[10px] sm:text-xs font-medium tracking-tight mt-0.5 ${
+                variant === 'dark' ? 'text-slate-300' : 'text-slate-500'
+              }`}
+            >
               Clinical Handwriting Deciphering &amp; Safety
             </span>
           )}

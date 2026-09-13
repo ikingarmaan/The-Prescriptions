@@ -148,7 +148,7 @@ export const Footer: React.FC<FooterProps> = ({ activeTab, setActiveTab, onOpenP
           {/* Column 1: Brand & Clinical Principles (4 cols) */}
           <div className="lg:col-span-4 space-y-4">
             <div className="flex items-center gap-2">
-              <ThePrescriptionLogo size="sm" showWordmark={true} />
+              <ThePrescriptionLogo size="md" showWordmark={true} variant="dark" />
             </div>
 
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
@@ -394,7 +394,14 @@ export const Footer: React.FC<FooterProps> = ({ activeTab, setActiveTab, onOpenP
       <div className="border-t border-slate-800/80 bg-slate-900/90 backdrop-blur-md px-4 sm:px-6 lg:px-8 py-5">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-300">
           <div className="flex items-center flex-wrap gap-2 text-center sm:text-left">
-            <span>© {new Date().getFullYear()} <strong className="text-white font-bold">Theprescription</strong>.</span>
+            <span>
+              © {new Date().getFullYear()}{' '}
+              <strong className="text-white font-black tracking-tight inline-flex items-center drop-shadow-sm">
+                <span className="text-white">The</span>
+                <span className="text-emerald-400">prescription</span>
+              </strong>
+              .
+            </span>
             <span className="hidden sm:inline text-slate-600">•</span>
             <span className="text-slate-300">Healthcare Accessibility &amp; Medication Safety</span>
             <span className="hidden sm:inline text-slate-600">•</span>
