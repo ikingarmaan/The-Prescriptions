@@ -20,11 +20,18 @@ function getGeminiApiKeys(): string[] {
     }
   }
 
-  // 2. GEMINI_API_KEY_1, GEMINI_API_KEY_2, etc.
+  // 2. GEMINI_API_KEY_1, GEMINI_API_KEY_2, GEMINI_API_KEY1, GEMINI_API_KEY2, etc.
   for (let i = 1; i <= 10; i++) {
-    const k = process.env[`GEMINI_API_KEY_${i}`];
-    if (k && k.trim() && !keys.includes(k.trim())) {
-      keys.push(k.trim());
+    const candidates = [
+      process.env[`GEMINI_API_KEY_${i}`],
+      process.env[`GEMINI_API_KEY${i}`],
+      process.env[`GEMINI_KEY_${i}`],
+      process.env[`GEMINI_KEY${i}`],
+    ];
+    for (const k of candidates) {
+      if (k && k.trim() && !keys.includes(k.trim())) {
+        keys.push(k.trim());
+      }
     }
   }
 
@@ -385,9 +392,11 @@ async function callGeminiWithRetry(params: {
 }): Promise<string> {
   const orderedKeys = getOrderedApiKeys();
   const modelsToTry = [
-    params.primaryModel || "gemini-2.5-flash",
-    "gemini-2.5-flash-lite",
-    "gemini-2.0-flash",
+    params.primaryModel || "gemini-3.6-flash",
+    "gemini-3.8-flash",
+    "gemini-3.1-flash-lite",
+    "gemini-2.5-flash",
+    "gemini-flash-latest",
   ];
   let lastError: any = null;
 
@@ -395,18 +404,17 @@ async function callGeminiWithRetry(params: {
     const apiKey = orderedKeys[keyIdx];
     const ai = getClientForKey(apiKey);
     const keyLabel = `Key #${keyIdx + 1} (…${apiKey.slice(-4)})`;
+    let keyIsDead = false;
 
     for (const model of modelsToTry) {
+      if (keyIsDead) break;
+
       for (let attempt = 1; attempt <= 2; attempt++) {
         try {
           const config = { ...params.config };
-          // Thinking config adaptation across Gemini models
+          // ThinkingLevel is only supported on Gemini 3 series models
           if (!model.startsWith("gemini-3") && config.thinkingConfig) {
-            if (model.startsWith("gemini-2.5")) {
-              config.thinkingConfig = { thinkingBudget: 1024 };
-            } else {
-              delete config.thinkingConfig;
-            }
+            delete config.thinkingConfig;
           }
 
           const response = await ai.models.generateContent({
@@ -421,27 +429,52 @@ async function callGeminiWithRetry(params: {
         } catch (err: any) {
           lastError = err;
           const errMsg = err?.message || String(err);
-          const isKeyExhaustedOrInvalid =
+
+          // If thinking config caused an error, retry immediately without it
+          if (errMsg.toLowerCase().includes("thinking") && params.config?.thinkingConfig) {
+            try {
+              const fallbackConfig = { ...params.config };
+              delete fallbackConfig.thinkingConfig;
+              const fallbackResponse = await ai.models.generateContent({
+                model,
+                contents: params.contents,
+                config: fallbackConfig,
+              });
+              if (fallbackResponse.text) {
+                return fallbackResponse.text;
+              }
+            } catch (retryErr: any) {
+              lastError = retryErr;
+            }
+          }
+
+          // Check if error is related to key validity, rate limits, or quota exhaustion
+          const isKeyOrQuotaError =
             errMsg.includes("429") ||
             errMsg.includes("RESOURCE_EXHAUSTED") ||
             errMsg.includes("quota") ||
             errMsg.includes("rate limit") ||
             errMsg.includes("RateLimitError") ||
+            errMsg.toLowerCase().includes("api key") ||
+            errMsg.toLowerCase().includes("apikey") ||
             errMsg.includes("API_KEY_INVALID") ||
             errMsg.includes("PERMISSION_DENIED") ||
             errMsg.includes("Forbidden") ||
-            errMsg.includes("403");
+            errMsg.includes("401") ||
+            errMsg.includes("403") ||
+            errMsg.includes("400");
 
-          if (isKeyExhaustedOrInvalid) {
+          if (isKeyOrQuotaError) {
             console.warn(
-              `[Gemini API] ${keyLabel} encountered error: ${errMsg.slice(0, 120)}`
+              `[Gemini API] ${keyLabel} failed with key/quota error: ${errMsg.slice(0, 150)}`
             );
             if (keyIdx < orderedKeys.length - 1) {
               const nextKey = orderedKeys[keyIdx + 1];
               console.log(
                 `[Gemini API] Auto-failover: Switching immediately to Key #${keyIdx + 2} (…${nextKey.slice(-4)}) to retry request seamlessly...`
               );
-              break; // Break attempt loop to move to next key immediately
+              keyIsDead = true;
+              break; // Break attempt loop, keyIsDead will break model loop immediately
             }
           }
 
@@ -451,26 +484,15 @@ async function callGeminiWithRetry(params: {
             errMsg.includes("high demand");
 
           if (isTransient && attempt < 2) {
-            await new Promise((resolve) => setTimeout(resolve, 1200 * attempt));
+            await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
             continue;
           }
         }
       }
+    }
 
-      // If quota or key error happened on this key and we broke out of attempts, stop trying other models on the dead key
-      const errMsg = lastError?.message || String(lastError);
-      if (
-        (errMsg.includes("429") ||
-          errMsg.includes("RESOURCE_EXHAUSTED") ||
-          errMsg.includes("quota") ||
-          errMsg.includes("rate limit") ||
-          errMsg.includes("API_KEY_INVALID") ||
-          errMsg.includes("PERMISSION_DENIED") ||
-          errMsg.includes("403")) &&
-        keyIdx < orderedKeys.length - 1
-      ) {
-        break; // Break model loop to advance to next key in outer loop
-      }
+    if (keyIsDead && keyIdx < orderedKeys.length - 1) {
+      continue; // Move to next key immediately
     }
   }
 
@@ -493,6 +515,10 @@ async function startServer() {
       hasGeminiKey: keys.length > 0,
       activeKeysCount: keys.length,
       multiKeyEnabled: keys.length > 1,
+      keys: keys.map((k, i) => ({
+        keyNumber: i + 1,
+        masked: `...${k.slice(-4)}`,
+      })),
       timestamp: new Date().toISOString(),
     });
   });
@@ -515,7 +541,7 @@ async function startServer() {
       try {
         const client = getClientForKey(key);
         const response = await client.models.generateContent({
-          model: "gemini-2.5-flash-lite",
+          model: "gemini-3.6-flash",
           contents: "Respond with only the single word: OK",
         });
         results.push({
@@ -523,7 +549,7 @@ async function startServer() {
           maskedKey: `...${key.slice(-4)}`,
           status: "ACTIVE & WORKING",
           latencyMs: Date.now() - start,
-          model: "gemini-2.5-flash-lite",
+          model: "gemini-3.6-flash",
           responsePreview: response.text?.trim() || "OK",
         });
       } catch (err: any) {
