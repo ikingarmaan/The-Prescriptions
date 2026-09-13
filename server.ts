@@ -164,6 +164,7 @@ interface DispatchResult {
 // 1. Resend API (HTTPS port 443 - Recommended, zero port blocks, 100 free/day)
 async function sendViaResend(params: EmailDispatchPayload, apiKey: string): Promise<void> {
   const fromEmail = process.env.RESEND_FROM || "onboarding@resend.dev";
+  const normalizedTo = params.to.trim().toLowerCase();
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -172,7 +173,7 @@ async function sendViaResend(params: EmailDispatchPayload, apiKey: string): Prom
     },
     body: JSON.stringify({
       from: `${params.fromName || "Theprescription"} <${fromEmail}>`,
-      to: [params.to],
+      to: [normalizedTo],
       reply_to: params.replyTo,
       subject: params.subject,
       html: params.html,
@@ -187,7 +188,8 @@ async function sendViaResend(params: EmailDispatchPayload, apiKey: string): Prom
 
 // 2. SendGrid API (HTTPS port 443 - 100 free/day)
 async function sendViaSendGrid(params: EmailDispatchPayload, apiKey: string): Promise<void> {
-  const fromEmail = process.env.SENDGRID_FROM || process.env.EMAIL_USER || "Theprescriptionn@gmail.com";
+  const fromEmail = process.env.SENDGRID_FROM || process.env.EMAIL_USER || "theprescriptionn@gmail.com";
+  const normalizedTo = params.to.trim().toLowerCase();
   const res = await fetch("https://api.sendgrid.com/v3/mail/send", {
     method: "POST",
     headers: {
@@ -197,14 +199,14 @@ async function sendViaSendGrid(params: EmailDispatchPayload, apiKey: string): Pr
     body: JSON.stringify({
       personalizations: [
         {
-          to: [{ email: params.to }],
+          to: [{ email: normalizedTo }],
         },
       ],
       from: {
         email: fromEmail,
         name: params.fromName || "Theprescription",
       },
-      reply_to: params.replyTo ? { email: params.replyTo } : undefined,
+      reply_to: params.replyTo ? { email: params.replyTo.trim().toLowerCase() } : undefined,
       subject: params.subject,
       content: [
         {
@@ -223,7 +225,8 @@ async function sendViaSendGrid(params: EmailDispatchPayload, apiKey: string): Pr
 
 // 3. Brevo API (HTTPS port 443 - 300 free/day)
 async function sendViaBrevo(params: EmailDispatchPayload, apiKey: string): Promise<void> {
-  const fromEmail = process.env.BREVO_FROM || process.env.EMAIL_USER || "Theprescriptionn@gmail.com";
+  const fromEmail = process.env.BREVO_FROM || process.env.EMAIL_USER || "theprescriptionn@gmail.com";
+  const normalizedTo = params.to.trim().toLowerCase();
   const res = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: {
@@ -236,8 +239,8 @@ async function sendViaBrevo(params: EmailDispatchPayload, apiKey: string): Promi
         name: params.fromName || "Theprescription",
         email: fromEmail,
       },
-      to: [{ email: params.to }],
-      replyTo: params.replyTo ? { email: params.replyTo } : undefined,
+      to: [{ email: normalizedTo }],
+      replyTo: params.replyTo ? { email: params.replyTo.trim().toLowerCase() } : undefined,
       subject: params.subject,
       htmlContent: params.html,
     }),
@@ -856,7 +859,7 @@ async function startServer() {
       const cleanEmail = email.trim();
       const cleanSubject = (typeof subject === "string" && subject.trim()) || "General Prescription Inquiry";
       const cleanMessage = message.trim();
-      const adminEmail = process.env.EMAIL_USER || "Theprescriptionn@gmail.com";
+      const adminEmail = (process.env.EMAIL_USER || "theprescriptionn@gmail.com").trim().toLowerCase();
 
       const provider = getActiveEmailProvider();
 
@@ -996,7 +999,7 @@ async function startServer() {
   // Diagnostic Test Endpoint: verify active email provider connectivity from Railway
   app.get("/api/test-email", async (_req: Request, res: Response) => {
     try {
-      const adminEmail = process.env.EMAIL_USER || "Theprescriptionn@gmail.com";
+      const adminEmail = (process.env.EMAIL_USER || "theprescriptionn@gmail.com").trim().toLowerCase();
       const provider = getActiveEmailProvider();
 
       if (provider.type === "none") {
