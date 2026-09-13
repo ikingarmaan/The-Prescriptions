@@ -50,7 +50,8 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
     'Popular',
     'Technology & Recognition',
     'Dosage & Doctor Codes',
-    'Clinical Safety',
+    'Clinical Safety & Protocols',
+    'Medicine Storage & Disposal',
     'Privacy & Data',
     'Features & Usage',
   ];
@@ -95,10 +96,12 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
         return <Sparkles className="w-3.5 h-3.5 text-emerald-600" />;
       case 'Dosage & Doctor Codes':
         return <Clock className="w-3.5 h-3.5 text-blue-600" />;
-      case 'Clinical Safety':
+      case 'Clinical Safety & Protocols':
         return <ShieldCheck className="w-3.5 h-3.5 text-rose-600" />;
+      case 'Medicine Storage & Disposal':
+        return <Stethoscope className="w-3.5 h-3.5 text-amber-600" />;
       case 'Privacy & Data':
-        return <Lock className="w-3.5 h-3.5 text-amber-600" />;
+        return <Lock className="w-3.5 h-3.5 text-cyan-600" />;
       case 'Features & Usage':
       default:
         return <FileText className="w-3.5 h-3.5 text-purple-600" />;
@@ -126,7 +129,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
         <p className="text-xs sm:text-sm text-slate-700 leading-relaxed max-w-2xl mx-auto font-medium">
           {variant === 'homepage'
             ? 'Quick answers to top questions on deciphering doctor handwriting, understanding 1-0-1 dosage codes, and our encrypted privacy protections.'
-            : 'Explore our complete knowledge base of 26 answers covering prescription parsing, doctor Latin codes, pharmacology accuracy, and patient privacy.'}
+            : `Explore our complete knowledge base of ${FAQ_DATABASE.length} verified answers covering prescription parsing, doctor Latin codes, pharmacology accuracy, medication safety protocols, and patient privacy.`}
         </p>
       </div>
 
@@ -141,7 +144,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search all 26 questions (e.g., handwriting accuracy, 1-0-1, privacy, meal times, lab tests)..."
+              placeholder="Search by symptom, medicine name, Latin code (e.g. 1-0-1, AC), or question..."
               className="w-full pl-10 pr-10 py-3 bg-white border border-slate-300 rounded-2xl text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-emerald-500 focus:border-transparent shadow-xs transition-all"
             />
             {searchQuery && (
@@ -156,23 +159,38 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
             )}
           </div>
 
-          {/* Category Pills */}
+          {/* Category Pills with live question counts */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none text-xs">
             {categories.map((cat) => {
               const isActive = selectedCategory === cat;
+              const count =
+                cat === 'All'
+                  ? FAQ_DATABASE.length
+                  : cat === 'Popular'
+                  ? FAQ_DATABASE.filter((i) => i.popular).length
+                  : FAQ_DATABASE.filter((i) => i.category === cat).length;
               return (
                 <button
                   key={cat}
                   type="button"
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
                     isActive
                       ? 'bg-slate-900 text-white shadow-xs'
                       : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-100 hover:text-slate-900'
                   }`}
                 >
                   {cat === 'Popular' && '🔥 '}
-                  {cat}
+                  <span>{cat}</span>
+                  <span
+                    className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono ${
+                      isActive
+                        ? 'bg-slate-700 text-emerald-300'
+                        : 'bg-slate-100 text-slate-600'
+                    }`}
+                  >
+                    {count}
+                  </span>
                 </button>
               );
             })}

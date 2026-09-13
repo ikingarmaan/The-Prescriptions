@@ -464,7 +464,7 @@ export const Footer: React.FC<FooterProps> = ({ activeTab, setActiveTab, onOpenP
                     <HelpCircle className="w-3.5 h-3.5 text-cyan-400" />
                     <span>Frequently Asked Questions</span>
                   </span>
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-cyan-950/60 text-cyan-300 border border-cyan-800/40">26 FAQs</span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-cyan-950/60 text-cyan-300 border border-cyan-800/40">62 FAQs</span>
                 </button>
               </li>
               <li>
