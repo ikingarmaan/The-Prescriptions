@@ -151,7 +151,7 @@ export const PrescriptionUploader: React.FC<PrescriptionUploaderProps> = ({
   };
 
   return (
-    <div id="prescription-uploader-root" className="w-full max-w-4xl mx-auto">
+    <div id="prescription-uploader-root" className="w-full mx-auto">
       {/* Card Header & Input Mode Switcher with Cool Emerald Theme */}
       <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-slate-200/80 overflow-hidden">
         <div className="p-5 sm:p-7 md:p-8 bg-gradient-to-r from-slate-950 via-emerald-950 to-teal-950 text-white relative overflow-hidden">

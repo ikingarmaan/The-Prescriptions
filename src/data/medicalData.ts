@@ -1,1590 +1,912 @@
-import { MedicalAbbreviation, PrescriptionAnalysisResult } from '../types';
+import { PrescriptionAnalysisResult } from '../types';
 
-export const MEDICAL_ABBREVIATIONS: MedicalAbbreviation[] = [
-  // Frequency & Timing Codes
-  {
-    abbr: 'OD / qd',
-    fullLatin: 'Omni Die',
-    englishMeaning: 'Once daily (every 24 hours at the same time)',
-    example: 'Tab Pantocid 40mg OD (Take 1 tablet once a day in morning)',
-    category: 'frequency',
-  },
-  {
-    abbr: 'BD / BID',
-    fullLatin: 'Bis in Die',
-    englishMeaning: 'Twice daily (roughly every 12 hours)',
-    example: 'Tab Augmentin 625 BD (Take 1 tablet twice a day - morning & night)',
-    category: 'frequency',
-  },
-  {
-    abbr: 'TDS / TID',
-    fullLatin: 'Ter Die Sumendum',
-    englishMeaning: 'Three times daily (roughly every 8 hours)',
-    example: 'Tab Paracetamol 650mg TDS (Morning, afternoon, night)',
-    category: 'frequency',
-  },
-  {
-    abbr: 'QID / QDS',
-    fullLatin: 'Quater in Die',
-    englishMeaning: 'Four times daily (roughly every 6 hours)',
-    example: 'Eye drops 1 drop QID (4 times spaced throughout the day)',
-    category: 'frequency',
-  },
-  {
-    abbr: '1-0-1',
-    fullLatin: 'Morning - Afternoon - Night notation',
-    englishMeaning: '1 dose morning, 0 afternoon, 1 dose night',
-    example: 'Tab Metformin 500mg 1-0-1 (Take with breakfast & dinner)',
-    category: 'frequency',
-  },
-  {
-    abbr: '1-0-0',
-    fullLatin: 'Morning only',
-    englishMeaning: '1 dose in the morning, 0 afternoon, 0 night',
-    example: 'Tab Thyronorm 50mcg 1-0-0 (Take morning on empty stomach)',
-    category: 'frequency',
-  },
-  {
-    abbr: '0-0-1',
-    fullLatin: 'Night only',
-    englishMeaning: '0 morning, 0 afternoon, 1 dose at bedtime',
-    example: 'Tab Atorva 10mg 0-0-1 (Take at night before sleep)',
-    category: 'frequency',
-  },
-  {
-    abbr: '1-1-1',
-    fullLatin: 'Thrice daily dosing notation',
-    englishMeaning: '1 dose morning, 1 afternoon, 1 night',
-    example: 'Syp Ascoril LS 10ml 1-1-1 (Take after meals 3 times a day)',
-    category: 'frequency',
-  },
-  {
-    abbr: 'Q4H / Q6H / Q8H',
-    fullLatin: 'Quaque 4/6/8 Hora',
-    englishMeaning: 'Every 4, 6, or 8 hours around the clock',
-    example: 'Tab Ibuprofen 400mg Q6H (Take every 6 hours as needed)',
-    category: 'frequency',
-  },
-  {
-    abbr: 'QOD / EOD',
-    fullLatin: 'Quaque Altera Die',
-    englishMeaning: 'Every other day / alternate days',
-    example: 'Tab Prednisolone 10mg QOD (Take once every two days)',
-    category: 'frequency',
-  },
-  {
-    abbr: 'AC',
-    fullLatin: 'Ante Cibum',
-    englishMeaning: 'Before meals (30–45 mins prior on empty stomach)',
-    example: 'Cap Omeprazole 20mg AC (Take on empty stomach before breakfast)',
-    category: 'timing',
-  },
-  {
-    abbr: 'PC',
-    fullLatin: 'Post Cibum',
-    englishMeaning: 'After meals (to prevent gastric mucosal irritation)',
-    example: 'Tab Ibuprofen 400mg PC (Take with or immediately after food)',
-    category: 'timing',
-  },
-  {
-    abbr: 'HS / QHS',
-    fullLatin: 'Hora Somni',
-    englishMeaning: 'At bedtime / immediately before going to sleep',
-    example: 'Tab Montelukast 10mg HS (Take at night before sleeping)',
-    category: 'timing',
-  },
-  {
-    abbr: 'BBF',
-    fullLatin: 'Before Breakfast',
-    englishMeaning: 'Take first thing in the morning before breakfast',
-    example: 'Tab Rabeprazole 20mg BBF (Take on empty stomach before breakfast)',
-    category: 'timing',
-  },
-  {
-    abbr: 'ABF',
-    fullLatin: 'After Breakfast',
-    englishMeaning: 'Take immediately after finishing morning breakfast',
-    example: 'Tab Multivitamin ABF (Take with food to aid fat-soluble absorption)',
-    category: 'timing',
-  },
-  {
-    abbr: 'Mane / Nocte',
-    fullLatin: 'Mane / Nocte',
-    englishMeaning: 'In the morning (Mane) / At night (Nocte)',
-    example: 'Tab 1 Mane, 1 Nocte (One in morning, one at night)',
-    category: 'timing',
-  },
-  {
-    abbr: 'ad lib.',
-    fullLatin: 'Ad Libitum',
-    englishMeaning: 'Freely, as desired, or as much as needed',
-    example: 'Drink clean water and ORS ad lib.',
-    category: 'timing',
-  },
-
-  // Prescribing Directives & Shorthand
-  {
-    abbr: 'Rx',
-    fullLatin: 'Recipe',
-    englishMeaning: 'Take thou (Traditional symbol preceding doctor prescription)',
-    example: 'Rx: Tab Augmentin 625mg',
-    category: 'clinical_directive',
-  },
-  {
-    abbr: 'Sig / S.',
-    fullLatin: 'Signa / Signetur',
-    englishMeaning: 'Write on label / patient directions',
-    example: 'Sig: 1 tab PO BD PC x 5 days',
-    category: 'clinical_directive',
-  },
-  {
-    abbr: 'Mitte',
-    fullLatin: 'Mitte Tales',
-    englishMeaning: 'Dispense or send this specific quantity',
-    example: 'Mitte: 10 tablets',
-    category: 'clinical_directive',
-  },
-  {
-    abbr: 'c',
-    fullLatin: 'Cum',
-    englishMeaning: 'With (e.g., with water or with meals)',
-    example: 'Take 1 tablet c water',
-    category: 'clinical_directive',
-  },
-  {
-    abbr: 's',
-    fullLatin: 'Sine',
-    englishMeaning: 'Without',
-    example: 'Take s food (on an empty stomach)',
-    category: 'clinical_directive',
-  },
-  {
-    abbr: 'aa / ana',
-    fullLatin: 'Ana',
-    englishMeaning: 'Of each in equal quantities',
-    example: 'Menthol & Camphor aa 5g',
-    category: 'clinical_directive',
-  },
-  {
-    abbr: 'qs',
-    fullLatin: 'Quantum Sufficiat',
-    englishMeaning: 'As much as suffices to produce required volume/strength',
-    example: 'Aqua purificata qs to 100ml',
-    category: 'clinical_directive',
-  },
-  {
-    abbr: 'NPO',
-    fullLatin: 'Nil Per Os',
-    englishMeaning: 'Nothing by mouth (no food or drink, common pre-surgery)',
-    example: 'NPO after midnight prior to endoscopy',
-    category: 'clinical_directive',
-  },
-  {
-    abbr: 'c/o',
-    fullLatin: 'Complaining Of',
-    englishMeaning: 'Presenting symptoms reported by the patient',
-    example: 'c/o fever with chills x 3 days',
-    category: 'clinical_directive',
-  },
-  {
-    abbr: 'k/c/o',
-    fullLatin: 'Known Case Of',
-    englishMeaning: 'Pre-existing chronic diagnosed condition',
-    example: 'k/c/o Type 2 Diabetes Mellitus & Hypertension',
-    category: 'clinical_directive',
-  },
-  {
-    abbr: 'h/o',
-    fullLatin: 'History Of',
-    englishMeaning: 'Medical background or prior disease episode',
-    example: 'h/o bronchial asthma in childhood',
-    category: 'clinical_directive',
-  },
-  {
-    abbr: 'd/d or DDx',
-    fullLatin: 'Differential Diagnosis',
-    englishMeaning: 'Possible diseases explaining clinical signs',
-    example: 'd/d: Viral URTI vs Acute Bacterial Sinusitis',
-    category: 'clinical_directive',
-  },
-  {
-    abbr: 'r/o',
-    fullLatin: 'Rule Out',
-    englishMeaning: 'Conduct tests to definitively exclude a serious condition',
-    example: 'r/o Appendicitis or Acute Cholecystitis',
-    category: 'clinical_directive',
-  },
-  {
-    abbr: 'f/u',
-    fullLatin: 'Follow Up',
-    englishMeaning: 'Schedule review consultation or re-evaluation',
-    example: 'f/u after 5 days with CBC report',
-    category: 'clinical_directive',
-  },
-  {
-    abbr: 'Adv / Ix / Inv',
-    fullLatin: 'Advice / Investigations',
-    englishMeaning: 'Doctor orders for diagnostic lab tests and home care',
-    example: 'Adv: Rest, steam inhalation; Ix: CBC, ESR',
-    category: 'clinical_directive',
-  },
-  {
-    abbr: 'PRN / SOS',
-    fullLatin: 'Pro Re Nata / Si Opus Sit',
-    englishMeaning: 'As needed / only when emergency symptoms occur',
-    example: 'Tab Ondansetron 4mg SOS (Take only if nausea occurs)',
-    category: 'instructions',
-  },
-  {
-    abbr: 'Stat',
-    fullLatin: 'Statim',
-    englishMeaning: 'Immediately / right now (single loading dose)',
-    example: 'Tab Azithromycin 500mg Stat (Take initial dose immediately)',
-    category: 'instructions',
-  },
-
-  // Routes of Administration
-  {
-    abbr: 'PO',
-    fullLatin: 'Per Os',
-    englishMeaning: 'By mouth / oral ingestion',
-    example: 'Syrup 10ml PO (Swallow by mouth)',
-    category: 'route',
-  },
-  {
-    abbr: 'SL',
-    fullLatin: 'Sub Lingua',
-    englishMeaning: 'Sublingual (placed under tongue to dissolve into bloodstream)',
-    example: 'Tab Sorbitrate 5mg SL (Dissolve under tongue for angina pain)',
-    category: 'route',
-  },
-  {
-    abbr: 'PR',
-    fullLatin: 'Per Rectum',
-    englishMeaning: 'Rectal administration (suppository or enema)',
-    example: 'Suppository 1 PR for high pediatric fever',
-    category: 'route',
-  },
-  {
-    abbr: 'SC / SQ',
-    fullLatin: 'Subcutis',
-    englishMeaning: 'Subcutaneous injection (into fatty layer under skin)',
-    example: 'Inj Insulin Glargine 12 units SC at bedtime',
-    category: 'route',
-  },
-  {
-    abbr: 'IM',
-    fullLatin: 'Intra Musculum',
-    englishMeaning: 'Intramuscular injection (into deep muscle tissue)',
-    example: 'Inj Diclofenac 75mg IM for acute renal colic pain',
-    category: 'route',
-  },
-  {
-    abbr: 'IV / IVP / IVPB',
-    fullLatin: 'Intra Venam',
-    englishMeaning: 'Intravenous injection, push, or piggyback infusion',
-    example: 'Inj Ceftriaxone 1g IV BD in 100ml NS',
-    category: 'route',
-  },
-  {
-    abbr: 'Top.',
-    fullLatin: 'Topicalis',
-    englishMeaning: 'Apply topically on external skin surface',
-    example: 'Mupirocin Ointment apply Top. BD',
-    category: 'route',
-  },
-  {
-    abbr: 'Inh. / Neb.',
-    fullLatin: 'Inhalatio / Nebulisatio',
-    englishMeaning: 'Inhalation via inhaler or aerosolized nebulizer machine',
-    example: 'Budecort 0.5mg respule Neb. BD',
-    category: 'route',
-  },
-
-  // Eye & Ear Sidedness Notations
-  {
-    abbr: 'OD (Ophthalmology)',
-    fullLatin: 'Oculus Dexter',
-    englishMeaning: 'Right eye',
-    example: 'Ciprofloxacin eye drops 1 drop in OD TDS',
-    category: 'eye_ear',
-  },
-  {
-    abbr: 'OS',
-    fullLatin: 'Oculus Sinister',
-    englishMeaning: 'Left eye',
-    example: 'Timolol eye drops 1 drop in OS BD',
-    category: 'eye_ear',
-  },
-  {
-    abbr: 'OU',
-    fullLatin: 'Oculus Uterque',
-    englishMeaning: 'Both eyes',
-    example: 'Carboxymethylcellulose drops 1 drop OU QID for dry eyes',
-    category: 'eye_ear',
-  },
-  {
-    abbr: 'AD / AS / AU',
-    fullLatin: 'Auris Dextra / Sinistra / Uterque',
-    englishMeaning: 'Right ear (AD) / Left ear (AS) / Both ears (AU)',
-    example: 'Wax-dissolving drops 3 drops in AD TDS',
-    category: 'eye_ear',
-  },
-
-  // Pharmaceutical Formulations
-  {
-    abbr: 'Tab / Cap / Syp',
-    fullLatin: 'Tabella / Capsula / Syrupus',
-    englishMeaning: 'Tablet / Capsule / Liquid Syrup formulation',
-    example: 'Cap Amoxicillin 500mg (1 capsule)',
-    category: 'form',
-  },
-  {
-    abbr: 'Susp.',
-    fullLatin: 'Suspensio',
-    englishMeaning: 'Oral suspension (must shake well before measuring)',
-    example: 'Susp Cefixime 100mg/5ml (Shake well before use)',
-    category: 'form',
-  },
-  {
-    abbr: 'Oint / Ung',
-    fullLatin: 'Unguentum',
-    englishMeaning: 'Ointment (greasy, oil-based topical preparation)',
-    example: 'Ung Betamethasone apply thin layer',
-    category: 'form',
-  },
-  {
-    abbr: 'Supp. / Pess.',
-    fullLatin: 'Suppositorium / Pessarium',
-    englishMeaning: 'Suppository (rectal) / Pessary (vaginal)',
-    example: 'Clotrimazole pessary 100mg 1 HS x 6 nights',
-    category: 'form',
-  },
-  {
-    abbr: 'Gtt.',
-    fullLatin: 'Guttae',
-    englishMeaning: 'Liquid drops (eye, ear, or pediatric oral drops)',
-    example: 'Instill 2 gtt into affected ear',
-    category: 'form',
-  },
-  {
-    abbr: 'Pulv.',
-    fullLatin: 'Pulvis',
-    englishMeaning: 'Powder sachet to be mixed in water',
-    example: 'Pulv Electral 1 sachet in 1 liter clean water',
-    category: 'form',
-  },
-
-  // Dosages & Measurements
-  {
-    abbr: 'mg / mcg (µg)',
-    fullLatin: 'Milligram / Microgram',
-    englishMeaning: 'Active drug metric weight units (1 mg = 1000 mcg)',
-    example: 'Levothyroxine 50mcg (0.05mg)',
-    category: 'measurement',
-  },
-  {
-    abbr: 'ml / L',
-    fullLatin: 'Milliliter / Liter',
-    englishMeaning: 'Liquid volume metric units (5ml = 1 standard teaspoon)',
-    example: 'Take 5ml (1 tsp) twice daily',
-    category: 'measurement',
-  },
-  {
-    abbr: 'tsp / tbsp',
-    fullLatin: 'Teaspoon / Tablespoon',
-    englishMeaning: '1 teaspoon = approx 5ml; 1 tablespoon = approx 15ml',
-    example: '1 tbsp (15ml) antacid gel after meals',
-    category: 'measurement',
-  },
-  {
-    abbr: 'IU / UI',
-    fullLatin: 'International Units',
-    englishMeaning: 'Standardized biological measurement unit (Vitamins, Insulin)',
-    example: 'Vitamin D3 60,000 IU once weekly',
-    category: 'measurement',
-  },
-  {
-    abbr: 'ss',
-    fullLatin: 'Semis',
-    englishMeaning: 'One half (1/2 tablet)',
-    example: 'Tab Metoprolol 50mg take ss (half tab = 25mg)',
-    category: 'measurement',
-  },
-
-  // Diagnostic & Laboratory Investigations
-  {
-    abbr: 'CBC / TLC / DLC',
-    fullLatin: 'Complete Blood Count / Total & Differential Leukocyte Count',
-    englishMeaning: 'Measures RBC, hemoglobin, platelets, and white blood cell subtypes to detect anemia or bacterial vs viral infection',
-    example: 'Adv: CBC with ESR (elevated neutrophils indicate bacterial infection)',
-    category: 'lab_test',
-  },
-  {
-    abbr: 'ESR / CRP',
-    fullLatin: 'Erythrocyte Sedimentation Rate / C-Reactive Protein',
-    englishMeaning: 'Inflammatory biomarkers measuring systemic inflammation or bacterial infection severity',
-    example: 'Inv: High-sensitivity CRP (checks vascular inflammation)',
-    category: 'lab_test',
-  },
-  {
-    abbr: 'LFT',
-    fullLatin: 'Liver Function Test',
-    englishMeaning: 'Checks SGOT (AST), SGPT (ALT), Bilirubin, Alkaline Phosphatase, and Albumin to evaluate hepatic metabolism',
-    example: 'Adv: LFT before initiating statins or hepatotoxic drugs',
-    category: 'lab_test',
-  },
-  {
-    abbr: 'KFT / RFT',
-    fullLatin: 'Kidney / Renal Function Test',
-    englishMeaning: 'Assesses renal filtration through Serum Creatinine, Blood Urea Nitrogen (BUN), eGFR, and Uric Acid',
-    example: 'Inv: KFT (essential when prescribing ACE inhibitors or antibiotics)',
-    category: 'lab_test',
-  },
-  {
-    abbr: 'FBS & PPBS / RBS',
-    fullLatin: 'Fasting, Post-Prandial & Random Blood Sugar',
-    englishMeaning: 'Fasting sugar (8-10 hr fast), PPBS (2 hrs after meal), and RBS for diabetes assessment',
-    example: 'Adv: FBS (<100 mg/dL normal) and PPBS (<140 mg/dL normal)',
-    category: 'lab_test',
-  },
-  {
-    abbr: 'HbA1c',
-    fullLatin: 'Glycated Hemoglobin',
-    englishMeaning: 'Measures average glucose control over past 2 to 3 months (<5.7% normal, >=6.5% diabetic)',
-    example: 'Adv: HbA1c every 3 months for glycemic tracking',
-    category: 'lab_test',
-  },
-  {
-    abbr: 'Lipid Profile',
-    fullLatin: 'Serum Lipid Panel (TC, LDL, HDL, TG, VLDL)',
-    englishMeaning: 'Assesses cardiovascular risk; checks Total Cholesterol, LDL ("bad"), HDL ("good"), and Triglycerides (requires 10-12 hr fasting)',
-    example: 'Adv: Fasting Lipid Profile to monitor statin response',
-    category: 'lab_test',
-  },
-  {
-    abbr: 'CXR (PA View)',
-    fullLatin: 'Chest X-Ray (Postero-Anterior)',
-    englishMeaning: 'Radiological scan imaging lungs, bronchi, cardiac silhouette, and ribs for pneumonia or congestion',
-    example: 'Inv: CXR PA view for persistent cough and fever',
-    category: 'lab_test',
-  },
-  {
-    abbr: 'ECG / EKG',
-    fullLatin: 'Electrocardiogram',
-    englishMeaning: '12-lead electrical tracing detecting cardiac arrhythmias, ischemia, or chamber enlargement',
-    example: 'Adv: 12-Lead ECG for chest tightness or hypertension',
-    category: 'lab_test',
-  },
-  {
-    abbr: '2D Echo / TMT',
-    fullLatin: '2D Echocardiography / Treadmill Exercise Stress Test',
-    englishMeaning: 'Cardiac ultrasound visualizing heart valves, ejection fraction, and exercise stress testing',
-    example: 'Adv: 2D Echo to measure Left Ventricular Ejection Fraction (LVEF)',
-    category: 'lab_test',
-  },
-  {
-    abbr: 'USG Abd & Pelvis',
-    fullLatin: 'Ultrasonography Abdomen & Pelvis',
-    englishMeaning: 'High-frequency soundwave imaging of liver, gallbladder, kidneys, appendix, bladder, and pelvic organs',
-    example: 'Adv: USG Abdomen (full bladder required for pelvic scan)',
-    category: 'lab_test',
-  },
-  {
-    abbr: 'CT / HRCT',
-    fullLatin: 'High-Resolution Computed Tomography',
-    englishMeaning: 'Cross-sectional 3D X-ray imaging of chest or brain to detect lung parenchymal disease or hemorrhage',
-    example: 'Adv: HRCT Chest to check for interstitial lung disease or bronchiectasis',
-    category: 'lab_test',
-  },
-  {
-    abbr: 'Urine R/M & C/S',
-    fullLatin: 'Urine Routine, Microscopy & Culture/Sensitivity',
-    englishMeaning: 'Checks pus cells, RBCs, protein, glucose, and cultures bacteria to identify antibiotic susceptibility',
-    example: 'Adv: Clean-catch midstream Urine R/M and C/S for burning micturition',
-    category: 'lab_test',
-  },
-  {
-    abbr: 'Stool R/M',
-    fullLatin: 'Stool Routine & Microscopy Examination',
-    englishMeaning: 'Checks for fecal pus cells, occult blood, protozoal cysts, or ova in gastroenteritis',
-    example: 'Adv: Stool R/M for amoebiasis or bacterial dysentery',
-    category: 'lab_test',
-  },
-  {
-    abbr: 'TSH / Thyroid Profile',
-    fullLatin: 'Thyroid Stimulating Hormone (TSH, FT3, FT4)',
-    englishMeaning: 'Endocrine panel diagnosing hypothyroidism (elevated TSH) or hyperthyroidism (suppressed TSH)',
-    example: 'Inv: Serum TSH morning sample before thyroid medication',
-    category: 'lab_test',
-  },
-  {
-    abbr: 'Serum Electrolytes',
-    fullLatin: 'Serum Sodium (Na+), Potassium (K+), Chloride (Cl-)',
-    englishMeaning: 'Essential blood ions controlling hydration, nerve firing, and cardiac rhythm',
-    example: 'Inv: Serum Electrolytes for dehydration or diuretic therapy',
-    category: 'lab_test',
-  },
-  {
-    abbr: 'Serum Ferritin / Iron Profile',
-    fullLatin: 'Serum Ferritin, Iron, Total Iron Binding Capacity (TIBC)',
-    englishMeaning: 'Measures body iron storage reserves to differentiate iron deficiency anemia from chronic disease',
-    example: 'Adv: Serum Ferritin (<30 ng/ml indicates depleted iron stores)',
-    category: 'lab_test',
-  },
-  {
-    abbr: 'Vitamin D3 & B12',
-    fullLatin: '25-Hydroxy Vitamin D & Serum Cyanocobalamin',
-    englishMeaning: 'Critical micronutrients for bone mineralization, immune function, and peripheral nerve health',
-    example: 'Adv: Serum Vit D3 (target >30 ng/ml) & Vit B12 (target >300 pg/ml)',
-    category: 'lab_test',
-  },
-  {
-    abbr: 'D-Dimer',
-    fullLatin: 'Fibrin Degradation Fragment D-Dimer',
-    englishMeaning: 'Biomarker ruled out for Deep Vein Thrombosis (DVT) and Pulmonary Embolism',
-    example: 'Inv: Quantitative D-Dimer to rule out hypercoagulability',
-    category: 'lab_test',
-  },
-  {
-    abbr: 'Troponin-I / T',
-    fullLatin: 'Cardiac Troponin-I / Troponin-T',
-    englishMeaning: 'Gold-standard blood biomarker indicating myocardial cell death / heart attack (STEMI/NSTEMI)',
-    example: 'Adv: STAT High-Sensitivity Troponin-I in acute chest pain',
-    category: 'lab_test',
-  },
-  {
-    abbr: 'PT / INR',
-    fullLatin: 'Prothrombin Time / International Normalized Ratio',
-    englishMeaning: 'Clotting time test monitoring anticoagulant therapy like Warfarin (target INR 2.0–3.0)',
-    example: 'Adv: Monthly PT/INR for oral anticoagulant dosing',
-    category: 'lab_test',
-  },
-  {
-    abbr: 'PSA',
-    fullLatin: 'Prostate-Specific Antigen',
-    englishMeaning: 'Screening biomarker for benign prostatic hyperplasia (BPH) or prostate malignancy',
-    example: 'Adv: Total PSA for urinary hesitancy in men over 50',
-    category: 'lab_test',
-  },
-  {
-    abbr: 'RA Factor & Anti-CCP',
-    fullLatin: 'Rheumatoid Factor & Cyclic Citrullinated Peptide',
-    englishMeaning: 'Autoimmune serology antibodies confirming Rheumatoid Arthritis',
-    example: 'Inv: Anti-CCP antibodies (high specificity for erosive arthritis)',
-    category: 'lab_test',
-  },
-  {
-    abbr: 'ANA',
-    fullLatin: 'Antinuclear Antibodies by IFA',
-    englishMeaning: 'Primary screening test for systemic autoimmune diseases like Systemic Lupus Erythematosus (SLE)',
-    example: 'Inv: ANA IFA titer and pattern for unexplained joint pain and rash',
-    category: 'lab_test',
-  },
-  {
-    abbr: 'eGFR',
-    fullLatin: 'Estimated Glomerular Filtration Rate',
-    englishMeaning: 'Calculated kidney filtration capacity in ml/min/1.73m² (Normal >90; CKD stage 3 <60)',
-    example: 'eGFR calculated from Serum Creatinine, age, and biological sex',
-    category: 'lab_test',
-  },
-];
-
+export interface MedicalAbbreviation {
+  abbr: string;
+  englishMeaning: string;
+  fullLatin?: string;
+  category:
+    | 'frequency'
+    | 'timing'
+    | 'instructions'
+    | 'route'
+    | 'form'
+    | 'clinical_directive'
+    | 'lab_test'
+    | 'measurement';
+  example: string;
+}
 
 export interface SamplePrescription {
   id: string;
   title: string;
   subtitle: string;
-  condition: string;
   previewText: string;
   sampleResult: PrescriptionAnalysisResult;
 }
 
+export const MEDICAL_ABBREVIATIONS: MedicalAbbreviation[] = [
+  // Frequency
+  {
+    abbr: 'OD',
+    englishMeaning: 'Once daily (usually morning)',
+    fullLatin: 'Omni die',
+    category: 'frequency',
+    example: 'Tab. Telma 40mg - OD x 30 days',
+  },
+  {
+    abbr: 'BD / BID',
+    englishMeaning: 'Twice a day (morning and night, ~12 hrs apart)',
+    fullLatin: 'Bis in die',
+    category: 'frequency',
+    example: 'Cap. Augmentin 625 - 1 tab BD x 5 days',
+  },
+  {
+    abbr: 'TDS / TID',
+    englishMeaning: 'Three times a day (morning, afternoon, night, ~8 hrs apart)',
+    fullLatin: 'Ter die sumendum',
+    category: 'frequency',
+    example: 'Tab. Paracetamol 650mg - TDS for fever',
+  },
+  {
+    abbr: 'QDS / QID',
+    englishMeaning: 'Four times a day (~6 hrs apart)',
+    fullLatin: 'Quater in die',
+    category: 'frequency',
+    example: 'Syp. Sucralfate 10ml - QID before meals',
+  },
+  {
+    abbr: '1-0-1',
+    englishMeaning: 'One in the morning, none in afternoon, one at night',
+    fullLatin: 'Morning - Afternoon - Night metric',
+    category: 'frequency',
+    example: 'Augmentin 625 [1-0-1] after food',
+  },
+  {
+    abbr: '1-0-0',
+    englishMeaning: 'One dose in the morning only',
+    fullLatin: 'Morning metric',
+    category: 'frequency',
+    example: 'Pantocid 40 [1-0-0] empty stomach',
+  },
+  {
+    abbr: '0-0-1',
+    englishMeaning: 'One dose at bedtime / night only',
+    fullLatin: 'Night metric',
+    category: 'frequency',
+    example: 'Atorva 10mg [0-0-1] after dinner',
+  },
+  {
+    abbr: 'QOD',
+    englishMeaning: 'Every other day / alternate days',
+    fullLatin: 'Quaque altera die',
+    category: 'frequency',
+    example: 'Tab. Vitamin D3 60,000 IU - QOD for 3 doses',
+  },
+
+  // Timing
+  {
+    abbr: 'AC',
+    englishMeaning: 'Before meals / empty stomach',
+    fullLatin: 'Ante cibum',
+    category: 'timing',
+    example: 'Cap. Omeprazole 20mg - 1 cap AC in morning',
+  },
+  {
+    abbr: 'PC',
+    englishMeaning: 'After meals / food',
+    fullLatin: 'Post cibum',
+    category: 'timing',
+    example: 'Tab. Combiflam - 1 tab PC (never on empty stomach)',
+  },
+  {
+    abbr: 'HS',
+    englishMeaning: 'At bedtime / hour of sleep',
+    fullLatin: 'Hora somni',
+    category: 'timing',
+    example: 'Tab. Montair-LC - 1 tab HS x 10 days',
+  },
+  {
+    abbr: 'OM',
+    englishMeaning: 'Every morning',
+    fullLatin: 'Omni mane',
+    category: 'timing',
+    example: 'Tab. Thyronorm 50mcg - OM fasting',
+  },
+  {
+    abbr: 'ON',
+    englishMeaning: 'Every night',
+    fullLatin: 'Omni nocte',
+    category: 'timing',
+    example: 'Tab. Clonazepam 0.5mg - ON',
+  },
+
+  // Instructions
+  {
+    abbr: 'SOS / PRN',
+    englishMeaning: 'Take only when necessary or as needed',
+    fullLatin: 'Si opus sit / Pro re nata',
+    category: 'instructions',
+    example: 'Tab. Dolo 650mg - 1 tab SOS for temp > 100°F',
+  },
+  {
+    abbr: 'Stat',
+    englishMeaning: 'Immediately / right now',
+    fullLatin: 'Statim',
+    category: 'instructions',
+    example: 'Tab. Ondansetron 4mg - 1 tab Stat for nausea',
+  },
+  {
+    abbr: 'NR',
+    englishMeaning: 'No refill without a new prescription',
+    fullLatin: 'Non repetatur',
+    category: 'instructions',
+    example: 'Antibiotic course - NR',
+  },
+
+  // Route
+  {
+    abbr: 'PO',
+    englishMeaning: 'By mouth / orally',
+    fullLatin: 'Per os',
+    category: 'route',
+    example: 'Tab. Amoxicillin 500mg - PO TDS',
+  },
+  {
+    abbr: 'SL',
+    englishMeaning: 'Sublingually (dissolve under tongue)',
+    fullLatin: 'Sub lingua',
+    category: 'route',
+    example: 'Tab. Sorbitrate 5mg - SL for acute chest discomfort',
+  },
+  {
+    abbr: 'IV',
+    englishMeaning: 'Intravenous injection or infusion',
+    fullLatin: 'Intra venam',
+    category: 'route',
+    example: 'Inj. Pantoprazole 40mg - IV push',
+  },
+  {
+    abbr: 'IM',
+    englishMeaning: 'Intramuscular injection into muscle',
+    fullLatin: 'Intra musculum',
+    category: 'route',
+    example: 'Inj. Tetanus Toxoid (TT) 0.5ml - IM Stat',
+  },
+
+  // Form
+  {
+    abbr: 'Tab',
+    englishMeaning: 'Tablet',
+    category: 'form',
+    example: 'Tab. Azithral 500mg',
+  },
+  {
+    abbr: 'Cap',
+    englishMeaning: 'Capsule',
+    category: 'form',
+    example: 'Cap. Amoxyclav 625mg',
+  },
+  {
+    abbr: 'Syp',
+    englishMeaning: 'Syrup / Oral liquid suspension',
+    category: 'form',
+    example: 'Syp. Ascoril-D 100ml - 5ml TDS',
+  },
+  {
+    abbr: 'Oint',
+    englishMeaning: 'Ointment (topical)',
+    category: 'form',
+    example: 'Oint. Mupirocin 2% - apply twice daily',
+  },
+
+  // Clinical Directives
+  {
+    abbr: 'Rx',
+    englishMeaning: 'Prescription recipe / "Take thou"',
+    fullLatin: 'Recipe',
+    category: 'clinical_directive',
+    example: '℞ Header on every formal doctor slip',
+  },
+  {
+    abbr: 'Sig',
+    englishMeaning: 'Write on label / patient directions',
+    fullLatin: 'Signa',
+    category: 'clinical_directive',
+    example: 'Sig: 1 puff twice daily',
+  },
+
+  // Lab Tests
+  {
+    abbr: 'CBC',
+    englishMeaning: 'Complete Blood Count (RBC, WBC, Platelets, Hemoglobin)',
+    category: 'lab_test',
+    example: 'Adv: CBC with ESR to evaluate infection',
+  },
+  {
+    abbr: 'LFT',
+    englishMeaning: 'Liver Function Test (Bilirubin, SGOT, SGPT, ALP)',
+    category: 'lab_test',
+    example: 'Routine LFT monitoring before statin therapy',
+  },
+  {
+    abbr: 'KFT / RFT',
+    englishMeaning: 'Kidney / Renal Function Test (Creatinine, Blood Urea, BUN)',
+    category: 'lab_test',
+    example: 'KFT check for renal clearance',
+  },
+  {
+    abbr: 'HbA1c',
+    englishMeaning: 'Glycated Hemoglobin (3-month average blood glucose)',
+    category: 'lab_test',
+    example: 'HbA1c every 3 months for diabetes control',
+  },
+
+  // Measurement Units
+  {
+    abbr: 'mg',
+    englishMeaning: 'Milligram (1/1000th of a gram)',
+    category: 'measurement',
+    example: '500mg, 40mg, 10mg',
+  },
+  {
+    abbr: 'mcg / μg',
+    englishMeaning: 'Microgram (1/1,000,000th of a gram)',
+    category: 'measurement',
+    example: 'Thyronorm 50mcg, Fentanyl 25mcg',
+  },
+  {
+    abbr: 'ml',
+    englishMeaning: 'Milliliter (liquid volume)',
+    category: 'measurement',
+    example: '5ml spoonful, 10ml measuring cup',
+  },
+  {
+    abbr: 'IU',
+    englishMeaning: 'International Units (biological activity)',
+    category: 'measurement',
+    example: 'Insulin 10 IU, Vitamin D3 60,000 IU',
+  },
+];
+
 export const SAMPLE_PRESCRIPTIONS: SamplePrescription[] = [
   {
     id: 'sample-respiratory',
-    title: 'Acute Bronchitis & Cough',
-    subtitle: 'Antibiotic + Cough Syrup + Antihistamine + CBC & Chest X-Ray',
-    condition: 'Upper Respiratory Tract Infection & Bronchial Irritation',
-    previewText: `Rx:
-1. Tab. Augmentin 625mg (Amox-Clav) - 1 tab BD PC x 5 days
-2. Tab. Pantocid 40mg - 1 tab OD AC (Morning) x 5 days
-3. Tab. Levocet M (Levocetirizine + Montelukast) - 1 tab HS x 7 days
-4. Syp. Ascoril LS - 10ml TDS PC x 5 days
-5. Tab. Dolo 650mg - 1 tab TDS SOS (if fever/body ache > 100°F)
-
-Adv / Investigations:
-• Complete Blood Count (CBC) with Differential
-• Chest X-Ray (PA View)`,
+    title: 'Acute Bronchitis & Chest Congestion',
+    subtitle: 'Antibiotic + Bronchodilator + Gastroprotection Regimen',
+    previewText: 'Rx: Augmentin 625 [1-0-1], Pantocid 40 [1-0-0 AC], Montair-LC [0-0-1 HS], Dolo 650 [SOS]',
     sampleResult: {
-      doctorSpecialtyOrClinic: 'Pulmonology & General Medicine Clinic',
-      prescriptionDate: 'Recent',
-      suspectedCondition: 'Acute Upper Respiratory Tract Infection with Productive Cough and Fever',
-      generalExplanation: 'This prescription treats an acute respiratory infection with bacterial involvement. It pairs a broad-spectrum antibiotic with an antacid to prevent stomach irritation, an evening allergy/airway medication to reduce nighttime coughing, a mucus-clearing cough syrup, and an as-needed pain/fever reliever. The doctor also ordered blood and chest imaging to confirm lung clearance.',
+      doctorSpecialtyOrClinic: 'Apex Pulmonology & Internal Medicine Clinic',
+      prescriptionDate: '12-Sep-2026',
+      suspectedCondition: 'Acute Bacterial Bronchitis with Bronchospasm and Pyrexia',
+      generalExplanation:
+        'This prescription treats a bacterial lower respiratory infection accompanied by mucosal bronchoconstriction and fever. The regimen combines a broad-spectrum penicillin antibiotic with an acid reducer to shield the gastric lining, an antiallergic agent to ease airway inflammation overnight, and fever relief as needed.',
       medicines: [
         {
-          name: 'Augmentin 625mg',
+          name: 'Augmentin 625',
           genericName: 'Amoxicillin (500mg) + Clavulanic Acid (125mg)',
           form: 'Tablet',
-          strength: '625 mg',
+          strength: '625mg',
           dosage: '1 tablet',
-          frequency: 'Twice daily (approx. every 12 hours)',
-          timingCode: 'BD / 1-0-1 PC',
+          frequency: 'Twice daily (Morning & Night, ~12 hrs apart)',
+          timingCode: 'BD / 1-0-1',
           mealRelation: 'after_meal',
-          mealRelationText: 'Take immediately after food or a meal to minimize gastric discomfort',
-          duration: '5 days',
-          scheduleTimes: { morning: true, afternoon: false, evening: true, bedtime: false, asNeeded: false },
-          purposeAndUsage: 'Broad-spectrum antibiotic. Amoxicillin kills the bacteria causing infection in your respiratory tract, while clavulanic acid prevents bacteria from resisting the antibiotic.',
-          howToTake: 'Swallow whole with a full glass of water. Do not chew or crush. Complete the full 5-day course even if you feel completely better.',
+          mealRelationText: 'Take immediately after breakfast and dinner with a full glass of water to avoid stomach discomfort.',
+          duration: '5 days complete course',
+          scheduleTimes: {
+            morning: true,
+            afternoon: false,
+            evening: false,
+            bedtime: true,
+            asNeeded: false,
+          },
+          purposeAndUsage:
+            'Eradicates bacterial infection causing chest congestion, productive cough, and bronchial inflammation.',
+          howToTake: 'Swallow whole with plenty of water. Do not crush or chew the tablet.',
           precautions: [
-            'Must complete the entire 5 days to prevent antibiotic resistance.',
+            'Complete the full 5-day antibiotic course even if you feel completely recovered earlier.',
             'Maintain good hydration throughout the day.',
-            'Inform doctor if you experience severe diarrhea or skin rash.'
           ],
-          commonSideEffects: ['Mild nausea', 'Soft stools', 'Mild stomach upset'],
-          whenToContactDoctor: 'Severe watery diarrhea, hives/allergic swelling, or difficulty breathing.'
+          commonSideEffects: ['Mild loose stools or nausea', 'Transient stomach fullness'],
+          whenToContactDoctor: 'Severe persistent diarrhea, skin hives, or wheezing.',
+          prescribedAs: 'brand',
+          companyName: 'GlaxoSmithKline (GSK)',
+          activeGenericSalt: 'Amoxicillin + Clavulanic Acid',
+          popularCompanyBrands: [
+            { brandName: 'Moxikind-CV', companyName: 'Mankind' },
+            { brandName: 'Clavam', companyName: 'Alkem' },
+            { brandName: 'Augmentin Duo', companyName: 'GSK' },
+          ],
+          nlpResolution: {
+            confidenceScore: 98.4,
+            originalRawToken: 'Augmentin 625 BD',
+            brandToGenericMapped: true,
+            userConfirmed: true,
+            canonicalMatch: 'Augmentin 625',
+          },
         },
         {
-          name: 'Pantocid 40mg',
+          name: 'Pantocid 40',
           genericName: 'Pantoprazole Sodium',
-          form: 'Tablet',
-          strength: '40 mg',
+          form: 'Enteric Coated Tablet',
+          strength: '40mg',
           dosage: '1 tablet',
-          frequency: 'Once daily (in the morning)',
+          frequency: 'Once daily in the morning',
           timingCode: 'OD / 1-0-0 AC',
           mealRelation: 'empty_stomach',
-          mealRelationText: 'Take 30 to 60 minutes before breakfast on an empty stomach with plain water',
-          duration: '5 days',
-          scheduleTimes: { morning: true, afternoon: false, evening: false, bedtime: false, asNeeded: false },
-          purposeAndUsage: 'Proton Pump Inhibitor (PPI) that decreases stomach acid production to shield your stomach lining from irritation caused by antibiotics or illness.',
-          howToTake: 'Swallow whole with water at least 30 minutes before having your morning meal or tea.',
-          precautions: ['Do not crush or split the tablet as it has an acid-resistant enteric coating.'],
-          commonSideEffects: ['Mild headache', 'Gas', 'Constipation or loose stools'],
-          whenToContactDoctor: 'Severe abdominal cramping or prolonged dizziness.'
-        },
-        {
-          name: 'Levocet M',
-          genericName: 'Levocetirizine (5mg) + Montelukast (10mg)',
-          form: 'Tablet',
-          strength: '5mg / 10mg',
-          dosage: '1 tablet',
-          frequency: 'Once daily (at night)',
-          timingCode: 'HS / 0-0-0-1',
-          mealRelation: 'anytime',
-          mealRelationText: 'Can be taken with or without food, preferably before bedtime',
+          mealRelationText: 'Take 30-45 minutes before morning breakfast with plain water.',
           duration: '7 days',
-          scheduleTimes: { morning: false, afternoon: false, evening: false, bedtime: true, asNeeded: false },
-          purposeAndUsage: 'Dual anti-allergic and leukotriene blocker. Relieves sneezing, runny nose, throat itching, and relaxes bronchial airway swelling to prevent coughing at night.',
-          howToTake: 'Take once daily in the evening or 30 minutes before sleep.',
-          precautions: ['May cause mild drowsiness; avoid driving or operating machinery immediately after taking.'],
-          commonSideEffects: ['Mild drowsiness', 'Dry mouth', 'Fatigue'],
-          whenToContactDoctor: 'Unusual mood changes or persistent daytime sleepiness.'
+          scheduleTimes: {
+            morning: true,
+            afternoon: false,
+            evening: false,
+            bedtime: false,
+            asNeeded: false,
+          },
+          purposeAndUsage:
+            'Gastroprotective agent that suppresses gastric acid secretion, shielding the stomach lining from antibiotic irritation.',
+          howToTake: 'Swallow whole on an empty stomach with water. Never crush enteric-coated tablets.',
+          precautions: ['Do not drink coffee or tea immediately after swallowing this tablet.'],
+          commonSideEffects: ['Mild headache', 'Dry mouth'],
+          prescribedAs: 'brand',
+          companyName: 'Sun Pharma',
+          activeGenericSalt: 'Pantoprazole Sodium',
+          popularCompanyBrands: [
+            { brandName: 'Pan 40', companyName: 'Alkem' },
+            { brandName: 'Pantop', companyName: 'Aristo' },
+            { brandName: 'Protonix', companyName: 'Pfizer' },
+          ],
+          nlpResolution: {
+            confidenceScore: 97.9,
+            originalRawToken: 'Pantocid 40 1-0-0 AC',
+            brandToGenericMapped: true,
+            userConfirmed: true,
+            canonicalMatch: 'Pantocid 40',
+          },
         },
         {
-          name: 'Ascoril LS Syrup',
-          genericName: 'Levosalbutamol + Ambroxol + Guaiphenesin',
-          form: 'Syrup / Liquid',
-          strength: 'Standard therapeutic oral suspension',
-          dosage: '10 ml (approx. 2 teaspoons)',
-          frequency: 'Three times daily',
-          timingCode: 'TDS / 1-1-1 PC',
-          mealRelation: 'after_meal',
-          mealRelationText: 'Take after meals with warm water',
-          duration: '5 days',
-          scheduleTimes: { morning: true, afternoon: true, evening: true, bedtime: false, asNeeded: false },
-          purposeAndUsage: 'Expectorant and bronchodilator. Thins thick mucus and widens bronchial airways to make coughing productive and breathing easier.',
-          howToTake: 'Use the measuring cup provided. Drink warm fluids after taking to help break up phlegm.',
-          precautions: ['Shake bottle well before each dose.', 'May cause mild hand tremors or elevated heart rate in some patients.'],
-          commonSideEffects: ['Mild tremor', 'Fast heartbeat sensation', 'Nausea'],
-          whenToContactDoctor: 'Severe palpitations, dizziness, or chest tightness.'
-        },
-        {
-          name: 'Dolo 650mg',
-          genericName: 'Paracetamol / Acetaminophen',
+          name: 'Montair-LC',
+          genericName: 'Montelukast Sodium (10mg) + Levocetirizine (5mg)',
           form: 'Tablet',
-          strength: '650 mg',
+          strength: '10mg + 5mg',
           dosage: '1 tablet',
-          frequency: 'As needed (maximum 3 times a day, separated by 6 hours)',
-          timingCode: 'PRN / SOS',
+          frequency: 'Once daily at bedtime',
+          timingCode: 'HS / 0-0-1',
+          mealRelation: 'anytime',
+          mealRelationText: 'Take at night before sleeping, with or without food.',
+          duration: '10 days',
+          scheduleTimes: {
+            morning: false,
+            afternoon: false,
+            evening: false,
+            bedtime: true,
+            asNeeded: false,
+          },
+          purposeAndUsage:
+            'Relieves nighttime allergic airway spasms, cough reflex, throat tickle, and runny nose.',
+          howToTake: 'Take 30 minutes before bedtime.',
+          precautions: ['May cause slight morning drowsiness. Avoid night driving after taking.'],
+          commonSideEffects: ['Mild sleepiness', 'Dry throat'],
+          prescribedAs: 'brand',
+          companyName: 'Cipla Limited',
+          activeGenericSalt: 'Montelukast + Levocetirizine',
+          popularCompanyBrands: [
+            { brandName: 'Montek-LC', companyName: 'Sun Pharma' },
+            { brandName: 'Telekast-L', companyName: 'Lupin' },
+            { brandName: 'Levolin', companyName: 'Cipla' },
+          ],
+          nlpResolution: {
+            confidenceScore: 96.5,
+            originalRawToken: 'Montair-LC HS',
+            brandToGenericMapped: true,
+            userConfirmed: true,
+            canonicalMatch: 'Montair-LC',
+          },
+        },
+        {
+          name: 'Dolo 650',
+          genericName: 'Paracetamol (Acetaminophen)',
+          form: 'Tablet',
+          strength: '650mg',
+          dosage: '1 tablet',
+          frequency: 'As needed for fever above 100°F or severe body ache',
+          timingCode: 'SOS',
           mealRelation: 'after_meal',
-          mealRelationText: 'Take with or after food with plenty of water',
-          duration: 'As needed for fever or pain',
-          scheduleTimes: { morning: false, afternoon: false, evening: false, bedtime: false, asNeeded: true },
-          purposeAndUsage: 'Analgesic and antipyretic. Lowers elevated body temperature (fever) and eases headache, throat discomfort, and general body aches.',
-          howToTake: 'Take 1 tablet only if fever exceeds 100°F or body pain is present. Allow at least 6 hours between doses.',
-          precautions: ['Do not exceed 3,000mg of paracetamol per day.', 'Avoid taking other cold medicines that also contain paracetamol to prevent overdose.'],
-          commonSideEffects: ['Very well tolerated when taken as directed.'],
-          whenToContactDoctor: 'Fever persisting over 3 days or rash.'
-        }
+          mealRelationText: 'Take after food if fever or headache occurs. Keep at least 6 hours between doses.',
+          duration: 'As needed (SOS)',
+          scheduleTimes: {
+            morning: false,
+            afternoon: false,
+            evening: false,
+            bedtime: false,
+            asNeeded: true,
+          },
+          purposeAndUsage: 'Rapid antipyretic to bring down body temperature and relieve muscle aches.',
+          howToTake: 'Take with a glass of water after meals.',
+          precautions: ['Do not exceed 3 tablets in 24 hours. Never combine with other paracetamol products.'],
+          commonSideEffects: ['Well-tolerated at recommended doses'],
+          prescribedAs: 'brand',
+          companyName: 'Micro Labs Limited',
+          activeGenericSalt: 'Paracetamol',
+          popularCompanyBrands: [
+            { brandName: 'Calpol 650', companyName: 'GSK' },
+            { brandName: 'Crocin 650', companyName: 'GSK' },
+            { brandName: 'Pacimol', companyName: 'Ipca' },
+          ],
+          nlpResolution: {
+            confidenceScore: 99.1,
+            originalRawToken: 'Dolo 650 SOS',
+            brandToGenericMapped: true,
+            userConfirmed: true,
+            canonicalMatch: 'Dolo 650',
+          },
+        },
       ],
       labTests: [
         {
-          testName: 'Complete Blood Count (CBC) with Differential',
+          testName: 'Complete Blood Count (CBC) with ESR',
           category: 'Blood Investigation',
-          whyDoctorOrdered: 'To measure White Blood Cell (WBC) count and neutrophil percentage to differentiate bacterial infection from viral bronchitis, and rule out severe leukocytosis.',
-          preparationInstructions: 'No special fasting is required. Can be done at any time of day. Stay normally hydrated.',
-          sampleRequired: 'Venous Blood Sample (EDTA purple-top tube)',
+          whyDoctorOrdered: 'Assesses total leukocyte (WBC) count and systemic infection markers.',
+          preparationInstructions: 'No strict fasting required; drink plenty of water prior to venipuncture.',
+          sampleRequired: 'Venous blood sample (EDTA tube)',
           fastingRequired: false,
           urgency: 'routine',
-          commonNormalRangeContext: 'Total WBC normal range is 4,000–11,000 cells/mcL. Elevated levels indicate immune response to infection.'
+          commonNormalRangeContext: 'Checks for elevated neutrophils indicative of bacterial infection.',
         },
         {
-          testName: 'Chest X-Ray (PA View)',
+          testName: 'Chest X-Ray PA View',
           category: 'Radiology / Imaging',
-          whyDoctorOrdered: 'To examine bronchial lung fields, evaluate for potential consolidation (pneumonia), and rule out fluid effusion or lower respiratory complications.',
-          preparationInstructions: 'Remove any metal necklaces, brassieres with underwire, or chest piercings prior to imaging.',
-          sampleRequired: 'Digital Radiographic Imaging',
+          whyDoctorOrdered: 'Rule out pneumonia, lung consolidation, or pleural effusion.',
+          preparationInstructions: 'Remove metallic necklaces, piercings, or clothing with metal zippers.',
+          sampleRequired: 'Radiographic imaging',
           fastingRequired: false,
           urgency: 'routine',
-          commonNormalRangeContext: 'Clear lung fields with normal broncho-vascular markings and normal cardiac shadow.'
-        }
+          commonNormalRangeContext: 'Evaluates lung fields and bronchovascular markings.',
+        },
       ],
       chronologicalTakingPlan: [
         {
-          timeLabel: '7:00 AM – Waking / Empty Stomach',
+          timeLabel: '7:30 AM – Empty Stomach',
           slotName: 'morning_empty_stomach',
-          title: 'Morning: Empty Stomach (Before Food)',
-          description: 'Take 30-45 minutes before having tea, coffee, or breakfast with a glass of plain water',
+          title: 'Morning: Before Breakfast',
+          description: 'Take 30-45 minutes before morning breakfast',
           items: [
             {
-              medicineName: 'Pantocid 40mg',
-              genericName: 'Pantoprazole Sodium',
+              medicineName: 'Pantocid 40',
+              genericName: 'Pantoprazole Sodium 40mg',
               dosage: '1 tablet',
-              instructions: 'Swallow whole. Shields stomach wall from acid irritation before meals.',
-              isCriticalTiming: true
-            }
-          ]
+              instructions: 'Empty stomach with plain water to protect the stomach lining.',
+              isCriticalTiming: true,
+            },
+          ],
         },
         {
-          timeLabel: '8:30 AM – Morning (Post-Breakfast)',
+          timeLabel: '8:30 AM – After Breakfast',
           slotName: 'morning_after_breakfast',
           title: 'Morning: After Breakfast',
-          description: 'Take within 15-30 minutes after completing your morning meal',
+          description: 'Take immediately after food',
           items: [
             {
-              medicineName: 'Augmentin 625mg',
+              medicineName: 'Augmentin 625',
               genericName: 'Amoxicillin + Clavulanic Acid',
               dosage: '1 tablet',
-              instructions: 'Take immediately after food with plenty of water to prevent stomach upset.',
-              isCriticalTiming: true
+              instructions: 'Swallow with water immediately after breakfast.',
+              isCriticalTiming: true,
             },
-            {
-              medicineName: 'Ascoril LS Syrup',
-              genericName: 'Levosalbutamol + Ambroxol + Guaiphenesin',
-              dosage: '10 ml',
-              instructions: 'Measure using the dosing cup. Drink warm water after to help dissolve phlegm.'
-            }
-          ]
+          ],
         },
         {
-          timeLabel: '1:30 PM – Afternoon (Post-Lunch)',
-          slotName: 'afternoon_after_lunch',
-          title: 'Afternoon: After Lunch',
-          description: 'Take after your afternoon meal',
-          items: [
-            {
-              medicineName: 'Ascoril LS Syrup',
-              genericName: 'Levosalbutamol + Ambroxol + Guaiphenesin',
-              dosage: '10 ml',
-              instructions: 'Second cough syrup dose to keep airways dilated throughout the day.'
-            }
-          ]
-        },
-        {
-          timeLabel: '8:30 PM – Evening (Post-Dinner)',
+          timeLabel: '8:30 PM – After Dinner',
           slotName: 'night_after_dinner',
           title: 'Night: After Dinner',
-          description: 'Take within 20 minutes after completing dinner',
+          description: 'Take approximately 12 hours after morning dose',
           items: [
             {
-              medicineName: 'Augmentin 625mg',
+              medicineName: 'Augmentin 625',
               genericName: 'Amoxicillin + Clavulanic Acid',
               dosage: '1 tablet',
-              instructions: 'Second antibiotic dose, spaced roughly 12 hours from morning dose.',
-              isCriticalTiming: true
+              instructions: 'Take 2nd antibiotic dose after dinner.',
+              isCriticalTiming: true,
             },
-            {
-              medicineName: 'Ascoril LS Syrup',
-              genericName: 'Levosalbutamol + Ambroxol + Guaiphenesin',
-              dosage: '10 ml',
-              instructions: 'Third cough syrup dose.'
-            }
-          ]
+          ],
         },
         {
-          timeLabel: '10:00 PM – Bedtime (Before Sleep)',
+          timeLabel: '10:00 PM – Bedtime',
           slotName: 'bedtime',
           title: 'Night: Bedtime',
-          description: 'Take 20-30 minutes before going to sleep',
+          description: 'Take right before sleep',
           items: [
             {
-              medicineName: 'Levocet M',
-              genericName: 'Levocetirizine + Montelukast',
+              medicineName: 'Montair-LC',
+              genericName: 'Montelukast + Levocetirizine',
               dosage: '1 tablet',
-              instructions: 'Prevents nocturnal coughing, sneezing, and airway bronchospasm so you can sleep peacefully.'
-            }
-          ]
+              instructions: 'Controls nighttime airway coughing and allergy symptoms.',
+              isCriticalTiming: false,
+            },
+          ],
         },
         {
-          timeLabel: 'As Needed (SOS / PRN)',
+          timeLabel: 'As Needed (SOS)',
           slotName: 'as_needed',
-          title: 'As Needed: Only When Required',
-          description: 'Only take if fever exceeds 100°F or severe body ache occurs',
+          title: 'Emergency / Symptomatic',
+          description: 'Only if fever exceeds 100°F or headache is severe',
           items: [
             {
-              medicineName: 'Dolo 650mg',
-              genericName: 'Paracetamol',
+              medicineName: 'Dolo 650',
+              genericName: 'Paracetamol 650mg',
               dosage: '1 tablet',
-              instructions: 'Maximum 3 times daily. Keep a minimum gap of 6 hours between doses.'
-            }
-          ]
-        }
+              instructions: 'Wait at least 6 hours between repeat doses.',
+              isCriticalTiming: false,
+            },
+          ],
+        },
       ],
       scheduleSummary: {
-        morning: ['Pantocid 40mg (30 mins before breakfast - Empty stomach)', 'Augmentin 625mg (After breakfast)', 'Ascoril LS Syrup 10ml (After breakfast)'],
-        afternoon: ['Ascoril LS Syrup 10ml (After lunch)'],
-        evening: ['Augmentin 625mg (After dinner)', 'Ascoril LS Syrup 10ml (After dinner)'],
-        bedtime: ['Levocet M 1 tablet (At night before sleeping)'],
-        asNeeded: ['Dolo 650mg (Only if fever > 100°F or severe body ache; min 6 hours apart)']
+        morning: ['Pantocid 40 (Before Food)', 'Augmentin 625 (After Food)'],
+        afternoon: [],
+        evening: [],
+        bedtime: ['Augmentin 625 (After Food)', 'Montair-LC (Bedtime)'],
+        asNeeded: ['Dolo 650 (For fever > 100°F)'],
       },
       potentialInteractionsOrSpacingAdvice: [
-        'Take Pantocid 40mg 30 minutes before your breakfast, then take Augmentin 625mg after you finish breakfast.',
-        'Drink plenty of warm water throughout the day to help the cough syrup liquefy chest secretions.',
-        'Avoid taking additional over-the-counter flu tablets that contain paracetamol while using Dolo 650.'
+        'Space antacids or calcium supplements at least 2 hours away from Augmentin.',
+        'If taking probiotics to prevent antibiotic-associated diarrhea, space them 2 hours apart from Augmentin.',
       ],
       foodAndDietaryRules: {
-        foodsToEat: [
-          'Warm vegetable soups and clear bone or lentil broths',
-          'Fresh curd / probiotic yogurt (to restore beneficial gut flora during antibiotic therapy)',
-          'Warm water with honey and ginger to soothe the irritated throat lining',
-          'Soft, easily digestible foods like oatmeal, khichdi, or steamed vegetables'
-        ],
-        foodsToAvoidOrLimit: [
-          'Ice-cold drinks, ice creams, or refrigerated fruit juices',
-          'Deep-fried, greasy, or excessively oily foods that trigger acid reflux and throat irritation',
-          'Alcohol and tobacco/smoking (which paralyzes bronchial cilia and delays recovery)'
-        ],
-        hydrationAdvice: 'Drink 2.5 to 3.0 Liters of warm fluids daily to keep mucosal secretions thin and easier to cough out.'
+        foodsToEat: ['Warm broths, clear vegetable soups', 'Yogurt / curd containing live cultures', 'Warm water with honey'],
+        foodsToAvoidOrLimit: ['Ice-cold beverages and ice cream', 'Oily, heavily spiced foods', 'Alcohol and tobacco smoke'],
+        hydrationAdvice: 'Drink 2.5 to 3 liters of warm water daily to thin mucus and aid recovery.',
       },
       lifestyleAdvice: [
-        'Steam inhalation twice daily can provide significant airway relief.',
-        'Drink at least 2 to 2.5 liters of warm fluids daily.',
-        'Rest adequately and avoid cold, refrigerated beverages or deep-fried foods while throat is inflamed.'
+        'Steam inhalation twice daily for 5-10 minutes helps clear bronchial secretions.',
+        'Rest with your head slightly elevated to prevent nighttime coughing fits.',
+        'Avoid exposure to dust, aerosol sprays, and temperature extremes.',
       ],
-      unclearOrAmbiguousNotes: [],
       multiEngineEnsemble: {
-        overallConfidence: 98.6,
-        ensembleAgreementPercent: 97.4,
+        overallConfidence: 97.8,
+        ensembleAgreementPercent: 96.5,
         engines: [
           {
             engineId: 'stroke_ligature',
             engineName: 'Neural Stroke & Cursive Ligature Analysis',
             frameworkTag: 'Cursive Ligature Attention',
-            engineRole: 'Deciphers cursive handwriting strokes, pen tilt, and letter ligatures',
-            extractedSnippet: 'Augmentin 625 BD PC, Pantocid 40 OD AC, Levocet-M HS, Ascoril LS 10ml TDS, Dolo 650 SOS',
-            confidence: 98.4,
-            specialtyFocus: 'Cursive stroke recognition & continuous doctor handwriting',
-            status: 'completed'
+            engineRole: 'Segmented individual doctor handwriting strokes and cursive drug prefixes',
+            extractedSnippet: 'Augm-625 BD, Pant-40 OD, Mont-LC HS, Dolo 650 SOS',
+            confidence: 98.2,
+            specialtyFocus: 'Rapid cursive clinical pen strokes',
+            status: 'completed',
           },
           {
             engineId: 'document_layout',
             engineName: 'Prescription Layout & Section Analyzer',
             frameworkTag: 'Document Geometry Hierarchy',
-            engineRole: 'Parses document hierarchy, doctor letterhead, and prescription tabular layout',
-            extractedSnippet: 'Clinic: Pulmonology OPD | Rx: 5 items | Adv: CBC with Diff, Chest X-Ray PA View',
-            confidence: 97.8,
-            specialtyFocus: 'Prescription document layout & diagnostic investigation sections',
-            status: 'completed'
+            engineRole: 'Isolated clinical header, Rx section, dosing instructions, and lab test rows',
+            extractedSnippet: 'Header: Apex Clinic; Body: 4 Meds; Footer: Lab CBC + CXR',
+            confidence: 97.4,
+            specialtyFocus: 'Spatial document hierarchy',
+            status: 'completed',
           },
           {
             engineId: 'latin_shorthand',
-            engineName: 'Medical Shorthand & Timing Decoder',
+            engineName: 'Medical Shorthand & Latin Lexicon Engine',
             frameworkTag: 'Deep Sequence Lexicon Decoding',
-            engineRole: 'Performs sequence-level beam search against 3,500+ pharmaceutical dictionary terms',
-            extractedSnippet: 'Augm-625 1-0-1 PC, Panto-40 1-0-0 AC, Levo-M 0-0-1, Ascoril-LS, Dolo-650',
-            confidence: 98.1,
-            specialtyFocus: 'Doctor shorthand, 1-0-1 timing codes, and Latin prescription notations',
-            status: 'completed'
+            engineRole: 'Decoded 1-0-1 as twice daily after food, OD AC as morning fasting, and HS as bedtime',
+            extractedSnippet: '1-0-1 -> BD; 1-0-0 AC -> OD ante cibum; HS -> hora somni',
+            confidence: 99.0,
+            specialtyFocus: 'Latin medical abbreviations',
+            status: 'completed',
           },
           {
             engineId: 'dosage_metrics',
-            engineName: 'Dosage Metrics & Unit Precision Parser',
+            engineName: 'Dosage Boundary & Metric Parser',
             frameworkTag: 'High-Precision Metric Boundaries',
-            engineRole: 'Accurate text boundary segmentation, units, numerals, and duration detection',
-            extractedSnippet: '625mg, 40mg, 10ml, 650mg, 5 days, 7 days, Inv: CBC, Chest X-Ray PA',
-            confidence: 98.9,
-            specialtyFocus: 'Dosage strengths (mg, ml), numeric frequencies, and duration figures',
-            status: 'completed'
+            engineRole: 'Separated milligrams (625mg, 40mg, 10mg+5mg, 650mg) from quantity counts',
+            extractedSnippet: 'Strength tokens verified: 625mg, 40mg, 15mg combo, 650mg',
+            confidence: 96.8,
+            specialtyFocus: 'Numerical metric safety boundaries',
+            status: 'completed',
           },
           {
             engineId: 'pharmacopeia_consensus',
             engineName: 'Clinical Pharmacopeia Cross-Validation',
             frameworkTag: 'Multimodal Clinical Safety Engine',
-            engineRole: 'Arbitrates cross-stage hypotheses using pharmacology knowledge and drug safety rules',
-            extractedSnippet: 'Amoxicillin+Clavulanate 625mg, Pantoprazole 40mg, Levocetirizine+Montelukast, Expectorant',
-            confidence: 99.2,
-            specialtyFocus: 'Pharmacological cross-validation, drug interactions, and medical sense checking',
-            status: 'consensus_aligned'
-          }
+            engineRole: 'Reconciled decoded drug names with recognized combinations for respiratory illness',
+            extractedSnippet: 'Consensus aligned: Amoxicillin-Clavulanate + Pantoprazole + Montelukast-Levocetirizine',
+            confidence: 97.6,
+            specialtyFocus: 'Drug-drug interaction and indication matching',
+            status: 'consensus_aligned',
+          },
         ],
-        consensusTokens: [
-          'Augmentin 625mg',
-          '1-0-1 (BD) PC',
-          'Pantocid 40mg',
-          '1-0-0 (OD) AC',
-          'Levocet M',
-          'Ascoril LS 10ml TDS',
-          'Dolo 650 SOS',
-          'CBC with Differential',
-          'Chest X-Ray PA View'
-        ],
+        consensusTokens: ['Augmentin 625', 'Pantocid 40', 'Montair-LC', 'Dolo 650', 'CBC', 'Chest X-Ray'],
         resolvedAmbiguities: [
-          "Cursive stroke analysis distinguished 'Augmentin 625' from potential misread 'Ampicillin' based on matching 625mg formulation.",
-          "Document layout verified 'Adv: CBC & Chest X-Ray' was an investigation block, not prescription medicine.",
-          "Dosage boundary verification confirmed '1-0-1' dosage frequency aligned with twice-daily antibiotic administration."
+          'Differentiated "Augmentin 625" from cursive "Amikacin 500" via 1-0-1 oral dosage format.',
+          'Resolved "Pantocid 40 AC" from "Paracetamol 500" based on morning fasting instruction.',
         ],
-        arbitrationExplanation: 'Multi-stage clinical verification cross-referenced cursive pen strokes with pharmaceutical databases, achieving a 98.6% combined consensus score across all 5 medications and 2 laboratory tests.'
+        arbitrationExplanation:
+          'All 5 clinical verification stages demonstrated 96.5% consensus. Dosage boundaries, frequency shorthand, and indication profiles align with clinical standard practice.',
       },
-      medicalDisclaimer: 'This analysis provides general educational guidance based on standard pharmacopeia data. Always verify specific dosing, allergies, and contraindications with your attending physician or licensed pharmacist.'
-    }
+      medicalDisclaimer:
+        'Theprescription is an educational decision-support aid. Never modify, start, or discontinue medications without the guidance of your prescribing physician.',
+    },
   },
   {
-    id: 'sample-chronic-hypertension',
-    title: 'Hypertension & Lipid Management',
-    subtitle: 'Blood Pressure Control + Cholesterol + Aspirin + Lipid & Kidney Tests',
-    condition: 'Essential Hypertension & Cardiovascular Risk Management',
-    previewText: `Rx (Cardiology OPD):
-1. Tab. Telma 40 (Telmisartan 40mg) - 1 tab OD morning (8 AM)
-2. Tab. Amlodipine 5mg - 1 tab OD morning (8 AM)
-3. Tab. Atorva 10 (Atorvastatin 10mg) - 1 tab OD HS (Bedtime)
-4. Tab. Ecosprin 75mg (Enteric coated aspirin) - 1 tab OD PC (After lunch)
-
-Adv / Diagnostic Workup:
-• Fasting Lipid Profile (Total Chol, LDL, HDL, Triglycerides)
-• Kidney Function Test (Serum Creatinine, Blood Urea, Electrolytes)
-• 12-Lead Resting ECG`,
+    id: 'sample-metabolic',
+    title: 'Type-2 Diabetes & Hypertension Regimen',
+    subtitle: 'Metformin + Telmisartan + Atorvastatin Maintenance Regimen',
+    previewText: 'Rx: Glycomet 500 SR [1-0-1], Telma 40 [1-0-0], Atorva 10 [0-0-1], Ecosprin 75 [0-1-0]',
     sampleResult: {
-      doctorSpecialtyOrClinic: 'Department of Cardiology & Internal Medicine',
-      prescriptionDate: 'Recent',
-      suspectedCondition: 'Essential Stage 1 Hypertension and Hyperlipidemia (Cardiovascular Protection)',
-      generalExplanation: 'This is a standard chronic maintenance regimen designed to keep arterial blood pressure within normal targets (<130/80 mmHg), reduce circulating bad cholesterol (LDL), and prevent platelet clumping to guard against heart attack or stroke. Periodic kidney function and lipid testing are scheduled to ensure safety and drug efficacy.',
+      doctorSpecialtyOrClinic: 'Endocrinology & Cardio-Metabolic Care Center',
+      prescriptionDate: '10-Sep-2026',
+      suspectedCondition: 'Type 2 Diabetes Mellitus with Essential Hypertension and Hyperlipidemia',
+      generalExplanation:
+        'This prescription manages chronic glycemic regulation, cardiovascular protection, and blood pressure control. It pairs an insulin-sensitizing biguanide with an angiotensin receptor blocker for kidney-protective blood pressure reduction, a night-time statin to lower LDL cholesterol, and a low-dose antiplatelet.',
       medicines: [
+        {
+          name: 'Glycomet 500 SR',
+          genericName: 'Metformin Hydrochloride (Sustained Release)',
+          form: 'Tablet',
+          strength: '500mg',
+          dosage: '1 tablet',
+          frequency: 'Twice daily with meals (Breakfast & Dinner)',
+          timingCode: 'BD / 1-0-1',
+          mealRelation: 'with_meal',
+          mealRelationText: 'Take during or immediately after breakfast and dinner.',
+          duration: 'Continuous / Long term',
+          scheduleTimes: {
+            morning: true,
+            afternoon: false,
+            evening: false,
+            bedtime: true,
+            asNeeded: false,
+          },
+          purposeAndUsage: 'Improves insulin sensitivity and reduces hepatic glucose production to keep blood sugar in target range.',
+          howToTake: 'Swallow whole with food. Do not chew sustained-release tablets.',
+          precautions: ['Avoid heavy alcohol consumption to prevent lactic acidosis risk.'],
+          commonSideEffects: ['Mild abdominal fullness', 'Metallic taste during early days'],
+          prescribedAs: 'brand',
+          companyName: 'USV Private Limited',
+          activeGenericSalt: 'Metformin Hydrochloride',
+          popularCompanyBrands: [
+            { brandName: 'Glucophage', companyName: 'Merck' },
+            { brandName: 'Obimet', companyName: 'Abbott' },
+            { brandName: 'Cetapin', companyName: 'Sanofi' },
+          ],
+          nlpResolution: {
+            confidenceScore: 98.9,
+            originalRawToken: 'Glycomet 500 SR BD',
+            brandToGenericMapped: true,
+            userConfirmed: true,
+            canonicalMatch: 'Glycomet 500 SR',
+          },
+        },
         {
           name: 'Telma 40',
           genericName: 'Telmisartan',
           form: 'Tablet',
-          strength: '40 mg',
+          strength: '40mg',
           dosage: '1 tablet',
-          frequency: 'Once daily (morning around 8 AM)',
+          frequency: 'Once daily in the morning',
           timingCode: 'OD / 1-0-0',
           mealRelation: 'anytime',
-          mealRelationText: 'Can be taken with or without breakfast; take consistently at the same time each morning',
-          duration: 'Continuous daily maintenance',
-          scheduleTimes: { morning: true, afternoon: false, evening: false, bedtime: false, asNeeded: false },
-          purposeAndUsage: 'Angiotensin II Receptor Blocker (ARB). Relaxes and dilates blood vessels, allowing blood to flow smoothly and reducing workload on the heart.',
-          howToTake: 'Take every morning with water. Do not skip doses even if you feel completely healthy.',
-          precautions: [
-            'Do not discontinue abruptly without doctor consultation.',
-            'Avoid potassium-rich salt substitutes unless advised by doctor.',
-            'Regularly monitor blood pressure.'
+          mealRelationText: 'Take in the morning with a glass of water, with or without breakfast.',
+          duration: 'Continuous / Long term',
+          scheduleTimes: {
+            morning: true,
+            afternoon: false,
+            evening: false,
+            bedtime: false,
+            asNeeded: false,
+          },
+          purposeAndUsage: 'Relaxes vascular walls to reduce systemic blood pressure and provide long-term kidney protection.',
+          howToTake: 'Take around the same time every morning.',
+          precautions: ['Do not stop suddenly without doctor advice, as rebound hypertension may occur.'],
+          commonSideEffects: ['Occasional mild dizziness on standing up quickly'],
+          prescribedAs: 'brand',
+          companyName: 'Glenmark Pharmaceuticals',
+          activeGenericSalt: 'Telmisartan',
+          popularCompanyBrands: [
+            { brandName: 'Micardis', companyName: 'Boehringer' },
+            { brandName: 'Telmikind', companyName: 'Mankind' },
+            { brandName: 'Telsartan', companyName: 'Dr. Reddy’s' },
           ],
-          commonSideEffects: ['Occasional lightheadedness when standing up quickly', 'Back pain', 'Sinus congestion'],
-          whenToContactDoctor: 'Severe dizziness, fainting, or swelling of lips or face.'
-        },
-        {
-          name: 'Amlodipine 5mg',
-          genericName: 'Amlodipine Besylate',
-          form: 'Tablet',
-          strength: '5 mg',
-          dosage: '1 tablet',
-          frequency: 'Once daily (morning)',
-          timingCode: 'OD / 1-0-0',
-          mealRelation: 'anytime',
-          mealRelationText: 'Can be taken with or without food with your morning medication',
-          duration: 'Continuous daily maintenance',
-          scheduleTimes: { morning: true, afternoon: false, evening: false, bedtime: false, asNeeded: false },
-          purposeAndUsage: 'Calcium Channel Blocker (CCB). Relaxes arterial smooth muscle cells to lower peripheral resistance and assist Telmisartan in blood pressure normalization.',
-          howToTake: 'Take together with Telmisartan each morning.',
-          precautions: ['Watch for ankle or foot swelling (edema); notify doctor if noticeable.'],
-          commonSideEffects: ['Mild swelling in ankles/feet', 'Flushing sensation', 'Fatigue'],
-          whenToContactDoctor: 'Marked leg swelling, chest pain, or rapid irregular heart rate.'
+          nlpResolution: {
+            confidenceScore: 97.8,
+            originalRawToken: 'Telma 40 OD',
+            brandToGenericMapped: true,
+            userConfirmed: true,
+            canonicalMatch: 'Telma 40',
+          },
         },
         {
           name: 'Atorva 10',
           genericName: 'Atorvastatin Calcium',
           form: 'Tablet',
-          strength: '10 mg',
+          strength: '10mg',
           dosage: '1 tablet',
-          frequency: 'Once daily (at night before bedtime)',
-          timingCode: 'OD / HS',
-          mealRelation: 'anytime',
-          mealRelationText: 'Best taken after dinner or at bedtime because liver cholesterol synthesis peaks at night',
-          duration: 'Continuous daily maintenance',
-          scheduleTimes: { morning: false, afternoon: false, evening: false, bedtime: true, asNeeded: false },
-          purposeAndUsage: 'HMG-CoA Reductase Inhibitor (Statin). Lowers "bad" LDL cholesterol and triglycerides in your bloodstream, stabilizing plaque inside arteries.',
-          howToTake: 'Take every night before going to bed with a glass of water.',
-          precautions: ['Avoid excessive intake of grapefruit or grapefruit juice.', 'Notify doctor if experiencing unexplained muscle ache.'],
-          commonSideEffects: ['Mild digestive discomfort', 'Joint ache'],
-          whenToContactDoctor: 'Unexplained severe muscle soreness, tenderness, or dark brown urine.'
-        },
-        {
-          name: 'Ecosprin 75',
-          genericName: 'Aspirin (Enteric-coated)',
-          form: 'Tablet',
-          strength: '75 mg',
-          dosage: '1 tablet',
-          frequency: 'Once daily (after lunch or main meal)',
-          timingCode: 'OD / 0-1-0 PC',
+          frequency: 'Once daily at bedtime',
+          timingCode: 'OD / 0-0-1',
           mealRelation: 'after_meal',
-          mealRelationText: 'Must be taken after food with a glass of water to protect gastric mucosa',
-          duration: 'Continuous daily maintenance',
-          scheduleTimes: { morning: false, afternoon: true, evening: false, bedtime: false, asNeeded: false },
-          purposeAndUsage: 'Low-dose antiplatelet agent. Inhibits blood clot formation inside coronary and cerebral arteries, preventing vascular events.',
-          howToTake: 'Swallow whole with plenty of water immediately following a substantial meal. Do not crush or chew.',
-          precautions: ['Enteric coating protects stomach lining; swallowing whole is vital.', 'Inform your dentist or surgeon that you take low-dose aspirin prior to procedures.'],
-          commonSideEffects: ['Mild acid reflux', 'Easier minor bruising'],
-          whenToContactDoctor: 'Black tarry stools, unusual bleeding, or persistent burning stomach ache.'
-        }
+          mealRelationText: 'Take at night after dinner. Cholesterol synthesis is highest during overnight sleep.',
+          duration: 'Continuous / Long term',
+          scheduleTimes: {
+            morning: false,
+            afternoon: false,
+            evening: false,
+            bedtime: true,
+            asNeeded: false,
+          },
+          purposeAndUsage: 'Reduces LDL cholesterol and protects arterial intima against atheromatous plaque formation.',
+          howToTake: 'Take with water at bedtime.',
+          precautions: ['Avoid drinking grapefruit juice while taking statins.'],
+          commonSideEffects: ['Mild muscle tightness or fatigue'],
+          prescribedAs: 'brand',
+          companyName: 'Zydus Cadila',
+          activeGenericSalt: 'Atorvastatin Calcium',
+          popularCompanyBrands: [
+            { brandName: 'Lipitor', companyName: 'Pfizer' },
+            { brandName: 'Storvas', companyName: 'Sun Pharma' },
+            { brandName: 'Tonact', companyName: 'Lupin' },
+          ],
+          nlpResolution: {
+            confidenceScore: 99.2,
+            originalRawToken: 'Atorva 10 ON',
+            brandToGenericMapped: true,
+            userConfirmed: true,
+            canonicalMatch: 'Atorva 10',
+          },
+        },
       ],
       labTests: [
         {
-          testName: 'Fasting Lipid Profile',
+          testName: 'Fasting Blood Sugar (FBS) & HbA1c',
           category: 'Blood Investigation',
-          whyDoctorOrdered: 'To monitor baseline and response to Atorvastatin therapy, ensuring target LDL (<70-100 mg/dL) and evaluating triglyceride levels.',
-          preparationInstructions: 'Requires strict 10 to 12 hours overnight fasting. Water is allowed and encouraged. Avoid alcohol 24 hours prior.',
-          sampleRequired: 'Venous Blood Sample',
+          whyDoctorOrdered: 'Evaluate 3-month glycemic control and fasting plasma glucose baseline.',
+          preparationInstructions: 'Strict overnight fasting of 8-10 hours; water is permitted.',
+          sampleRequired: 'Venous blood sample (Fluoride & EDTA tubes)',
           fastingRequired: true,
           urgency: 'routine',
-          commonNormalRangeContext: 'Total Cholesterol < 200 mg/dL, LDL < 100 mg/dL, HDL > 40 mg/dL (men) / > 50 mg/dL (women), Triglycerides < 150 mg/dL.'
+          commonNormalRangeContext: 'Target HbA1c < 7.0% for most adults with diabetes.',
         },
         {
-          testName: 'Kidney Function Test (KFT) & Serum Electrolytes',
+          testName: 'Lipid Profile & Serum Creatinine',
           category: 'Blood Investigation',
-          whyDoctorOrdered: 'Telmisartan (ARB) acts on the renin-angiotensin system and can alter renal hemodynamics and potassium retention. KFT monitors eGFR, creatinine, and serum potassium.',
-          preparationInstructions: 'No strict fasting required, but maintain normal hydration. Avoid heavy red meat consumption the night before.',
-          sampleRequired: 'Venous Blood Sample',
-          fastingRequired: false,
+          whyDoctorOrdered: 'Assess total cholesterol fractions and baseline renal filtration rate.',
+          preparationInstructions: '10-12 hours overnight fasting.',
+          sampleRequired: 'Venous blood sample',
+          fastingRequired: true,
           urgency: 'routine',
-          commonNormalRangeContext: 'Serum Creatinine 0.7–1.3 mg/dL, Serum Potassium 3.5–5.0 mEq/L.'
+          commonNormalRangeContext: 'Evaluates LDL, HDL, Triglycerides, and eGFR.',
         },
-        {
-          testName: '12-Lead Resting Electrocardiogram (ECG)',
-          category: 'Cardiology / ECG',
-          whyDoctorOrdered: 'To check for hypertensive heart disease, left ventricular hypertrophy (LVH), ST-T segment changes, or conduction abnormalities.',
-          preparationInstructions: 'No special preparation. Wear comfortable clothing with easy access to wrists, ankles, and chest.',
-          sampleRequired: 'Non-invasive Electrical Tracing',
-          fastingRequired: false,
-          urgency: 'routine',
-          commonNormalRangeContext: 'Normal sinus rhythm with normal voltage and axis.'
-        }
       ],
       chronologicalTakingPlan: [
         {
-          timeLabel: '8:00 AM – Morning (Breakfast Time)',
+          timeLabel: '8:30 AM – Morning Breakfast',
           slotName: 'morning_after_breakfast',
-          title: 'Morning: Blood Pressure Protection',
-          description: 'Take together every morning at the same hour with water',
+          title: 'Morning: Breakfast',
+          description: 'Take blood pressure and diabetes medicines',
           items: [
             {
               medicineName: 'Telma 40',
               genericName: 'Telmisartan 40mg',
               dosage: '1 tablet',
-              instructions: 'Relaxes vascular walls. Keeps 24-hour daytime arterial pressure controlled.',
-              isCriticalTiming: true
+              instructions: 'Blood pressure control.',
             },
             {
-              medicineName: 'Amlodipine 5mg',
-              genericName: 'Amlodipine Besylate',
+              medicineName: 'Glycomet 500 SR',
+              genericName: 'Metformin 500mg',
               dosage: '1 tablet',
-              instructions: 'Calcium channel blocker; works synergistically with Telma.'
-            }
-          ]
+              instructions: 'Take with food to minimize stomach upset.',
+            },
+          ],
         },
         {
-          timeLabel: '1:30 PM – Afternoon (Post-Lunch)',
-          slotName: 'afternoon_after_lunch',
-          title: 'Afternoon: Cardioprotection',
-          description: 'Take immediately after completing your midday meal with a full glass of water',
+          timeLabel: '8:30 PM – Dinner',
+          slotName: 'night_after_dinner',
+          title: 'Night: Dinner',
+          description: 'Evening diabetes medication',
           items: [
             {
-              medicineName: 'Ecosprin 75',
-              genericName: 'Aspirin (Enteric-coated)',
+              medicineName: 'Glycomet 500 SR',
+              genericName: 'Metformin 500mg',
               dosage: '1 tablet',
-              instructions: 'Prevents blood clotting. Food in stomach prevents gastric irritation.',
-              isCriticalTiming: true
-            }
-          ]
+              instructions: 'Take during or immediately after dinner.',
+            },
+          ],
         },
         {
-          timeLabel: '10:00 PM – Bedtime (Before Sleep)',
+          timeLabel: '10:00 PM – Bedtime',
           slotName: 'bedtime',
-          title: 'Night: Cholesterol Stabilization',
-          description: 'Take 20-30 minutes before sleep with plain water',
+          title: 'Night: Bedtime',
+          description: 'Cholesterol protective statin',
           items: [
             {
               medicineName: 'Atorva 10',
               genericName: 'Atorvastatin 10mg',
               dosage: '1 tablet',
-              instructions: 'Statin drug. Liver synthesizes cholesterol primarily at night; bedtime dosing maximizes plaque stabilization.',
-              isCriticalTiming: true
-            }
-          ]
-        }
-      ],
-      scheduleSummary: {
-        morning: ['Telma 40 (1 tab at 8 AM)', 'Amlodipine 5mg (1 tab at 8 AM)'],
-        afternoon: ['Ecosprin 75mg (1 tab immediately after lunch)'],
-        evening: [],
-        bedtime: ['Atorva 10 (1 tab at bedtime)'],
-        asNeeded: []
-      },
-      potentialInteractionsOrSpacingAdvice: [
-        'Take your blood pressure medicines (Telma & Amlodipine) consistently at the same hour each morning.',
-        'Always take Ecosprin with food (e.g., after lunch) to avoid stomach irritation.',
-        'Atorvastatin is most effective when taken in the evening before sleep.',
-        'Avoid grapefruit and grapefruit juice as it increases atorvastatin blood concentration.'
-      ],
-      foodAndDietaryRules: {
-        foodsToEat: [
-          'DASH diet foods: Leafy greens, berries, whole grains, and lean proteins',
-          'Garlic, oats, flaxseed, and walnuts (natural cardioprotective fiber)',
-          'Potassium-balanced fruits like apples, oranges, and watermelon (avoid artificial potassium supplements)'
-        ],
-        foodsToAvoidOrLimit: [
-          'Strictly restrict sodium: Limit added salt to under 2 grams (approx. 1/2 to 1 level teaspoon) per day',
-          'Processed meats, pickles, papads, and canned soups with high sodium content',
-          'Grapefruit and grapefruit juice (inhibits CYP3A4 metabolism of statins)',
-          'Excessive alcohol consumption'
-        ],
-        hydrationAdvice: 'Maintain healthy hydration with 2 to 2.5 liters of plain water throughout the day.'
-      },
-      lifestyleAdvice: [
-        'Maintain a low-sodium diet (under 2 grams of sodium / 1 teaspoon salt per day).',
-        'Incorporate 30 minutes of brisk walking or moderate physical activity 5 days a week.',
-        'Keep a daily blood pressure log in the morning and evening for review during your next doctor appointment.'
-      ],
-      unclearOrAmbiguousNotes: [],
-      multiEngineEnsemble: {
-        overallConfidence: 99.1,
-        ensembleAgreementPercent: 98.6,
-        engines: [
-          {
-            engineId: 'stroke_ligature',
-            engineName: 'Neural Stroke & Cursive Ligature Analysis',
-            frameworkTag: 'Cursive Ligature Attention',
-            engineRole: 'Deciphers cursive handwriting strokes, pen tilt, and letter ligatures',
-            extractedSnippet: 'Telma 40 OD M, Amlodipine 5mg OD M, Atorva 10 HS, Ecosprin 75 PC Lunch',
-            confidence: 98.8,
-            specialtyFocus: 'Cursive stroke recognition & continuous doctor handwriting',
-            status: 'completed'
-          },
-          {
-            engineId: 'document_layout',
-            engineName: 'Prescription Layout & Section Analyzer',
-            frameworkTag: 'Document Geometry Hierarchy',
-            engineRole: 'Parses document hierarchy, doctor letterhead, and prescription tabular layout',
-            extractedSnippet: 'Cardiology OPD | Rx: 4 items | Adv: Fasting Lipid Profile, Serum Creatinine, ECG',
-            confidence: 99.0,
-            specialtyFocus: 'Prescription document layout & diagnostic investigation sections',
-            status: 'completed'
-          },
-          {
-            engineId: 'latin_shorthand',
-            engineName: 'Medical Shorthand & Timing Decoder',
-            frameworkTag: 'Deep Sequence Lexicon Decoding',
-            engineRole: 'Performs sequence-level beam search against 3,500+ pharmaceutical dictionary terms',
-            extractedSnippet: 'Telma-40 1-0-0, Amlo-5 1-0-0, Atorva-10 0-0-1, Ecosprin-75 0-1-0 PC',
-            confidence: 98.7,
-            specialtyFocus: 'Doctor shorthand, 1-0-1 timing codes, and Latin prescription notations',
-            status: 'completed'
-          },
-          {
-            engineId: 'dosage_metrics',
-            engineName: 'Dosage Metrics & Unit Precision Parser',
-            frameworkTag: 'High-Precision Metric Boundaries',
-            engineRole: 'Accurate text boundary segmentation, units, numerals, and duration detection',
-            extractedSnippet: '40mg, 5mg, 10mg, 75mg, 30 days, Adv: Lipid Profile, Creatinine, ECG',
-            confidence: 99.4,
-            specialtyFocus: 'Dosage strengths (mg, ml), numeric frequencies, and duration figures',
-            status: 'completed'
-          },
-          {
-            engineId: 'pharmacopeia_consensus',
-            engineName: 'Clinical Pharmacopeia Cross-Validation',
-            frameworkTag: 'Multimodal Clinical Safety Engine',
-            engineRole: 'Arbitrates cross-stage hypotheses using pharmacology knowledge and drug safety rules',
-            extractedSnippet: 'Telmisartan 40mg, Amlodipine 5mg, Atorvastatin 10mg, Aspirin 75mg Enteric-Coated',
-            confidence: 99.6,
-            specialtyFocus: 'Pharmacological cross-validation, drug interactions, and medical sense checking',
-            status: 'consensus_aligned'
-          }
-        ],
-        consensusTokens: [
-          'Telma 40 (Telmisartan)',
-          'Amlodipine 5mg',
-          'Atorva 10 (Atorvastatin)',
-          'Ecosprin 75',
-          'Fasting Lipid Profile',
-          'Serum Creatinine & eGFR',
-          '12-Lead ECG'
-        ],
-        resolvedAmbiguities: [
-          "Stroke and dosage verification verified 'Atorva 10' timing is 'HS' (bedtime), corresponding to optimal nocturnal hepatic cholesterol synthesis.",
-          "Confirmed 'Ecosprin 75' is enteric-coated formulation prescribed after lunch to minimize morning gastric acidity overlap.",
-          "Document layout verified 'Adv: Fasting Lipid Profile & Creatinine' as 10-12 hour fasting blood tests."
-        ],
-        arbitrationExplanation: 'Multi-stage consensus verified chronic cardiovascular maintenance regimen, reconciling anti-hypertensive timing and nighttime statin dosing.'
-      },
-      medicalDisclaimer: 'This review is for patient educational purposes only. Never adjust or stop blood pressure or cardiovascular medications without direct approval from your prescribing cardiologist.'
-    }
-  },
-  {
-    id: 'sample-gastro-infection',
-    title: 'Gastroenteritis & Acid Peptic Regimen',
-    subtitle: 'Gut Antibiotic + Antacid + Probiotics + ORS + Stool & Electrolytes',
-    condition: 'Acute Bacterial Gastroenteritis & Dehydration Prevention',
-    previewText: `Rx:
-1. Tab. Norflox TZ (Norfloxacin 400mg + Tinidazole 600mg) - 1 tab BD PC x 5 days
-2. Cap. Omez 20mg (Omeprazole) - 1 cap OD AC (Morning) x 5 days
-3. Cap. Darolac (Probiotics: Lactobacillus) - 1 cap BD (Space 2 hrs from antibiotic)
-4. Tab. Cyclopam (Dicyclomine + Paracetamol) - 1 tab SOS for cramps
-5. Electral ORS sachet - 1 sachet in 1 liter clean water
-
-Adv / Diagnostic Tests:
-• Stool Routine & Microscopic Examination (R/M)
-• Serum Electrolytes (Na+, K+, Cl-)`,
-    sampleResult: {
-      doctorSpecialtyOrClinic: 'Gastroenterology & Family Medicine Clinic',
-      prescriptionDate: 'Recent',
-      suspectedCondition: 'Acute Bacterial Gastrointestinal Infection with Abdominal Cramps',
-      generalExplanation: 'This prescription treats an intestinal infection causing loose stools or diarrhea. It provides an antibacterial/antiprotozoal drug to eliminate the pathogens, a stomach protector, a probiotic to replenish healthy gut flora, an antispasmodic for painful abdominal cramps, and oral rehydration salts to restore electrolytes. Diagnostic stool and electrolyte tests check pathogen type and hydration status.',
-      medicines: [
-        {
-          name: 'Norflox TZ',
-          genericName: 'Norfloxacin (400mg) + Tinidazole (600mg)',
-          form: 'Tablet',
-          strength: '400mg / 600mg',
-          dosage: '1 tablet',
-          frequency: 'Twice daily (Morning & Night)',
-          timingCode: 'BD / 1-0-1 PC',
-          mealRelation: 'after_meal',
-          mealRelationText: 'Take after a light meal with plenty of water',
-          duration: '5 days',
-          scheduleTimes: { morning: true, afternoon: false, evening: true, bedtime: false, asNeeded: false },
-          purposeAndUsage: 'Combination antimicrobial and antiprotozoal. Kills infection-causing bacteria and protozoa in the intestines that cause diarrhea, amoebiasis, and stomach bugs.',
-          howToTake: 'Swallow whole with plenty of fluids. Take 1 tablet morning and 1 tablet night for all 5 days.',
-          precautions: [
-            'Strictly avoid alcohol during and for 3 days after taking Tinidazole as it causes severe vomiting/flushing.',
-            'Finish the full 5 days even if diarrhea resolves early.'
+              instructions: 'Take before sleep.',
+            },
           ],
-          commonSideEffects: ['Metallic taste in mouth', 'Darkened urine (harmless)', 'Mild nausea'],
-          whenToContactDoctor: 'Severe tendon pain, allergic reaction, or persistent high fever.'
         },
-        {
-          name: 'Omez 20mg',
-          genericName: 'Omeprazole',
-          form: 'Capsule',
-          strength: '20 mg',
-          dosage: '1 capsule',
-          frequency: 'Once daily (morning)',
-          timingCode: 'OD / 1-0-0 AC',
-          mealRelation: 'empty_stomach',
-          mealRelationText: 'Take 30 minutes before first meal of the day',
-          duration: '5 days',
-          scheduleTimes: { morning: true, afternoon: false, evening: false, bedtime: false, asNeeded: false },
-          purposeAndUsage: 'Acid reducer (PPI). Prevents hyperacidity and protects the inflamed stomach wall while you recover.',
-          howToTake: 'Swallow whole with water 30 minutes before breakfast.',
-          precautions: ['Do not chew the capsule granules.'],
-          commonSideEffects: ['Mild headache', 'Flatulence'],
-          whenToContactDoctor: 'Severe allergic skin rash.'
-        },
-        {
-          name: 'Darolac Probiotic',
-          genericName: 'Lactobacillus, Bifidobacterium, Streptococcus Faecalis',
-          form: 'Capsule',
-          strength: 'Multi-strain beneficial bacteria',
-          dosage: '1 capsule',
-          frequency: 'Twice daily',
-          timingCode: 'BD / 1-0-1',
-          mealRelation: 'after_meal',
-          mealRelationText: 'Take with food, at least 2 hours apart from the antibiotic',
-          duration: '5 days',
-          scheduleTimes: { morning: true, afternoon: false, evening: true, bedtime: false, asNeeded: false },
-          purposeAndUsage: 'Restores beneficial microorganisms in the bowel that are depleted by infection and antibiotics, speeding up recovery and preventing antibiotic-associated diarrhea.',
-          howToTake: 'Take 2 hours after taking Norflox TZ so the antibiotic does not kill the beneficial probiotic bacteria.',
-          precautions: ['Keep in a cool, dry place away from heat.'],
-          commonSideEffects: ['Generally very well tolerated; occasional mild gas for 1-2 days.'],
-          whenToContactDoctor: 'Persistent abdominal distension.'
-        },
-        {
-          name: 'Cyclopam',
-          genericName: 'Dicyclomine Hydrochloride (20mg) + Paracetamol (500mg)',
-          form: 'Tablet',
-          strength: '20mg / 500mg',
-          dosage: '1 tablet',
-          frequency: 'As needed (SOS) for severe stomach cramping',
-          timingCode: 'SOS / PRN',
-          mealRelation: 'after_meal',
-          mealRelationText: 'Take only when experiencing painful stomach cramps or spasm',
-          duration: 'As needed (max 3 times/day)',
-          scheduleTimes: { morning: false, afternoon: false, evening: false, bedtime: false, asNeeded: true },
-          purposeAndUsage: 'Antispasmodic and pain reliever. Relaxes hyperactive smooth muscles in the gut to ease griping abdominal cramps and fever.',
-          howToTake: 'Take 1 tablet with water when pain occurs. Do not take repeatedly unless cramps recur (minimum 6 hours gap).',
-          precautions: ['May cause mild dry mouth or blurred vision.'],
-          commonSideEffects: ['Dry mouth', 'Mild dizziness', 'Drowsiness'],
-          whenToContactDoctor: 'Inability to urinate or severe eye pain.'
-        },
-        {
-          name: 'Electral ORS',
-          genericName: 'Oral Rehydration Salts (WHO Formula)',
-          form: 'Oral Powder Sachet',
-          strength: 'WHO standard osmolarity formula',
-          dosage: '1 sachet dissolved in 1 Liter clean drinking water',
-          frequency: 'Sip frequently throughout the day',
-          timingCode: 'Ad libitum',
-          mealRelation: 'anytime',
-          mealRelationText: 'Drink whenever thirsty and after each loose bowel movement',
-          duration: 'Until diarrhea ceases and hydration is restored',
-          scheduleTimes: { morning: true, afternoon: true, evening: true, bedtime: true, asNeeded: true },
-          purposeAndUsage: 'Replenishes water, sodium, potassium, and chloride lost through diarrhea to prevent dangerous dehydration and electrolyte imbalance.',
-          howToTake: 'Dissolve entire sachet in 1 liter of boiled and cooled drinking water. Stir well. Discard any solution left over after 24 hours.',
-          precautions: ['Do not mix with milk, juice, or soups — use clean water only.'],
-          commonSideEffects: ['None when mixed in correct proportions.'],
-          whenToContactDoctor: 'Signs of severe dehydration like sunken eyes, no urination for 6 hours, or confusion.'
-        }
-      ],
-      labTests: [
-        {
-          testName: 'Stool Routine & Microscopy Examination (R/M)',
-          category: 'Urine / Stool',
-          whyDoctorOrdered: 'To detect microscopic presence of pus cells (leukocytes indicating invasive colitis), occult blood, and specific protozoal cysts or ova (e.g. Entamoeba histolytica or Giardia lamblia).',
-          preparationInstructions: 'Collect fresh stool sample in the sterile container provided by the diagnostic lab. Avoid contamination with urine or toilet water.',
-          sampleRequired: 'Fresh Stool Specimen in sterile container',
-          fastingRequired: false,
-          urgency: 'urgent',
-          commonNormalRangeContext: 'Normal stool shows no RBCs, no pus cells, and no pathogenic parasites or cysts.'
-        },
-        {
-          testName: 'Serum Electrolytes (Sodium, Potassium, Chloride)',
-          category: 'Blood Investigation',
-          whyDoctorOrdered: 'Profuse watery diarrhea causes rapid depletion of potassium and sodium. This test prevents cardiac arrhythmias and severe weakness caused by hypokalemia.',
-          preparationInstructions: 'No fasting required. Continue drinking ORS fluids as instructed.',
-          sampleRequired: 'Venous Blood Sample',
-          fastingRequired: false,
-          urgency: 'urgent',
-          commonNormalRangeContext: 'Sodium 135–145 mEq/L, Potassium 3.5–5.0 mEq/L, Chloride 96–106 mEq/L.'
-        }
-      ],
-      chronologicalTakingPlan: [
-        {
-          timeLabel: '7:00 AM – Waking / Empty Stomach',
-          slotName: 'morning_empty_stomach',
-          title: 'Morning: Gastric Acid Reduction',
-          description: 'Take 30 minutes before first meal with water',
-          items: [
-            {
-              medicineName: 'Omez 20mg',
-              genericName: 'Omeprazole',
-              dosage: '1 capsule',
-              instructions: 'Shields inflamed gastric mucosa before eating.',
-              isCriticalTiming: true
-            }
-          ]
-        },
-        {
-          timeLabel: '8:30 AM – Morning (Post-Breakfast)',
-          slotName: 'morning_after_breakfast',
-          title: 'Morning: Gut Antimicrobial',
-          description: 'Take after a light breakfast (toast, plain khichdi, or banana)',
-          items: [
-            {
-              medicineName: 'Norflox TZ',
-              genericName: 'Norfloxacin + Tinidazole',
-              dosage: '1 tablet',
-              instructions: 'Take after light food with plenty of water. Eliminates intestinal bacterial & protozoal infection.',
-              isCriticalTiming: true
-            }
-          ]
-        },
-        {
-          timeLabel: '10:30 AM – Mid-Morning (2 Hours Spacing)',
-          slotName: 'evening_tea',
-          title: 'Mid-Morning: Gut Flora Restoration',
-          description: 'CRITICAL SPACING: Take exactly 2 hours after the antibiotic so live probiotic bacteria are not destroyed',
-          items: [
-            {
-              medicineName: 'Darolac Probiotic',
-              genericName: 'Multi-strain Probiotics',
-              dosage: '1 capsule',
-              instructions: 'Restores beneficial microflora in the gut. Must be spaced 2 hours from Norflox TZ.',
-              isCriticalTiming: true
-            }
-          ]
-        },
-        {
-          timeLabel: 'Throughout Day – Hydration Protocol',
-          slotName: 'morning_empty_stomach',
-          title: 'All Day: Oral Rehydration Salts (ORS)',
-          description: 'Sip 1 Liter throughout the day, especially after each loose stool',
-          items: [
-            {
-              medicineName: 'Electral ORS',
-              genericName: 'Oral Rehydration Salts',
-              dosage: 'Sip continuously',
-              instructions: 'Dissolve 1 full sachet in 1 liter clean water. Replaces lost water, sodium, and potassium.'
-            }
-          ]
-        },
-        {
-          timeLabel: '8:00 PM – Evening (Post-Dinner)',
-          slotName: 'night_after_dinner',
-          title: 'Night: Second Antimicrobial Dose',
-          description: 'Take after light dinner with water',
-          items: [
-            {
-              medicineName: 'Norflox TZ',
-              genericName: 'Norfloxacin + Tinidazole',
-              dosage: '1 tablet',
-              instructions: 'Second antimicrobial dose (approx. 12 hours from morning dose).',
-              isCriticalTiming: true
-            }
-          ]
-        },
-        {
-          timeLabel: '10:00 PM – Bedtime (2 Hours Spacing)',
-          slotName: 'bedtime',
-          title: 'Bedtime: Night Probiotic',
-          description: 'Take 2 hours after evening antibiotic before sleep',
-          items: [
-            {
-              medicineName: 'Darolac Probiotic',
-              genericName: 'Multi-strain Probiotics',
-              dosage: '1 capsule',
-              instructions: 'Second probiotic capsule to replenish healthy bowel flora overnight.',
-              isCriticalTiming: true
-            }
-          ]
-        },
-        {
-          timeLabel: 'As Needed (SOS / PRN)',
-          slotName: 'as_needed',
-          title: 'As Needed: Cramp Relief',
-          description: 'Only take if painful abdominal spasm occurs',
-          items: [
-            {
-              medicineName: 'Cyclopam',
-              genericName: 'Dicyclomine + Paracetamol',
-              dosage: '1 tablet',
-              instructions: 'Relaxes intestine smooth muscles. Minimum 6 hours gap between doses.'
-            }
-          ]
-        }
       ],
       scheduleSummary: {
-        morning: ['Omez 20mg (30 mins before breakfast - Empty stomach)', 'Norflox TZ (After breakfast)', 'Darolac Probiotic (2 hours after breakfast)', 'Sip ORS solution throughout morning'],
-        afternoon: ['Continue sipping ORS solution'],
-        evening: ['Norflox TZ (After dinner)', 'Darolac Probiotic (2 hours after dinner)'],
-        bedtime: ['Sip ORS if thirsty'],
-        asNeeded: ['Cyclopam 1 tablet (Only if experiencing severe stomach cramping)']
+        morning: ['Telma 40 (Blood Pressure)', 'Glycomet 500 SR (With Breakfast)'],
+        afternoon: [],
+        evening: [],
+        bedtime: ['Glycomet 500 SR (With Dinner)', 'Atorva 10 (Bedtime)'],
+        asNeeded: [],
       },
       potentialInteractionsOrSpacingAdvice: [
-        'Crucial spacing: Take Darolac Probiotic 2 hours AFTER Norflox TZ to protect the live bacteria.',
-        'Strictly do not consume alcohol while taking Norflox TZ/Tinidazole due to severe disulfiram-like reactions.',
-        'Dissolve ORS in exact recommended water quantity (1 Liter per sachet).'
+        'Maintain a consistent schedule every day for Telma 40.',
+        'Do not take over-the-counter NSAIDs (like Ibuprofen) without consulting doctor, as they can blunter blood pressure medicines.',
       ],
       foodAndDietaryRules: {
-        foodsToEat: [
-          'BRAT diet: Bananas, Boiled White Rice, Applesauce, and plain White Toast',
-          'Diluted rice water (kanji), light moong dal khichdi, and tender coconut water',
-          'Clean boiled and cooled water with ORS',
-          'Fresh curd / yogurt after the first 24 hours to supply natural lactobacillus'
-        ],
-        foodsToAvoidOrLimit: [
-          'Milk, heavy dairy cream, cheese, and butter (temporary secondary lactose intolerance during gut infections)',
-          'Spicy, oily, deep-fried street foods and raw salads/uncooked vegetables',
-          'Coffee, tea, alcohol, and sugary sodas which worsen diarrhea and dehydration',
-          'Artificial sweeteners which draw water into the bowel'
-        ],
-        hydrationAdvice: 'Drink 100-200ml of ORS solution after every episode of loose stool to replace fluid volume immediately.'
+        foodsToEat: ['High-fiber green leafy vegetables, oats, whole grains', 'Low-glycemic legumes and pulses', 'Nuts (almonds, walnuts) in moderation'],
+        foodsToAvoidOrLimit: ['Refined white flour, sugar, and sweetened beverages', 'High-sodium processed snacks and pickles', 'Deep fried items'],
+        hydrationAdvice: 'Drink 2 to 2.5 liters of clean water daily.',
       },
       lifestyleAdvice: [
-        'Eat a bland BRAT diet: Bananas, Rice, Applesauce, and Toast or light khichdi.',
-        'Avoid oily, spicy, dairy, or caffeinated foods until bowel movements normalize.',
-        'Wash hands thoroughly with soap before meals and after using the restroom.'
+        'Aim for 30 minutes of brisk walking 5 days a week.',
+        'Check home blood pressure and random fasting glucose weekly.',
       ],
-      unclearOrAmbiguousNotes: [],
       multiEngineEnsemble: {
-        overallConfidence: 98.9,
-        ensembleAgreementPercent: 98.2,
+        overallConfidence: 98.4,
+        ensembleAgreementPercent: 97.2,
         engines: [
           {
             engineId: 'stroke_ligature',
             engineName: 'Neural Stroke & Cursive Ligature Analysis',
             frameworkTag: 'Cursive Ligature Attention',
-            engineRole: 'Deciphers cursive handwriting strokes, pen tilt, and letter ligatures',
-            extractedSnippet: 'Norflox TZ BD PC, Omez 20 OD AC, Darolac BD (space 2h), Cyclopam SOS, Electral',
+            engineRole: 'Recognized cardio-metabolic cursive abbreviations and salt units',
+            extractedSnippet: 'Glycomet 500 SR BD, Telma 40 OD, Atorva 10 ON',
             confidence: 98.6,
-            specialtyFocus: 'Cursive stroke recognition & continuous doctor handwriting',
-            status: 'completed'
+            specialtyFocus: 'Chronic maintenance handwriting',
+            status: 'completed',
           },
           {
             engineId: 'document_layout',
             engineName: 'Prescription Layout & Section Analyzer',
             frameworkTag: 'Document Geometry Hierarchy',
-            engineRole: 'Parses document hierarchy, doctor letterhead, and prescription tabular layout',
-            extractedSnippet: 'Gastroenterology OPD | Rx: 5 items | Adv: Stool R/M, Serum Electrolytes',
-            confidence: 98.8,
-            specialtyFocus: 'Prescription document layout & diagnostic investigation sections',
-            status: 'completed'
+            engineRole: 'Extracted chronic prescription grid layout',
+            extractedSnippet: '3 Chronic Medications + Fasting Lab Orders',
+            confidence: 98.0,
+            specialtyFocus: 'Clinical column alignment',
+            status: 'completed',
           },
           {
             engineId: 'latin_shorthand',
-            engineName: 'Medical Shorthand & Timing Decoder',
+            engineName: 'Medical Shorthand & Latin Lexicon Engine',
             frameworkTag: 'Deep Sequence Lexicon Decoding',
-            engineRole: 'Performs sequence-level beam search against 3,500+ pharmaceutical dictionary terms',
-            extractedSnippet: 'Norflox-TZ 1-0-1, Omez-20 1-0-0, Darolac 1-0-1, Cyclopam SOS, Electral sachet',
-            confidence: 98.5,
-            specialtyFocus: 'Doctor shorthand, 1-0-1 timing codes, and Latin prescription notations',
-            status: 'completed'
+            engineRole: 'Resolved OD mane, BD cum cibis, and ON hora somni',
+            extractedSnippet: 'OD -> Once Daily; BD -> Twice Daily; ON -> Overnight',
+            confidence: 99.1,
+            specialtyFocus: 'Latin chronic instructions',
+            status: 'completed',
           },
           {
             engineId: 'dosage_metrics',
-            engineName: 'Dosage Metrics & Unit Precision Parser',
+            engineName: 'Dosage Boundary & Metric Parser',
             frameworkTag: 'High-Precision Metric Boundaries',
-            engineRole: 'Accurate text boundary segmentation, units, numerals, and duration detection',
-            extractedSnippet: '400mg/600mg, 20mg, 1 sachet / 1L water, 5 days, Inv: Stool R/M, Electrolytes',
-            confidence: 99.2,
-            specialtyFocus: 'Dosage strengths (mg, ml), numeric frequencies, and duration figures',
-            status: 'completed'
+            engineRole: 'Verified 500mg, 40mg, and 10mg dosages',
+            extractedSnippet: 'Metrics verified: 500mg SR, 40mg, 10mg',
+            confidence: 97.9,
+            specialtyFocus: 'Titration metric boundaries',
+            status: 'completed',
           },
           {
             engineId: 'pharmacopeia_consensus',
             engineName: 'Clinical Pharmacopeia Cross-Validation',
             frameworkTag: 'Multimodal Clinical Safety Engine',
-            engineRole: 'Arbitrates cross-stage hypotheses using pharmacology knowledge and drug safety rules',
-            extractedSnippet: 'Norfloxacin+Tinidazole, Omeprazole, Probiotic spore complex, Dicyclomine, Oral Rehydration',
-            confidence: 99.5,
-            specialtyFocus: 'Pharmacological cross-validation, drug interactions, and medical sense checking',
-            status: 'consensus_aligned'
-          }
+            engineRole: 'Cross-checked cardiovascular and diabetic guideline synergy',
+            extractedSnippet: 'Synergistic guideline consensus: Metformin + ARB + Statin',
+            confidence: 98.4,
+            specialtyFocus: 'Guideline concordance',
+            status: 'consensus_aligned',
+          },
         ],
-        consensusTokens: [
-          'Norflox TZ (Norfloxacin + Tinidazole)',
-          'Omez 20 (Omeprazole)',
-          'Darolac Probiotic (space 2h)',
-          'Cyclopam (SOS)',
-          'Electral ORS (1L water)',
-          'Stool Routine & Microscopy',
-          'Serum Electrolytes (Na/K/Cl)'
-        ],
-        resolvedAmbiguities: [
-          "Reconciled critical 2-hour spacing requirement between Darolac probiotic and Norflox TZ antibiotic to prevent bactericidal killing of beneficial probiotic flora.",
-          "Confirmed 'Electral' preparation requires exactly 1 Liter of clean boiled/filtered water per sachet for iso-osmolar electrolyte absorption.",
-          "Validated Stool R/M and Serum Electrolytes as the ordered laboratory panel to evaluate dehydration."
-        ],
-        arbitrationExplanation: 'Multi-stage consensus verified acute gastrointestinal anti-infective therapy, enforcing strict 2-hour separation for probiotic efficacy and correct ORS dilution.'
+        consensusTokens: ['Glycomet 500 SR', 'Telma 40', 'Atorva 10', 'HbA1c', 'Lipid Profile'],
+        resolvedAmbiguities: ['Distinguished Glycomet 500 SR from Glycomet-GP via standalone salt notation.'],
+        arbitrationExplanation: 'Complete concordance across chronic maintenance therapy guidelines and handwriting strokes.',
       },
-      medicalDisclaimer: 'Medical guidance only. Seek urgent emergency care if there is blood in stool, severe uncontrollable vomiting preventing hydration, or very high fever.'
-    }
-  }
+      medicalDisclaimer: 'Prescription educational support. Never alter diabetic or hypertensive dosages without clinical consultation.',
+    },
+  },
 ];

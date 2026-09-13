@@ -282,7 +282,7 @@ export default function App() {
 
       {/* Trust & Safety Banner */}
       <div className="relative z-10 bg-emerald-900/95 backdrop-blur-xs text-emerald-100 py-2 px-3 sm:px-4 text-[11px] sm:text-xs font-medium border-b border-emerald-800/60 print:hidden shadow-2xs">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+        <div className="max-w-5xl mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
             <span className="leading-snug">
@@ -296,7 +296,7 @@ export default function App() {
       </div>
 
       {/* Main Container with bottom clearance for mobile nav */}
-      <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 pb-28 sm:pb-12">
+      <main className="relative z-10 flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 pb-28 sm:pb-12">
         {activeTab === 'prescription' && (
           <div className="space-y-6">
             {!analysisResult || isPrescriptionUnunderstood ? (
@@ -317,6 +317,108 @@ export default function App() {
                     }}
                   />
                 )}
+
+                {/* Interactive Animated "How It Works" Guide - Displayed ONLY on Home Page */}
+                <HowItWorksGuide
+                  onStartUpload={() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  onSelectSample={handleSelectSample}
+                />
+
+                {/* Homepage Embedded FAQ Section */}
+                <FaqSection
+                  variant="homepage"
+                  onNavigateToTab={(tab) => setActiveTab(tab as AppNavTab)}
+                />
+
+                {/* High-Visibility Clinical Tools & Quick Actions directly below FAQ */}
+                <div className="pt-6 pb-2">
+                  <div className="text-center max-w-2xl mx-auto mb-6">
+                    <span className="text-[11px] font-black uppercase tracking-widest text-emerald-800 bg-emerald-100/90 border border-emerald-300 px-3 py-1 rounded-full">
+                      Clinical Exploration
+                    </span>
+                    <h3 className="text-xl sm:text-2xl font-black text-slate-900 mt-2">
+                      Fast Medical Tools & Databases
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-600 mt-1">
+                      Access our drug catalog, decode Latin abbreviations, or review medical safety policies.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {/* Tool 1: Medicine Lookup */}
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('lookup')}
+                      className="p-5 rounded-2xl bg-white border-2 border-slate-200 hover:border-blue-500 shadow-sm hover:shadow-md transition-all text-left group cursor-pointer flex flex-col justify-between"
+                    >
+                      <div className="space-y-2">
+                        <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold group-hover:scale-105 transition-transform">
+                          <Search className="w-5 h-5" />
+                        </div>
+                        <h4 className="font-black text-slate-900 text-base group-hover:text-blue-700 transition-colors">
+                          Medicine & Salt Directory
+                        </h4>
+                        <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                          Search 5,000+ brand names, active pharmacological molecules, side effects, and safe timing.
+                        </p>
+                      </div>
+                      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-1 text-xs font-black text-blue-700">
+                        <span>Search Medicines</span>
+                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </button>
+
+                    {/* Tool 2: Doctor Abbreviations */}
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('abbreviations')}
+                      className="p-5 rounded-2xl bg-white border-2 border-slate-200 hover:border-purple-500 shadow-sm hover:shadow-md transition-all text-left group cursor-pointer flex flex-col justify-between"
+                    >
+                      <div className="space-y-2">
+                        <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold group-hover:scale-105 transition-transform">
+                          <BookOpen className="w-5 h-5" />
+                        </div>
+                        <h4 className="font-black text-slate-900 text-base group-hover:text-purple-700 transition-colors">
+                          Doctor Shorthand Codes
+                        </h4>
+                        <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                          Decipher Latin prescription codes: 1-0-1, BD (twice daily), TDS, AC (before meals), PC, and SOS.
+                        </p>
+                      </div>
+                      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-1 text-xs font-black text-purple-700">
+                        <span>Explore Codes</span>
+                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </button>
+
+                    {/* Tool 3: Sample Prescriptions Test */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      className="p-5 rounded-2xl bg-white border-2 border-slate-200 hover:border-emerald-500 shadow-sm hover:shadow-md transition-all text-left group cursor-pointer flex flex-col justify-between"
+                    >
+                      <div className="space-y-2">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold group-hover:scale-105 transition-transform">
+                          <FileText className="w-5 h-5" />
+                        </div>
+                        <h4 className="font-black text-slate-900 text-base group-hover:text-emerald-700 transition-colors">
+                          Check Cursive Handwriting
+                        </h4>
+                        <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                          Upload a photo or choose from 6 realistic doctor clinic samples to see real-time AI transcription.
+                        </p>
+                      </div>
+                      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-1 text-xs font-black text-emerald-700">
+                        <span>Back to Scanner</span>
+                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </button>
+                  </div>
+                </div>
               </>
             ) : (
               <PrescriptionResultView
@@ -326,108 +428,6 @@ export default function App() {
                 onConfirmOrEditMedicine={handleConfirmOrEditMedicine}
               />
             )}
-
-            {/* Interactive Animated "How It Works" Guide */}
-            <HowItWorksGuide
-              onStartUpload={() => {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              onSelectSample={handleSelectSample}
-            />
-
-            {/* Homepage Embedded FAQ Section */}
-            <FaqSection
-              variant="homepage"
-              onNavigateToTab={(tab) => setActiveTab(tab as AppNavTab)}
-            />
-
-            {/* High-Visibility Clinical Tools & Quick Actions directly below FAQ */}
-            <div className="pt-6 pb-2">
-              <div className="text-center max-w-2xl mx-auto mb-6">
-                <span className="text-[11px] font-black uppercase tracking-widest text-emerald-800 bg-emerald-100/90 border border-emerald-300 px-3 py-1 rounded-full">
-                  Clinical Exploration
-                </span>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 mt-2">
-                  Fast Medical Tools & Databases
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-600 mt-1">
-                  Access our drug catalog, decode Latin abbreviations, or review medical safety policies.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {/* Tool 1: Medicine Lookup */}
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('lookup')}
-                  className="p-5 rounded-2xl bg-white border-2 border-slate-200 hover:border-blue-500 shadow-sm hover:shadow-md transition-all text-left group cursor-pointer flex flex-col justify-between"
-                >
-                  <div className="space-y-2">
-                    <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold group-hover:scale-105 transition-transform">
-                      <Search className="w-5 h-5" />
-                    </div>
-                    <h4 className="font-black text-slate-900 text-base group-hover:text-blue-700 transition-colors">
-                      Medicine & Salt Directory
-                    </h4>
-                    <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                      Search 5,000+ brand names, active pharmacological molecules, side effects, and safe timing.
-                    </p>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-1 text-xs font-black text-blue-700">
-                    <span>Search Medicines</span>
-                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </button>
-
-                {/* Tool 2: Doctor Abbreviations */}
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('abbreviations')}
-                  className="p-5 rounded-2xl bg-white border-2 border-slate-200 hover:border-purple-500 shadow-sm hover:shadow-md transition-all text-left group cursor-pointer flex flex-col justify-between"
-                >
-                  <div className="space-y-2">
-                    <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold group-hover:scale-105 transition-transform">
-                      <BookOpen className="w-5 h-5" />
-                    </div>
-                    <h4 className="font-black text-slate-900 text-base group-hover:text-purple-700 transition-colors">
-                      Doctor Shorthand Codes
-                    </h4>
-                    <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                      Decipher Latin prescription codes: 1-0-1, BD (twice daily), TDS, AC (before meals), PC, and SOS.
-                    </p>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-1 text-xs font-black text-purple-700">
-                    <span>Explore Codes</span>
-                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </button>
-
-                {/* Tool 3: Sample Prescriptions Test */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  className="p-5 rounded-2xl bg-white border-2 border-slate-200 hover:border-emerald-500 shadow-sm hover:shadow-md transition-all text-left group cursor-pointer flex flex-col justify-between"
-                >
-                  <div className="space-y-2">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold group-hover:scale-105 transition-transform">
-                      <FileText className="w-5 h-5" />
-                    </div>
-                    <h4 className="font-black text-slate-900 text-base group-hover:text-emerald-700 transition-colors">
-                      Check Cursive Handwriting
-                    </h4>
-                    <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                      Upload a photo or choose from 6 realistic doctor clinic samples to see real-time AI transcription.
-                    </p>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-1 text-xs font-black text-emerald-700">
-                    <span>Back to Scanner</span>
-                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </button>
-              </div>
-            </div>
           </div>
         )}
 
@@ -483,7 +483,7 @@ export default function App() {
 
         {/* Emergency Hotline Alert Strip - High-Contrast Rose Box */}
         <div className="bg-rose-50 border-b-2 border-rose-200 px-4 py-2.5 sm:py-3 text-center text-xs sm:text-sm text-rose-950 font-bold">
-          <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-center gap-2">
+          <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-2">
             <div className="w-6 h-6 rounded-full bg-rose-200 text-rose-800 flex items-center justify-center shrink-0">
               <PhoneCall className="w-3.5 h-3.5 text-rose-700" />
             </div>
@@ -494,16 +494,18 @@ export default function App() {
         </div>
 
         {/* Multi-Column High-Contrast Sitemap */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
           {/* Col 1: Brand & Tagline */}
           <div className="space-y-4 sm:col-span-2 md:col-span-1">
             <ThePrescriptionLogo size="sm" showWordmark={true} />
             <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
               Deciphering handwritten doctor prescriptions into clear medicine names, active generic formulas, meal timings, and patient-safe schedules.
             </p>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 font-bold">
-              <Lock className="w-3.5 h-3.5 text-emerald-700" />
-              <span>Encrypted Ephemeral Decryption • Zero Data Retention</span>
+            <div className="flex flex-col gap-2">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 font-bold">
+                <Lock className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+                <span>Encrypted Ephemeral Decryption</span>
+              </div>
             </div>
           </div>
 
@@ -653,7 +655,7 @@ export default function App() {
         </div>
 
         {/* Bottom copyright line */}
-        <div className="border-t border-slate-200 bg-slate-50/80 py-4 px-4 sm:px-8 max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs sm:text-sm text-slate-600 font-medium">
+        <div className="border-t border-slate-200 bg-slate-50/80 py-4 px-4 sm:px-8 max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs sm:text-sm text-slate-600 font-medium">
           <div className="flex items-center gap-2">
             <span>© {new Date().getFullYear()} <strong className="text-slate-900 font-black">Theprescription</strong>. All rights reserved.</span>
           </div>

@@ -132,7 +132,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
 
       {/* Interactive Controls (Full view or when user searches on homepage) */}
       {variant === 'full' && (
-        <div className="max-w-3xl mx-auto space-y-4 mb-6">
+        <div className="w-full mx-auto space-y-4 mb-6">
           {/* Search Bar */}
           <div className="relative">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -200,7 +200,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
       )}
 
       {/* Accordion Questions List (Showing 4 on homepage by default) */}
-      <div className="max-w-3xl mx-auto space-y-3">
+      <div className="w-full mx-auto space-y-3">
         {displayedFaqs.map((faq) => {
           const isOpen = expandedId === faq.id;
           return (
@@ -299,7 +299,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
 
       {/* Homepage specific: Clear Call-To-Action to View All 26 Questions */}
       {variant === 'homepage' && (
-        <div className="max-w-3xl mx-auto mt-6 bg-slate-900 text-white p-5 rounded-2xl shadow-md flex flex-col sm:flex-row items-center justify-between gap-4 border border-slate-800">
+        <div className="w-full mx-auto mt-6 bg-slate-900 text-white p-5 rounded-2xl shadow-md flex flex-col sm:flex-row items-center justify-between gap-4 border border-slate-800">
           <div className="text-center sm:text-left space-y-1">
             <div className="text-xs font-extrabold uppercase tracking-wider text-emerald-400 flex items-center justify-center sm:justify-start gap-1.5">
               <BookOpen className="w-3.5 h-3.5" />

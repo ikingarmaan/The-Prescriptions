@@ -48,7 +48,7 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ currentPage, onNavigate })
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 animate-in fade-in duration-200">
+    <div className="w-full mx-auto py-2 sm:py-6 animate-in fade-in duration-200">
       {/* Top Breadcrumb & Page Navigation Bar */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <button

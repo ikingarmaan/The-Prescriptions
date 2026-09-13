@@ -24,7 +24,7 @@ import { DailyScheduleTimeline } from './DailyScheduleTimeline';
 import { MultiEngineConsensusCard } from './MultiEngineConsensusCard';
 import { HumanInTheLoopVerificationCard } from './HumanInTheLoopVerificationCard';
 import { MedicineDetail } from '../types';
-import { generatePrintableCardHtml, downloadFile } from '../utils/cardDownload';
+import { generateAndDownloadMedicationCardPdf } from '../utils/cardDownload';
 
 interface PrescriptionResultViewProps {
   result: PrescriptionAnalysisResult;
@@ -48,9 +48,7 @@ export const PrescriptionResultView: React.FC<PrescriptionResultViewProps> = ({
   const [downloaded, setDownloaded] = useState<boolean>(false);
 
   const handleDownloadCard = () => {
-    const htmlContent = generatePrintableCardHtml(result);
-    const filename = `medication-card-${new Date().toISOString().slice(0, 10)}.html`;
-    downloadFile(htmlContent, filename, 'text/html;charset=utf-8');
+    generateAndDownloadMedicationCardPdf(result);
     setDownloaded(true);
     setTimeout(() => setDownloaded(false), 3000);
   };
@@ -85,7 +83,7 @@ ${
   };
 
   return (
-    <div id="prescription-result-container" className="w-full max-w-5xl mx-auto space-y-6">
+    <div id="prescription-result-container" className="w-full mx-auto space-y-6">
       {/* Overview Banner Card with Cool Emerald Theme */}
       <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="p-5 sm:p-7 md:p-8 bg-gradient-to-r from-slate-950 via-emerald-950 to-teal-950 text-white relative overflow-hidden">
@@ -94,7 +92,7 @@ ${
           <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
 
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-5 relative z-10">
-            <div className="space-y-2 max-w-3xl">
+            <div className="space-y-2 max-w-2xl">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 backdrop-blur-xs flex items-center gap-1.5">
                   <Stethoscope className="w-3.5 h-3.5 text-emerald-400" />
@@ -121,13 +119,13 @@ ${
               </p>
             </div>
 
-            {/* Quick Actions (Thumb-Friendly on Mobile) */}
-            <div className="grid grid-cols-2 sm:flex sm:flex-wrap md:flex-col gap-2 shrink-0 w-full sm:w-auto">
+            {/* Quick Actions (Thumb-Friendly on Mobile, clean 2x2 grid on Laptop) */}
+            <div className="grid grid-cols-2 gap-2 shrink-0 w-full md:w-72">
               <button
                 id="print-summary-card-btn"
                 type="button"
                 onClick={onOpenPrintModal}
-                className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 text-xs font-extrabold rounded-xl shadow-md shadow-emerald-500/25 transition-all flex items-center justify-center gap-1.5 min-h-[44px] cursor-pointer"
+                className="px-3.5 py-2.5 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 text-xs font-extrabold rounded-xl shadow-md shadow-emerald-500/25 transition-all flex items-center justify-center gap-1.5 min-h-[44px] cursor-pointer"
                 title="Open printable card & print settings"
               >
                 <Printer className="w-4 h-4" />
@@ -138,18 +136,18 @@ ${
                 id="quick-download-card-btn"
                 type="button"
                 onClick={handleDownloadCard}
-                className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-xs font-bold rounded-xl border border-emerald-500/40 shadow-sm transition-all flex items-center justify-center gap-1.5 min-h-[44px] cursor-pointer"
-                title="Download offline-ready medication card HTML"
+                className="px-3.5 py-2.5 bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-xs font-bold rounded-xl border border-emerald-500/40 shadow-sm transition-all flex items-center justify-center gap-1.5 min-h-[44px] cursor-pointer"
+                title="Download official medication schedule card as PDF document"
               >
                 {downloaded ? (
                   <>
                     <Check className="w-4 h-4 text-emerald-400" />
-                    <span>Card Downloaded!</span>
+                    <span>PDF Downloaded!</span>
                   </>
                 ) : (
                   <>
                     <Download className="w-4 h-4 text-emerald-400" />
-                    <span>Download Card</span>
+                    <span>Download PDF</span>
                   </>
                 )}
               </button>
@@ -157,7 +155,7 @@ ${
               <button
                 type="button"
                 onClick={handleCopySummary}
-                className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold rounded-xl border border-white/15 transition-all flex items-center justify-center gap-1.5 min-h-[44px] cursor-pointer"
+                className="px-3.5 py-2.5 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold rounded-xl border border-white/15 transition-all flex items-center justify-center gap-1.5 min-h-[44px] cursor-pointer"
               >
                 {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Share2 className="w-4 h-4" />}
                 <span>{copied ? 'Copied!' : 'Copy Summary'}</span>
@@ -167,10 +165,10 @@ ${
                 id="analyze-another-btn"
                 type="button"
                 onClick={onReset}
-                className="col-span-2 sm:col-span-1 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-emerald-200 hover:text-white text-xs font-semibold rounded-xl border border-white/10 transition-all flex items-center justify-center gap-1.5 min-h-[44px] cursor-pointer"
+                className="px-3.5 py-2.5 bg-white/10 hover:bg-white/20 text-emerald-200 hover:text-white text-xs font-semibold rounded-xl border border-white/10 transition-all flex items-center justify-center gap-1.5 min-h-[44px] cursor-pointer"
               >
                 <RotateCcw className="w-4 h-4" />
-                <span>New Prescription</span>
+                <span>New Slip</span>
               </button>
             </div>
           </div>

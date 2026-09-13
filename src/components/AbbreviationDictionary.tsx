@@ -30,7 +30,7 @@ export const AbbreviationDictionary: React.FC = () => {
   ];
 
   return (
-    <div id="abbreviation-dictionary-root" className="w-full max-w-4xl mx-auto space-y-6">
+    <div id="abbreviation-dictionary-root" className="w-full mx-auto space-y-6">
       {/* Header with Cool Royal Violet / Amethyst Theme */}
       <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
         <div className="p-5 sm:p-7 md:p-8 bg-gradient-to-r from-slate-950 via-purple-950 to-violet-950 text-white relative overflow-hidden">

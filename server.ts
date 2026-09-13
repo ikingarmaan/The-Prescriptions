@@ -1,16 +1,13 @@
 import express, { type Request, type Response } from "express";
 import path from "path";
+import fs from "fs";
 import dotenv from "dotenv";
 import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
-import { createServer as createViteServer } from "vite";
 import { postProcessPrescriptionResultWithNLP } from "./src/utils/smartNlpEngine";
 
 dotenv.config();
 
 function getGenAIClient(): GoogleGenAI {
-  if (!process.env.GEMINI_API_KEY) {
-    dotenv.config({ override: true });
-  }
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY environment variable is missing.");
@@ -362,7 +359,7 @@ async function callGeminiWithRetry(params: {
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = parseInt(process.env.PORT || "3000", 10) || 3000;
 
   // Body parser with 25MB limit for high-res prescription photos
   app.use(express.json({ limit: "25mb" }));
@@ -370,9 +367,6 @@ async function startServer() {
 
   // API Health Check
   app.get("/api/health", (_req: Request, res: Response) => {
-    if (!process.env.GEMINI_API_KEY) {
-      dotenv.config({ override: true });
-    }
     res.json({
       status: "ok",
       hasGeminiKey: Boolean(process.env.GEMINI_API_KEY),
@@ -622,24 +616,50 @@ Include its generic name, primary uses, mechanism of action, typical dosage form
     }
   });
 
-  // Vite middleware setup
-  if (process.env.NODE_ENV !== "production") {
+  // Vite / Static middleware setup
+  const distPath = fs.existsSync(path.join(process.cwd(), "dist", "index.html"))
+    ? path.join(process.cwd(), "dist")
+    : typeof __dirname !== "undefined" && fs.existsSync(path.join(__dirname, "index.html"))
+    ? __dirname
+    : typeof __dirname !== "undefined" && fs.existsSync(path.join(__dirname, "..", "dist", "index.html"))
+    ? path.join(__dirname, "..", "dist")
+    : path.join(process.cwd(), "dist");
+
+  const isProduction = process.env.NODE_ENV === "production" || fs.existsSync(path.join(distPath, "index.html"));
+
+  if (!isProduction) {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
     app.get("*", (_req: Request, res: Response) => {
       res.sendFile(path.join(distPath, "index.html"));
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Prescription Medicine Checker server listening on http://0.0.0.0:${PORT}`);
+  const server = app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Prescription Medicine Checker server listening on http://0.0.0.0:${PORT} (env: ${process.env.NODE_ENV || "development"})`);
   });
+
+  // Graceful shutdown for container environments (Railway, Docker, etc.)
+  const shutdown = () => {
+    console.log("Shutting down server gracefully...");
+    server.close(() => {
+      console.log("HTTP server closed.");
+      process.exit(0);
+    });
+    setTimeout(() => {
+      console.error("Forcefully shutting down after timeout.");
+      process.exit(1);
+    }, 5000);
+  };
+
+  process.on("SIGTERM", shutdown);
+  process.on("SIGINT", shutdown);
 }
 
 startServer().catch((err) => {

@@ -1,37 +1,13 @@
-export type MealRelation = 'before_meal' | 'after_meal' | 'with_meal' | 'empty_stomach' | 'anytime';
+/**
+ * Core TypeScript definitions for Theprescription clinical deciphering engine.
+ */
 
-export type NLPConfidenceLevel = 'high' | 'medium' | 'low';
-
-export interface SmartNLPAlternativeCandidate {
-  brandName: string;
-  genericName: string;
-  similarityScore: number;
-}
-
-export interface SmartNLPResolution {
-  originalRawToken?: string;
-  matchedBrandOrDrug: string;
-  canonicalGeneric: string;
-  brandToGenericMapped: boolean;
-  confidenceLevel: NLPConfidenceLevel;
-  confidenceScore: number; // 0 - 100
-  matchAlgorithm: 'exact_dictionary' | 'fuzzy_rapidfuzz' | 'shorthand_expansion' | 'misspelling_correction' | 'pharmacopeia_synonym' | 'hitl_learned_memory';
-  spellingCorrected: boolean;
-  originalSpelling?: string;
-  userConfirmed?: boolean;
-  alternativeCandidates?: SmartNLPAlternativeCandidate[];
-}
-
-export interface SmartNLPSummary {
-  totalMedicinesProcessed: number;
-  highConfidenceCount: number;
-  mediumConfidenceCount: number;
-  lowConfidenceCount: number;
-  spellingsCorrectedCount: number;
-  brandsMappedCount: number;
-  requiresUserConfirmation: boolean;
-  arbitrationNote?: string;
-}
+export type MealRelation =
+  | 'before_meal'
+  | 'after_meal'
+  | 'with_meal'
+  | 'empty_stomach'
+  | 'anytime';
 
 export interface ScheduleTimes {
   morning: boolean;
@@ -41,15 +17,22 @@ export interface ScheduleTimes {
   asNeeded: boolean;
 }
 
-export interface CompanyMedicineBrand {
+export interface NlpResolution {
+  confidenceScore: number;
+  originalRawToken?: string;
+  brandToGenericMapped?: boolean;
+  userConfirmed?: boolean;
+  fuzzyMatchScore?: number;
+  canonicalMatch?: string;
+  reasoning?: string;
+}
+
+export interface PopularBrandEquivalent {
   brandName: string;
   companyName: string;
-  standardStrength?: string;
-  country?: string;
 }
 
 export interface MedicineDetail {
-  id?: string;
   name: string;
   genericName: string;
   form: string;
@@ -57,7 +40,7 @@ export interface MedicineDetail {
   dosage: string;
   frequency: string;
   timingCode: string;
-  mealRelation: MealRelation;
+  mealRelation: MealRelation | string;
   mealRelationText: string;
   duration: string;
   scheduleTimes: ScheduleTimes;
@@ -66,106 +49,59 @@ export interface MedicineDetail {
   precautions: string[];
   commonSideEffects: string[];
   whenToContactDoctor?: string;
-  missedDoseGuidance?: string;
-  storageRequirement?: string;
-  nlpResolution?: SmartNLPResolution;
-  // Two-way Generic vs Company Brand cross-reference
+  // Clinical enrichment metadata
+  nlpResolution?: NlpResolution;
   prescribedAs?: 'brand' | 'generic';
   companyName?: string;
   activeGenericSalt?: string;
-  popularCompanyBrands?: CompanyMedicineBrand[];
+  popularCompanyBrands?: PopularBrandEquivalent[];
 }
 
 export interface LabTestDetail {
-  id?: string;
   testName: string;
-  category: 'Blood Investigation' | 'Radiology / Imaging' | 'Urine / Stool' | 'Cardiology / ECG' | 'Microbiology / Culture' | 'Biochemistry' | 'Other';
+  category: string;
   whyDoctorOrdered: string;
   preparationInstructions: string;
   sampleRequired: string;
   fastingRequired: boolean;
-  urgency: 'routine' | 'urgent' | 'follow_up';
+  urgency?: string;
   commonNormalRangeContext?: string;
 }
 
-export interface ChronologicalScheduleStep {
-  timeLabel: string;
-  slotName: 'morning_empty_stomach' | 'morning_after_breakfast' | 'afternoon_after_lunch' | 'evening_tea' | 'night_after_dinner' | 'bedtime' | 'as_needed';
-  title: string;
-  description: string;
-  items: {
-    medicineName: string;
-    genericName: string;
-    dosage: string;
-    instructions: string;
-    isCriticalTiming?: boolean;
-  }[];
+export interface TakingPlanMedicineItem {
+  medicineName: string;
+  genericName: string;
+  dosage: string;
+  instructions: string;
+  isCriticalTiming?: boolean;
 }
 
-export interface MultiEngineOCRDetail {
-  engineId:
-    | 'stroke_ligature'
-    | 'document_layout'
-    | 'latin_shorthand'
-    | 'dosage_metrics'
-    | 'pharmacopeia_consensus'
-    | 'trocr'
-    | 'donut'
-    | 'cnn_rnn'
-    | 'paddle'
-    | 'gemini_arbiter'
-    | string;
+export interface ChronologicalTakingPlanSlot {
+  timeLabel: string;
+  slotName: string;
+  title: string;
+  description: string;
+  items: TakingPlanMedicineItem[];
+}
+
+export interface MultiEngineStage {
+  engineId: string;
   engineName: string;
   frameworkTag: string;
   engineRole: string;
   extractedSnippet: string;
   confidence: number;
   specialtyFocus: string;
-  status: 'completed' | 'consensus_aligned' | string;
+  status: string;
 }
 
 export interface MultiEngineEnsembleResult {
   overallConfidence: number;
   ensembleAgreementPercent: number;
-  engines: MultiEngineOCRDetail[];
+  engines: MultiEngineStage[];
   consensusTokens: string[];
   resolvedAmbiguities: string[];
   arbitrationExplanation: string;
-}
-
-export interface PrescriptionAnalysisResult {
-  unableToDecipher?: boolean;
-  doctorSpecialtyOrClinic?: string;
-  prescriptionDate?: string;
-  suspectedCondition?: string;
-  generalExplanation: string;
-  medicines: MedicineDetail[];
-  labTests?: LabTestDetail[];
-  chronologicalTakingPlan?: ChronologicalScheduleStep[];
-  scheduleSummary: {
-    morning: string[];
-    afternoon: string[];
-    evening: string[];
-    bedtime: string[];
-    asNeeded: string[];
-  };
-  potentialInteractionsOrSpacingAdvice: string[];
-  foodAndDietaryRules?: {
-    foodsToEat: string[];
-    foodsToAvoidOrLimit: string[];
-    hydrationAdvice: string;
-  };
-  lifestyleAdvice: string[];
-  unclearOrAmbiguousNotes: string[];
-  ocrTranscriptionNotes?: {
-    engineUsed: string;
-    rawTokensIdentified?: string[];
-    confidenceAssessment?: string;
-  };
-  multiEngineEnsemble?: MultiEngineEnsembleResult;
-  smartNlpSummary?: SmartNLPSummary;
-  imagePreprocessingReport?: ImagePreprocessingReport;
-  medicalDisclaimer: string;
 }
 
 export interface BoundingBox {
@@ -175,54 +111,65 @@ export interface BoundingBox {
   height: number;
 }
 
-export interface WordSegment {
+export interface WordToken {
   id: string;
   box: BoundingBox;
+  text?: string;
   confidence?: number;
-  extractedText?: string;
 }
 
-export interface LineSegment {
+export interface SegmentedLine {
   id: string;
   lineIndex: number;
   box: BoundingBox;
-  words: WordSegment[];
+  words: WordToken[];
   lineImageBase64?: string;
-  extractedText?: string;
+  recognizedText?: string;
 }
 
 export interface ImagePreprocessingReport {
   originalImage: string;
-  enhancedImage: string; // Denoised + Contrast enhanced
-  deskewedImage: string; // Straightened text orientation
-  adaptiveBinarizedImage: string; // Sharp black-and-white
-  skewAngle: number; // e.g., -2.4 degrees
-  canvasWidth: number;
-  canvasHeight: number;
-  noiseReductionApplied: boolean;
+  enhancedImage: string;
+  deskewedImage: string;
+  adaptiveBinarizedImage: string;
+  skewAngle: number;
   contrastEnhancementFactor: number;
-  adaptiveThresholdWindow: number;
-  lines: LineSegment[];
-  totalWordsDetected: number;
   totalLinesDetected: number;
-  processingTimeMs: number;
-  statusMessage: string;
+  totalWordsDetected: number;
+  canvasWidth?: number;
+  canvasHeight?: number;
+  lines: SegmentedLine[];
 }
 
-export interface MedicalAbbreviation {
-  abbr: string;
-  fullLatin?: string;
-  englishMeaning: string;
-  example: string;
-  category:
-    | 'frequency'
-    | 'timing'
-    | 'form'
-    | 'route'
-    | 'instructions'
-    | 'lab_test'
-    | 'clinical_directive'
-    | 'measurement'
-    | 'eye_ear';
+export interface ScheduleSummary {
+  morning: string[];
+  afternoon: string[];
+  evening: string[];
+  bedtime: string[];
+  asNeeded: string[];
 }
 
+export interface FoodAndDietaryRules {
+  foodsToEat: string[];
+  foodsToAvoidOrLimit: string[];
+  hydrationAdvice: string;
+}
+
+export interface PrescriptionAnalysisResult {
+  doctorSpecialtyOrClinic?: string;
+  prescriptionDate?: string;
+  suspectedCondition?: string;
+  generalExplanation: string;
+  medicines: MedicineDetail[];
+  labTests: LabTestDetail[];
+  chronologicalTakingPlan: ChronologicalTakingPlanSlot[];
+  scheduleSummary: ScheduleSummary;
+  potentialInteractionsOrSpacingAdvice: string[];
+  foodAndDietaryRules: FoodAndDietaryRules;
+  lifestyleAdvice: string[];
+  unclearOrAmbiguousNotes?: string[];
+  unableToDecipher?: boolean;
+  multiEngineEnsemble?: MultiEngineEnsembleResult;
+  medicalDisclaimer: string;
+  imagePreprocessingReport?: ImagePreprocessingReport;
+}

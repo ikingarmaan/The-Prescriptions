@@ -100,17 +100,17 @@ const USER_STEPS: UserStep[] = [
   {
     id: 5,
     stepNumber: 'Step 5',
-    actionTitle: 'Print Your Pocket Wallet Card',
-    quickSummary: 'Export a clean, pocket-sized daily routine for your wallet or fridge.',
+    actionTitle: 'Download PDF or Print Medication Card',
+    quickSummary: 'Export an official PDF medication schedule or print a daily routine for your wallet or fridge.',
     instructions: [
-      'Click the "Print Medication Card" button at the top of your results view.',
-      'Choose between a full-page schedule or a compact foldable pocket card.',
-      'Hang it on your refrigerator or hand it to elderly family members and caregivers.',
+      'Click "Download Card" to immediately generate and download your official PDF schedule document.',
+      'Or click "Print Medication Card" to preview and print a clean hard copy.',
+      'Hang it on your refrigerator or hand it to family members and caregivers for safe dosing.',
     ],
-    userTip: 'Tip: Use the checkbox columns to mark off your morning, afternoon, and night doses each day.',
+    userTip: 'Tip: Use the checkbox columns on your printed or PDF card to mark off your doses each day.',
     icon: Printer,
     accentGradient: 'from-rose-500 to-red-500',
-    highlightTag: 'Your Action: Print & Keep Safe',
+    highlightTag: 'Your Action: Download PDF or Print',
   },
 ];
 
