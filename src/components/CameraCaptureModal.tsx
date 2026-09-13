@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Camera,
   X,
@@ -25,10 +26,10 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
 }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const nativeFileInputRef = useRef<HTMLInputElement | null>(null);
   const galleryFileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const [stream, setStream] = useState<MediaStream | null>(null);
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
@@ -37,31 +38,48 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
   const [isFlashing, setIsFlashing] = useState<boolean>(false);
   const [isStarting, setIsStarting] = useState<boolean>(false);
 
+  // Stop camera tracks safely without triggering state re-renders
   const stopCamera = useCallback(() => {
-    if (stream) {
-      stream.getTracks().forEach((track) => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => {
         try {
           track.stop();
         } catch {
           // ignore
         }
       });
-      setStream(null);
+      streamRef.current = null;
     }
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
     setIsTorchOn(false);
     setTorchSupported(false);
-  }, [stream]);
+  }, []);
 
+  // Start camera stream once
   const startCamera = useCallback(
     async (mode: 'environment' | 'user') => {
-      stopCamera();
+      // First stop any lingering stream
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => {
+          try {
+            track.stop();
+          } catch {
+            // ignore
+          }
+        });
+        streamRef.current = null;
+      }
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
+
+      setIsTorchOn(false);
+      setTorchSupported(false);
       setCameraError(null);
       setIsStarting(true);
 
-      // Verify browser support for mediaDevices
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         setCameraError(
           'Live camera stream is not supported in this browser. Please use your phone camera app or upload from gallery.'
@@ -80,12 +98,13 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
           audio: false,
         });
 
-        setStream(mediaStream);
+        streamRef.current = mediaStream;
         if (videoRef.current) {
           videoRef.current.srcObject = mediaStream;
+          videoRef.current.play().catch(() => {});
         }
 
-        // Detect torch support on the active video track
+        // Detect torch support on active track
         const videoTrack = mediaStream.getVideoTracks()[0];
         if (videoTrack) {
           const caps = (videoTrack.getCapabilities ? videoTrack.getCapabilities() : {}) as any;
@@ -98,30 +117,30 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
       } catch (err: any) {
         console.error('Camera access error:', err);
 
-        // Fallback: try default video constraint if environment facingMode fails
+        // Fallback: try basic video constraint if environment facingMode fails
         if (mode === 'environment') {
           try {
             const fallbackStream = await navigator.mediaDevices.getUserMedia({
               video: true,
               audio: false,
             });
-            setStream(fallbackStream);
+            streamRef.current = fallbackStream;
             if (videoRef.current) {
               videoRef.current.srcObject = fallbackStream;
+              videoRef.current.play().catch(() => {});
             }
-            setIsStarting(false);
             return;
           } catch (e: any) {
             setCameraError(
               e.name === 'NotAllowedError'
-                ? 'Camera access was blocked by your browser. You can still use your phone camera app directly below or allow camera in browser settings.'
-                : 'Unable to start camera stream. Please use your phone camera app below.'
+                ? 'Camera access was blocked. Tap "Open Phone Camera" below or enable camera in browser settings.'
+                : 'Unable to start camera stream. Tap "Open Phone Camera" below.'
             );
           }
         } else {
           setCameraError(
             err.name === 'NotAllowedError'
-              ? 'Camera permission denied. Tap below to use your phone camera app instead.'
+              ? 'Camera permission denied. Tap "Open Phone Camera" below to take a photo.'
               : err.message || 'Camera not available on this device.'
           );
         }
@@ -129,11 +148,13 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
         setIsStarting(false);
       }
     },
-    [stopCamera]
+    []
   );
 
+  // Initialize camera only on mount or when facing mode changes
   useEffect(() => {
-    if (isOpen && !capturedPhoto) {
+    if (isOpen) {
+      setCapturedPhoto(null);
       startCamera(facingMode);
     } else {
       stopCamera();
@@ -142,12 +163,27 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
     return () => {
       stopCamera();
     };
-  }, [isOpen, facingMode, capturedPhoto, startCamera, stopCamera]);
+  }, [isOpen, facingMode]); // Stable dependencies - NEVER loops!
+
+  // Manage body class to lock scrolling and hide mobile bottom nav
+  useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add('camera-modal-active');
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.classList.remove('camera-modal-active');
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.classList.remove('camera-modal-active');
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   // Torch / Flashlight toggle
   const toggleTorch = async () => {
-    if (!stream || !torchSupported) return;
-    const track = stream.getVideoTracks()[0];
+    if (!streamRef.current || !torchSupported) return;
+    const track = streamRef.current.getVideoTracks()[0];
     if (track) {
       try {
         const nextState = !isTorchOn;
@@ -166,7 +202,6 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
     if (!videoRef.current) return;
     const video = videoRef.current;
 
-    // Trigger visual shutter flash
     setIsFlashing(true);
     setTimeout(() => setIsFlashing(false), 160);
 
@@ -215,10 +250,12 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
 
   if (!isOpen) return null;
 
-  return (
+  // Render modal directly into document.body to escape any parent stacking contexts
+  return createPortal(
     <div
       id="camera-modal-overlay"
-      className="fixed inset-0 z-50 flex flex-col bg-slate-950 text-white select-none overscroll-none h-[100dvh] w-screen sm:items-center sm:justify-center sm:bg-slate-950/85 sm:backdrop-blur-md sm:p-4"
+      className="fixed inset-0 z-[9999] flex flex-col bg-slate-950 text-white select-none overscroll-none h-[100dvh] w-screen sm:items-center sm:justify-center sm:bg-slate-950/90 sm:backdrop-blur-md sm:p-4"
+      style={{ touchAction: 'none' }}
     >
       {/* Hidden native camera and gallery file inputs for instant fallback */}
       <input
@@ -242,7 +279,7 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
         className="w-full h-full sm:h-auto sm:max-h-[92vh] sm:max-w-md sm:rounded-3xl sm:border sm:border-slate-800 sm:shadow-2xl overflow-hidden flex flex-col justify-between bg-slate-950 relative"
       >
         {/* Top Header Bar with Safe-Area Inset */}
-        <div className="flex items-center justify-between px-4 sm:px-5 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 border-b border-slate-800/80 bg-slate-900/90 backdrop-blur-md shrink-0 z-20">
+        <div className="flex items-center justify-between px-4 sm:px-5 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 border-b border-slate-800/80 bg-slate-900/95 backdrop-blur-md shrink-0 z-20">
           <div className="flex items-center space-x-2.5">
             <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
               <Camera className="w-4 h-4" />
@@ -253,18 +290,44 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               </div>
               <p className="text-[11px] text-slate-400">
-                {capturedPhoto ? 'Review photo clarity' : 'Medical document viewfinder'}
+                {capturedPhoto ? 'Review photo clarity' : 'Align prescription paper'}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-1.5">
-            {/* Torch / Flashlight Toggle (Only in capture mode & if supported) */}
+            {/* Direct Phone Camera App Shortcut */}
+            {!capturedPhoto && (
+              <button
+                type="button"
+                onClick={() => nativeFileInputRef.current?.click()}
+                className="p-2 text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 rounded-full transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
+                title="Use Phone Camera App"
+                aria-label="Use Phone Camera App"
+              >
+                <Smartphone className="w-4 h-4 text-emerald-400" />
+              </button>
+            )}
+
+            {/* Gallery Upload Shortcut */}
+            {!capturedPhoto && (
+              <button
+                type="button"
+                onClick={() => galleryFileInputRef.current?.click()}
+                className="p-2 text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 rounded-full transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
+                title="Choose from Gallery"
+                aria-label="Choose from Gallery"
+              >
+                <Upload className="w-4 h-4 text-slate-300" />
+              </button>
+            )}
+
+            {/* Torch / Flashlight Toggle */}
             {!capturedPhoto && torchSupported && (
               <button
                 type="button"
                 onClick={toggleTorch}
-                className={`p-2.5 rounded-full transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${
+                className={`p-2 rounded-full transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center ${
                   isTorchOn
                     ? 'bg-amber-400 text-slate-950 font-bold shadow-md shadow-amber-400/40'
                     : 'text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700'
@@ -276,24 +339,11 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
               </button>
             )}
 
-            {/* Flip camera toggle (Front/Back) */}
-            {!capturedPhoto && !cameraError && (
-              <button
-                type="button"
-                onClick={toggleFacingMode}
-                className="p-2.5 text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 rounded-full transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-                title="Switch Camera"
-                aria-label="Switch camera"
-              >
-                <RefreshCw className="w-4 h-4" />
-              </button>
-            )}
-
             {/* Close Button */}
             <button
               id="close-camera-btn"
               onClick={onClose}
-              className="p-2.5 text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 rounded-full transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ml-1"
+              className="p-2 text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 rounded-full transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center ml-1"
               aria-label="Close camera"
             >
               <X className="w-5 h-5" />
@@ -305,12 +355,12 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
         <div className="relative flex-1 min-h-0 flex flex-col items-center justify-center bg-black overflow-hidden p-3 sm:p-5">
           {cameraError ? (
             /* Error / Permission Blocked Fallback Screen */
-            <div className="w-full max-w-sm p-5 text-center bg-slate-900/90 rounded-2xl border border-slate-800 text-white space-y-4 shadow-xl">
+            <div className="w-full max-w-sm p-5 text-center bg-slate-900/95 rounded-2xl border border-slate-800 text-white space-y-4 shadow-2xl">
               <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/30 text-amber-400 mx-auto flex items-center justify-center">
                 <AlertCircle className="w-6 h-6" />
               </div>
               <div>
-                <h4 className="font-bold text-sm text-slate-100 mb-1">Camera Stream Unavailable</h4>
+                <h4 className="font-bold text-sm text-slate-100 mb-1">Camera Unavailable</h4>
                 <p className="text-xs text-slate-300 leading-relaxed">{cameraError}</p>
               </div>
 
@@ -321,7 +371,7 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
                 className="w-full py-3.5 px-4 bg-emerald-500 hover:bg-emerald-600 active:scale-[0.99] text-slate-950 text-xs sm:text-sm font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 min-h-[48px]"
               >
                 <Smartphone className="w-4 h-4" />
-                <span>Snap with Phone Camera App (High Res)</span>
+                <span>Open Phone Camera App</span>
               </button>
 
               {/* Action 2: Choose from Photos */}
@@ -331,7 +381,7 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
                 className="w-full py-3 px-4 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition-colors flex items-center justify-center gap-2 min-h-[44px]"
               >
                 <Upload className="w-4 h-4 text-slate-400" />
-                <span>Choose Photo from Gallery</span>
+                <span>Upload from Photos / Gallery</span>
               </button>
 
               {/* Action 3: Retry in-app camera */}
@@ -341,7 +391,7 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
                 className="text-xs text-emerald-400 hover:text-emerald-300 underline underline-offset-4 pt-1 inline-flex items-center gap-1.5"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
-                <span>Try Browser Camera Again</span>
+                <span>Retry In-App Camera</span>
               </button>
             </div>
           ) : capturedPhoto ? (
@@ -360,7 +410,7 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
 
               <div className="text-[11px] text-slate-400 mt-2 text-center flex items-center gap-1 justify-center shrink-0">
                 <Info className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span>Make sure doctor handwriting, medicine names, and dosages are readable.</span>
+                <span>Check that medicines and doses are readable before continuing.</span>
               </div>
             </div>
           ) : (
@@ -394,7 +444,7 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
                 {/* Bottom guidance pill inside viewfinder */}
                 <div className="absolute bottom-3 inset-x-3 text-center pointer-events-none z-10">
                   <span className="text-[11px] font-semibold text-white/95 bg-slate-950/80 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/15 shadow-md inline-block">
-                    Position prescription inside green corners • Hold steady
+                    Position prescription inside green corners
                   </span>
                 </div>
               </div>
@@ -403,7 +453,7 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
               {isStarting && (
                 <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-2 z-20">
                   <div className="w-8 h-8 border-3 border-emerald-400/30 border-t-emerald-400 rounded-full animate-spin" />
-                  <span className="text-xs text-emerald-300 font-medium">Opening camera...</span>
+                  <span className="text-xs text-emerald-300 font-medium">Starting camera...</span>
                 </div>
               )}
             </div>
@@ -412,46 +462,46 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
           <canvas ref={canvasRef} className="hidden" />
         </div>
 
-        {/* Bottom Control Bar with Safe-Area Inset for iOS Home Indicator & Android Navigation */}
-        <div className="px-4 sm:px-6 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] border-t border-slate-800/80 bg-slate-900/90 backdrop-blur-md shrink-0 z-20">
+        {/* Bottom Control Bar - High Clearance & Zero Clutter */}
+        <div className="px-6 pt-4 pb-[max(2.5rem,env(safe-area-inset-bottom,32px))] border-t border-slate-800/80 bg-slate-900/95 backdrop-blur-md shrink-0 z-30">
           {!capturedPhoto ? (
-            <div className="flex items-center justify-between gap-3 max-w-sm mx-auto w-full">
-              {/* Native phone camera app direct trigger */}
+            <div className="flex items-center justify-between gap-6 max-w-xs mx-auto w-full">
+              {/* Flip camera toggle button */}
               <button
                 type="button"
-                onClick={() => nativeFileInputRef.current?.click()}
-                className="flex flex-col items-center justify-center gap-1 text-[11px] font-semibold text-slate-300 hover:text-white p-2 rounded-xl hover:bg-slate-800/80 transition-colors min-h-[48px] min-w-[64px]"
-                title="Use phone native camera app"
-                aria-label="Use system camera"
+                onClick={toggleFacingMode}
+                className="flex flex-col items-center justify-center gap-1 text-slate-300 hover:text-white p-2.5 rounded-2xl hover:bg-slate-800/80 active:bg-slate-800 transition-colors min-h-[52px] min-w-[56px]"
+                title="Switch Camera"
+                aria-label="Switch camera"
               >
-                <Smartphone className="w-5 h-5 text-emerald-400" />
-                <span>System Cam</span>
+                <RefreshCw className="w-5 h-5 text-slate-300" />
+                <span className="text-[10px] font-medium text-slate-400">Flip</span>
               </button>
 
-              {/* High-contrast large circular tactile shutter button */}
+              {/* Giant, Prominent 80px Circular Shutter Button */}
               <button
                 id="capture-photo-btn"
                 type="button"
                 onClick={takeSnapshot}
                 disabled={Boolean(cameraError) || isStarting}
-                className="w-18 h-18 sm:w-16 sm:h-16 rounded-full bg-emerald-500 hover:bg-emerald-400 active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 shadow-xl shadow-emerald-500/30 transition-all flex items-center justify-center ring-4 ring-emerald-400/30 ring-offset-4 ring-offset-slate-950 cursor-pointer"
+                className="w-20 h-20 rounded-full bg-emerald-500 hover:bg-emerald-400 active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 shadow-2xl shadow-emerald-500/40 flex items-center justify-center ring-4 ring-emerald-400/40 ring-offset-4 ring-offset-slate-950 cursor-pointer transition-all shrink-0"
                 aria-label="Capture photo"
               >
-                <div className="w-14 h-14 sm:w-12 sm:h-12 rounded-full border-2 border-slate-950/40 flex items-center justify-center">
-                  <Camera className="w-7 h-7 sm:w-6 sm:h-6 text-slate-950" />
+                <div className="w-16 h-16 rounded-full border-2 border-slate-950/40 flex items-center justify-center bg-white/20">
+                  <Camera className="w-8 h-8 text-slate-950" />
                 </div>
               </button>
 
-              {/* Gallery upload */}
+              {/* Cancel / Close button */}
               <button
                 type="button"
-                onClick={() => galleryFileInputRef.current?.click()}
-                className="flex flex-col items-center justify-center gap-1 text-[11px] font-semibold text-slate-300 hover:text-white p-2 rounded-xl hover:bg-slate-800/80 transition-colors min-h-[48px] min-w-[64px]"
-                title="Upload from gallery"
-                aria-label="Choose photo"
+                onClick={onClose}
+                className="flex flex-col items-center justify-center gap-1 text-slate-300 hover:text-white p-2.5 rounded-2xl hover:bg-slate-800/80 active:bg-slate-800 transition-colors min-h-[52px] min-w-[56px]"
+                title="Cancel"
+                aria-label="Cancel"
               >
-                <Upload className="w-5 h-5 text-slate-300" />
-                <span>Gallery</span>
+                <X className="w-5 h-5 text-slate-400" />
+                <span className="text-[10px] font-medium text-slate-400">Cancel</span>
               </button>
             </div>
           ) : (
@@ -461,7 +511,7 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
                 id="retake-photo-btn"
                 type="button"
                 onClick={handleRetake}
-                className="flex-1 py-3.5 px-4 border border-slate-700 bg-slate-800/90 text-slate-200 hover:text-white hover:bg-slate-700 active:bg-slate-800 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer shadow-sm"
+                className="flex-1 py-3.5 px-4 border border-slate-700 bg-slate-800/90 text-slate-200 hover:text-white hover:bg-slate-700 active:bg-slate-800 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 min-h-[50px] cursor-pointer shadow-sm"
               >
                 <RefreshCw className="w-4 h-4" />
                 <span>Retake</span>
@@ -470,7 +520,7 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
                 id="use-photo-btn"
                 type="button"
                 onClick={handleConfirm}
-                className="flex-1 py-3.5 px-4 bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] text-slate-950 text-xs sm:text-sm font-extrabold rounded-xl shadow-lg shadow-emerald-500/30 transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
+                className="flex-1 py-3.5 px-4 bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] text-slate-950 text-xs sm:text-sm font-extrabold rounded-xl shadow-lg shadow-emerald-500/30 transition-all flex items-center justify-center gap-2 min-h-[50px] cursor-pointer"
               >
                 <Check className="w-4 h-4 stroke-[3]" />
                 <span>Use Photo</span>
@@ -479,6 +529,7 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

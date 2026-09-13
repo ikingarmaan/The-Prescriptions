@@ -65,3 +65,10 @@
   animation: scannerLaser 2.8s ease-in-out infinite;
 }
 
+body.camera-modal-active #mobile-bottom-nav {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+
