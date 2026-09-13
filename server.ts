@@ -1479,6 +1479,34 @@ Include its generic name, primary uses, mechanism of action, typical dosage form
 
   const isProduction = process.env.NODE_ENV === "production" || fs.existsSync(path.join(distPath, "index.html"));
 
+  // RSS Feed & Substack Export Endpoints
+  app.get(["/feed.xml", "/rss.xml", "/feed"], (_req: Request, res: Response) => {
+    const feedFile = path.join(distPath, "feed.xml");
+    const fallbackPath = path.join(process.cwd(), "public", "feed.xml");
+    const targetFile = fs.existsSync(feedFile) ? feedFile : fallbackPath;
+
+    if (fs.existsSync(targetFile)) {
+      res.setHeader("Content-Type", "application/xml; charset=utf-8");
+      res.sendFile(targetFile);
+    } else {
+      res.status(404).send("Feed not found");
+    }
+  });
+
+  app.get("/theprescription-substack-export.xml", (_req: Request, res: Response) => {
+    const exportFile = path.join(distPath, "theprescription-substack-export.xml");
+    const fallbackPath = path.join(process.cwd(), "public", "theprescription-substack-export.xml");
+    const targetFile = fs.existsSync(exportFile) ? exportFile : fallbackPath;
+
+    if (fs.existsSync(targetFile)) {
+      res.setHeader("Content-Type", "application/xml; charset=utf-8");
+      res.setHeader("Content-Disposition", 'attachment; filename="theprescription-substack-export.xml"');
+      res.sendFile(targetFile);
+    } else {
+      res.status(404).send("Substack export file not found");
+    }
+  });
+
   if (!isProduction) {
     const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({

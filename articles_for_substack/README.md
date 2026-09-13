@@ -1,0 +1,23 @@
+# Theprescription Articles Collection (Substack Ready)
+
+This directory contains all 17 articles formatted in clean Markdown, ready to import or copy into Substack.
+
+| # | Article Title | Category | Words | Markdown File |
+|---|---|---|---|---|
+| 1 | [The Mystery of Doctor Handwriting: Why Physicians Write in Cursive and How Pharmacists Decode It](01_doctor-handwriting-mystery.md) | Doctor Handwriting & Shorthand | 1781 | `01_doctor-handwriting-mystery.md` |
+| 2 | [Generic vs. Brand-Name Medications: The Pharmacology, Bioequivalence, and Cost Truths](02_generic-vs-brand-drugs.md) | Generic Salts & Pharmacology | 1781 | `02_generic-vs-brand-drugs.md` |
+| 3 | [Deciphering Doctor Shorthand: The Ultimate Guide to Prescription Latin Codes (OD, BD, TDS, AC, PC, SOS)](03_deciphering-doctor-abbreviations-guide.md) | Prescription Abbreviations & Codes | 1861 | `03_deciphering-doctor-abbreviations-guide.md` |
+| 4 | [The Top 10 Dangerous Drug-Food Interactions: Grapefruit, Dairy, Leafy Greens, and Beyond](04_dangerous-drug-food-interactions.md) | Drug-Food & Chemical Interactions | 1830 | `04_dangerous-drug-food-interactions.md` |
+| 5 | [What Does '1-0-1' or '0-1-0' Mean on Your Medicine Box? A Patient Guide to Dosage Timing](05_what-does-1-0-1-mean-prescription-timing.md) | Prescription Abbreviations & Codes | 1843 | `05_what-does-1-0-1-mean-prescription-timing.md` |
+| 6 | [Look-Alike, Sound-Alike (LASA) Medications: Preventing Fatal Prescription Mix-Ups](06_look-alike-sound-alike-lasa-drugs.md) | Patient Safety & Clinical Protocols | 1804 | `06_look-alike-sound-alike-lasa-drugs.md` |
+| 7 | [The Antibiotic Resistance Crisis: Why You Must Never Stop Your Prescription Early](07_why-finish-antibiotic-course-resistance.md) | Patient Safety & Clinical Protocols | 1747 | `07_why-finish-antibiotic-course-resistance.md` |
+| 8 | [Chronotherapy & Medicine Timing: The Biological Clock That Determines When to Take Your Pills](08_chronotherapy-best-time-take-medications.md) | Drug-Food & Chemical Interactions | 1738 | `08_chronotherapy-best-time-take-medications.md` |
+| 9 | [Empty Stomach vs. With Meals: How Food Chemistry Alters Drug Absorption and Gastric Safety](09_empty-stomach-vs-after-food-medications.md) | Drug-Food & Chemical Interactions | 1825 | `09_empty-stomach-vs-after-food-medications.md` |
+| 10 | [How to Read Routine Blood Test Prescriptions: Understanding CBC, Lipid Panel, and Kidney Markers](10_how-to-read-blood-test-prescriptions-cbc-lft-kft.md) | Diagnostic Tests & Biomarkers | 1758 | `10_how-to-read-blood-test-prescriptions-cbc-lft-kft.md` |
+| 11 | [The Anatomy of a Prescription: What 'Rx', 'Sig', 'Disp', and DEA Numbers Actually Mean](11_anatomy-of-a-prescription-rx-sig-disp-explained.md) | Prescription Abbreviations & Codes | 1713 | `11_anatomy-of-a-prescription-rx-sig-disp-explained.md` |
+| 12 | [Why Doctors Prescribe Antacids (PPIs) Along With Antibiotics and Painkillers](12_why-doctors-prescribe-antacids-ppis-with-antibiotics.md) | Patient Safety & Clinical Protocols | 1712 | `12_why-doctors-prescribe-antacids-ppis-with-antibiotics.md` |
+| 13 | [Steroid Tapering Protocols: Why You Can Never Stop Prednisone or Dexamethasone Suddenly](13_steroid-tapering-schedules-prednisone-safety.md) | Patient Safety & Clinical Protocols | 1734 | `13_steroid-tapering-schedules-prednisone-safety.md` |
+| 14 | [What to Do When a Doctor Prescription is Completely Illegible: A 5-Step Patient Safety Protocol](14_what-to-do-when-prescription-is-unreadable.md) | Doctor Handwriting & Shorthand | 1720 | `14_what-to-do-when-prescription-is-unreadable.md` |
+| 15 | [Pediatric Dosing and Liquid Medications: Preventing Accidental Overdoses in Infants and Children](15_pediatric-liquid-medicine-dosing-safety-guide.md) | Patient Safety & Clinical Protocols | 1728 | `15_pediatric-liquid-medicine-dosing-safety-guide.md` |
+| 16 | [Polypharmacy in Older Adults: Managing 5+ Daily Prescriptions and Avoiding Medication Cascades](16_polypharmacy-elderly-prescription-safety-guide.md) | Patient Safety & Clinical Protocols | 1763 | `16_polypharmacy-elderly-prescription-safety-guide.md` |
+| 17 | [The Future of Healthcare Literacy: How AI and Computer Vision Are Ending Medical Transcription Errors](17_ai-in-healthcare-handwriting-ocr-prescription-safety.md) | AI, Technology & Digital Health | 1657 | `17_ai-in-healthcare-handwriting-ocr-prescription-safety.md` |
