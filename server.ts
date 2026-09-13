@@ -8,18 +8,29 @@ import { postProcessPrescriptionResultWithNLP } from "./src/utils/smartNlpEngine
 dotenv.config();
 
 function getGenAIClient(): GoogleGenAI {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = (process.env.GEMINI_API_KEY || "").trim();
   if (!apiKey) {
-    throw new Error("GEMINI_API_KEY environment variable is missing.");
+    throw new Error("GEMINI_API_KEY environment variable is missing. Please add GEMINI_API_KEY in your Railway project Variables tab.");
   }
   return new GoogleGenAI({
     apiKey,
     httpOptions: {
       headers: {
-        "User-Agent": "aistudio-build",
+        "User-Agent": "the-prescription-app",
       },
     },
   });
+}
+
+function cleanAndParseJson(raw: string): any {
+  if (!raw || typeof raw !== "string") {
+    throw new Error("Empty response received from AI model.");
+  }
+  let cleaned = raw.trim();
+  if (cleaned.startsWith("```")) {
+    cleaned = cleaned.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
+  }
+  return JSON.parse(cleaned);
 }
 
 const analysisSchema = {
@@ -312,9 +323,9 @@ async function callGeminiWithRetry(params: {
 }): Promise<string> {
   const ai = getGenAIClient();
   const modelsToTry = [
-    params.primaryModel || "gemini-3.8-flash",
-    "gemini-3.1-flash-lite",
-    "gemini-flash-latest",
+    params.primaryModel || "gemini-2.5-flash",
+    "gemini-2.5-flash-lite",
+    "gemini-3.7-flash",
   ];
   let lastError: any = null;
 
@@ -338,6 +349,25 @@ async function callGeminiWithRetry(params: {
       } catch (err: any) {
         lastError = err;
         const errMsg = err?.message || String(err);
+
+        // If the error was caused by thinkingConfig incompatibility, retry immediately without it
+        if (errMsg.toLowerCase().includes("thinking") && params.config?.thinkingConfig) {
+          try {
+            const noThinkingConfig = { ...params.config };
+            delete noThinkingConfig.thinkingConfig;
+            const fallbackResponse = await ai.models.generateContent({
+              model,
+              contents: params.contents,
+              config: noThinkingConfig,
+            });
+            if (fallbackResponse.text) {
+              return fallbackResponse.text;
+            }
+          } catch (retryErr: any) {
+            lastError = retryErr;
+          }
+        }
+
         const isTransient =
           errMsg.includes("503") ||
           errMsg.includes("UNAVAILABLE") ||
@@ -389,6 +419,7 @@ async function startServer() {
 
       if (!imageBase64 && (!textNotes || !textNotes.trim())) {
         res.status(400).json({
+          success: false,
           error: "Please provide either a prescription photo or written prescription notes.",
         });
         return;
@@ -564,7 +595,7 @@ Provide clear dietary instructions (probiotics/yogurt, hydration, foods to avoid
         },
       });
 
-      const parsedData = JSON.parse(responseText.trim());
+      const parsedData = cleanAndParseJson(responseText);
       // Apply Smart NLP Post-Processing layer (RapidFuzz, Brand->Generic, Dictionary, Confidence Scoring)
       const enrichedData = postProcessPrescriptionResultWithNLP(parsedData);
       if (preprocessingReport) {
@@ -585,7 +616,7 @@ Provide clear dietary instructions (probiotics/yogurt, hydration, foods to avoid
     try {
       const { medicineName } = req.body;
       if (!medicineName || !medicineName.trim()) {
-        res.status(400).json({ error: "Medicine name is required." });
+        res.status(400).json({ success: false, error: "Medicine name is required." });
         return;
       }
 
@@ -605,7 +636,7 @@ Include its generic name, primary uses, mechanism of action, typical dosage form
         },
       });
 
-      const parsedData = JSON.parse(responseText.trim());
+      const parsedData = cleanAndParseJson(responseText);
       res.json({ success: true, data: parsedData });
     } catch (err: any) {
       console.error("Error checking medicine:", err);
