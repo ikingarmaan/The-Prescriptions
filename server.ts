@@ -421,16 +421,20 @@ async function callGeminiWithRetry(params: {
         } catch (err: any) {
           lastError = err;
           const errMsg = err?.message || String(err);
-          const isRateLimitOrQuota =
+          const isKeyExhaustedOrInvalid =
             errMsg.includes("429") ||
             errMsg.includes("RESOURCE_EXHAUSTED") ||
             errMsg.includes("quota") ||
             errMsg.includes("rate limit") ||
-            errMsg.includes("RateLimitError");
+            errMsg.includes("RateLimitError") ||
+            errMsg.includes("API_KEY_INVALID") ||
+            errMsg.includes("PERMISSION_DENIED") ||
+            errMsg.includes("Forbidden") ||
+            errMsg.includes("403");
 
-          if (isRateLimitOrQuota) {
+          if (isKeyExhaustedOrInvalid) {
             console.warn(
-              `[Gemini API] ${keyLabel} hit rate limit / quota exhaustion (HTTP 429).`
+              `[Gemini API] ${keyLabel} encountered error: ${errMsg.slice(0, 120)}`
             );
             if (keyIdx < orderedKeys.length - 1) {
               const nextKey = orderedKeys[keyIdx + 1];
@@ -453,13 +457,16 @@ async function callGeminiWithRetry(params: {
         }
       }
 
-      // If quota was exhausted on this key and we broke out of attempts, stop trying other models on the dead key
+      // If quota or key error happened on this key and we broke out of attempts, stop trying other models on the dead key
       const errMsg = lastError?.message || String(lastError);
       if (
         (errMsg.includes("429") ||
           errMsg.includes("RESOURCE_EXHAUSTED") ||
           errMsg.includes("quota") ||
-          errMsg.includes("rate limit")) &&
+          errMsg.includes("rate limit") ||
+          errMsg.includes("API_KEY_INVALID") ||
+          errMsg.includes("PERMISSION_DENIED") ||
+          errMsg.includes("403")) &&
         keyIdx < orderedKeys.length - 1
       ) {
         break; // Break model loop to advance to next key in outer loop
@@ -487,6 +494,63 @@ async function startServer() {
       activeKeysCount: keys.length,
       multiKeyEnabled: keys.length > 1,
       timestamp: new Date().toISOString(),
+    });
+  });
+
+  // API Endpoint: Live-test all configured keys & failover readiness
+  app.get("/api/test-keys", async (_req: Request, res: Response) => {
+    const keys = getGeminiApiKeys();
+    if (keys.length === 0) {
+      res.status(500).json({
+        success: false,
+        error: "No Gemini API keys configured on this server.",
+      });
+      return;
+    }
+
+    const results = [];
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      const start = Date.now();
+      try {
+        const client = getClientForKey(key);
+        const response = await client.models.generateContent({
+          model: "gemini-2.5-flash-lite",
+          contents: "Respond with only the single word: OK",
+        });
+        results.push({
+          keyNumber: i + 1,
+          maskedKey: `...${key.slice(-4)}`,
+          status: "ACTIVE & WORKING",
+          latencyMs: Date.now() - start,
+          model: "gemini-2.5-flash-lite",
+          responsePreview: response.text?.trim() || "OK",
+        });
+      } catch (err: any) {
+        results.push({
+          keyNumber: i + 1,
+          maskedKey: `...${key.slice(-4)}`,
+          status: "FAILED",
+          latencyMs: Date.now() - start,
+          error: err?.message || String(err),
+        });
+      }
+    }
+
+    const workingCount = results.filter((r) => r.status.startsWith("ACTIVE")).length;
+
+    res.json({
+      success: workingCount > 0,
+      totalKeysConfigured: keys.length,
+      workingKeysCount: workingCount,
+      failoverReady: workingCount > 1,
+      keys: results,
+      summary:
+        workingCount > 1
+          ? `All ${workingCount} keys are active and verified. If Key 1 reaches its 429 quota or fails, the server will seamlessly failover to Key 2.`
+          : workingCount === 1
+          ? `1 key is working. Add a second valid key to enable automatic failover.`
+          : `No keys are working. Please check your Railway variables.`,
     });
   });
 
