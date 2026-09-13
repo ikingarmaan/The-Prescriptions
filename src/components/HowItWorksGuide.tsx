@@ -16,6 +16,7 @@ import {
   AlertTriangle,
   Lightbulb,
   ExternalLink,
+  Check,
 } from 'lucide-react';
 import { SamplePrescription, SAMPLE_PRESCRIPTIONS } from '../data/medicalData';
 
@@ -55,17 +56,17 @@ const USER_STEPS: UserStep[] = [
   {
     id: 2,
     stepNumber: 'Step 2',
-    actionTitle: 'Click "Decipher Prescription"',
-    quickSummary: 'Press the decipher button and let the AI scan all handwriting in seconds.',
+    actionTitle: 'Check Consent & Click "Analyze"',
+    quickSummary: 'Check the safety consent box and click Analyze to start deciphering.',
     instructions: [
-      'Once your image is loaded, click the green "Decipher Prescription" button.',
-      'The AI reads doctor handwriting, isolates each line, and identifies drug names.',
-      'Doctor codes like 1-0-1, BD, and TDS are automatically converted into plain hours.',
+      'Check the required safety agreement box confirming you will consult a doctor or pharmacist before use.',
+      'Click the green "Analyze & Explain Medicines" button to start the AI scan.',
+      'Relax as our AI carefully reads doctor handwriting, dosage codes, and timings.',
     ],
-    userTip: 'Tip: You can watch the real-time scanning radar while the AI parses each medicine.',
+    userTip: 'Tip: Checking the consent box is required before analysis to ensure safe and informed medication use.',
     icon: Sparkles,
     accentGradient: 'from-blue-500 to-indigo-500',
-    highlightTag: 'Your Action: Trigger AI Scan',
+    highlightTag: 'Your Action: Check Consent & Analyze',
   },
   {
     id: 3,
@@ -386,10 +387,10 @@ export const HowItWorksGuide: React.FC<HowItWorksGuideProps> = ({
                 <span className="text-[11px] font-bold text-slate-400 font-mono uppercase">
                   Website Screen Preview
                 </span>
-                <div className="text-xs font-black text-white">One-Click Deciphering</div>
+                <div className="text-xs font-black text-white">Consent &amp; Prescription Analysis</div>
               </div>
 
-              <div className="bg-slate-900/90 rounded-2xl p-5 border border-slate-800 space-y-4 shadow-xl">
+              <div className="bg-slate-900/90 rounded-2xl p-5 border border-slate-800 space-y-3.5 shadow-xl">
                 {/* Image preview thumbnail */}
                 <div className="flex items-center gap-3 p-3 bg-slate-950 rounded-xl border border-slate-800">
                   <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-emerald-400 font-bold">
@@ -406,24 +407,35 @@ export const HowItWorksGuide: React.FC<HowItWorksGuideProps> = ({
                   </span>
                 </div>
 
-                {/* Big Decipher Button with pulse animation */}
+                {/* Consent Checkbox Simulation */}
+                <div className="p-3 rounded-xl bg-slate-950/90 border border-emerald-500/50 flex items-start gap-2.5">
+                  <div className="w-4 h-4 rounded bg-emerald-500 text-slate-950 flex items-center justify-center mt-0.5 shrink-0">
+                    <Check className="w-3 h-3 stroke-[3]" />
+                  </div>
+                  <div className="text-[11px] text-emerald-200 leading-snug">
+                    <span className="font-bold block text-white">Mandatory Safety Consent:</span>
+                    <span>I consent to AI analysis &amp; agree to consult a doctor/pharmacist before taking medicines.</span>
+                  </div>
+                </div>
+
+                {/* Analyze Button with pulse animation */}
                 <div className="relative">
                   <div className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-black rounded-xl text-center text-sm shadow-lg flex items-center justify-center gap-2">
                     <Sparkles className="w-4 h-4 animate-spin" />
-                    <span>Decipher Prescription Now</span>
+                    <span>Analyze &amp; Explain Medicines</span>
                   </div>
                   {/* Cursor click simulation */}
                   <div className="absolute -bottom-2 right-8 flex items-center gap-1 text-[11px] font-black text-amber-300 bg-slate-900 px-2 py-0.5 rounded-md border border-amber-500/40">
                     <MousePointer className="w-3 h-3 text-amber-400" />
-                    <span>Press Button</span>
+                    <span>Click to Analyze</span>
                   </div>
                 </div>
 
-                {/* Progress bar simulation */}
+                {/* Uplifting waiting prompt simulation */}
                 <div className="space-y-1.5 pt-1">
                   <div className="flex justify-between text-[11px] text-slate-400 font-mono">
-                    <span>Reading cursive ligatures...</span>
-                    <span className="text-emerald-400 font-bold">Done in ~2s</span>
+                    <span className="text-emerald-300 italic">"Good things take time — reading with care ✨"</span>
+                    <span className="text-emerald-400 font-bold">~5s</span>
                   </div>
                   <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
                     <div className="h-full bg-emerald-400 w-full animate-pulse" />
@@ -432,7 +444,7 @@ export const HowItWorksGuide: React.FC<HowItWorksGuideProps> = ({
               </div>
 
               <div className="text-center text-[11px] text-slate-400">
-                ⚡ Reads messy handwriting, dosage frequencies, and meal requirements.
+                🔒 Safe, private analysis with mandatory patient consent verification.
               </div>
             </div>
           )}

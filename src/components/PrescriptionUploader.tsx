@@ -53,6 +53,7 @@ export const PrescriptionUploader: React.FC<PrescriptionUploaderProps> = ({
   const [isEnhancing, setIsEnhancing] = useState<boolean>(false);
   const [multiEngineProgress, setMultiEngineProgress] = useState<MultiEngineProcessProgress | null>(null);
   const [preprocessingReport, setPreprocessingReport] = useState<ImagePreprocessingReport | null>(null);
+  const [hasConsent, setHasConsent] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const processLoadedImage = async (dataUrl: string) => {
@@ -129,6 +130,10 @@ export const PrescriptionUploader: React.FC<PrescriptionUploaderProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!hasConsent) {
+      alert('Please check the safety agreement box giving your consent before analyzing your prescription.');
+      return;
+    }
     if (activeInputTab === 'photo' && !selectedImage) {
       alert('Please upload a prescription image or switch to the text tab.');
       return;
@@ -433,6 +438,48 @@ Adv / Inv:
             />
           </div>
 
+          {/* Patient Consent & Safety Checkbox (Required to Analyze) */}
+          <div className="pt-2 border-t border-slate-100">
+            <label
+              htmlFor="prescription-ai-consent-checkbox"
+              className={`flex items-start gap-3 p-3.5 sm:p-4 rounded-2xl border transition-all cursor-pointer select-none ${
+                hasConsent
+                  ? 'bg-emerald-50/80 border-emerald-300 ring-1 ring-emerald-400/20 shadow-xs'
+                  : 'bg-amber-50/50 border-amber-200/90 hover:bg-amber-50/80'
+              }`}
+            >
+              <input
+                id="prescription-ai-consent-checkbox"
+                type="checkbox"
+                checked={hasConsent}
+                onChange={(e) => setHasConsent(e.target.checked)}
+                className="mt-0.5 w-4 h-4 rounded text-emerald-600 border-slate-300 focus:ring-emerald-500 cursor-pointer shrink-0 accent-emerald-600"
+              />
+              <div className="text-xs space-y-0.5 flex-1">
+                <div className="flex items-center gap-2 font-bold text-slate-900">
+                  <span>Mandatory Consent &amp; Safety Agreement</span>
+                  <span
+                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      hasConsent
+                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                        : 'bg-amber-100 text-amber-800 border border-amber-200'
+                    }`}
+                  >
+                    {hasConsent ? 'Consent Confirmed' : 'Required to Analyze'}
+                  </span>
+                </div>
+                <p className="text-slate-600 leading-relaxed">
+                  I consent to AI analysis of this prescription for informational understanding, and I agree to consult a doctor or pharmacist before taking, stopping, or changing any medicine.
+                </p>
+              </div>
+            </label>
+            {!hasConsent && (
+              <p className="text-[11px] text-amber-700 font-medium mt-1.5 pl-1 flex items-center gap-1">
+                <span>⚠️ Please check the consent box above to enable the "Analyze &amp; Explain Medicines" button.</span>
+              </p>
+            )}
+          </div>
+
           {/* Submit Action */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 border-t border-slate-100">
             <div className="text-[11px] sm:text-xs text-slate-500 flex items-center gap-1.5">
@@ -443,7 +490,12 @@ Adv / Inv:
             <button
               id="submit-prescription-btn"
               type="submit"
-              disabled={isLoading || (activeInputTab === 'photo' && !selectedImage) || (activeInputTab === 'text' && !textNotes.trim())}
+              disabled={
+                isLoading ||
+                !hasConsent ||
+                (activeInputTab === 'photo' && !selectedImage) ||
+                (activeInputTab === 'text' && !textNotes.trim())
+              }
               className="w-full sm:w-auto px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 min-h-[48px]"
             >
               {isLoading ? (
