@@ -1,6 +1,7 @@
 import express, { type Request, type Response } from "express";
 import path from "path";
 import fs from "fs";
+import crypto from "node:crypto";
 import os from "node:os";
 import net from "node:net";
 import dns from "node:dns";
@@ -427,6 +428,39 @@ function getClientForKey(apiKey: string): GoogleGenAI {
   return client;
 }
 
+// Track temporary quota exhaustion cooldown per key (key string -> expiry epoch ms)
+const keyUnhealthyUntil = new Map<string, number>();
+
+// In-Memory Fast Caching Engine for repeat prescription & medicine analyses
+interface CachedPrescriptionAnalysis {
+  data: any;
+  cachedAt: number;
+}
+
+const prescriptionAnalysisCache = new Map<string, CachedPrescriptionAnalysis>();
+const singleMedicineCache = new Map<string, { data: any; cachedAt: number }>();
+const MAX_PRESCRIPTION_CACHE_SIZE = 300;
+const PRESCRIPTION_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+const MEDICINE_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+function computePrescriptionHash(imageBase64?: string, textNotes?: string, patientContext?: string): string {
+  const hash = crypto.createHash("sha256");
+  if (imageBase64) {
+    const len = imageBase64.length;
+    if (len > 30000) {
+      hash.update(imageBase64.slice(0, 10000));
+      hash.update(imageBase64.slice(Math.floor(len / 2) - 5000, Math.floor(len / 2) + 5000));
+      hash.update(imageBase64.slice(-10000));
+      hash.update(String(len));
+    } else {
+      hash.update(imageBase64);
+    }
+  }
+  if (textNotes) hash.update(textNotes.trim().toLowerCase());
+  if (patientContext) hash.update(patientContext.trim().toLowerCase());
+  return hash.digest("hex");
+}
+
 let keyRoundRobinIndex = 0;
 
 function getOrderedApiKeys(): string[] {
@@ -440,14 +474,36 @@ function getOrderedApiKeys(): string[] {
     return allKeys;
   }
 
-  // Round-robin start index so requests are evenly distributed across keys
-  const startIndex = keyRoundRobinIndex % allKeys.length;
-  keyRoundRobinIndex = (keyRoundRobinIndex + 1) % allKeys.length;
+  const now = Date.now();
+  const healthyKeys: string[] = [];
+  const coolingDownKeys: string[] = [];
+
+  for (const k of allKeys) {
+    const cooldownExpiry = keyUnhealthyUntil.get(k) || 0;
+    if (cooldownExpiry <= now) {
+      healthyKeys.push(k);
+    } else {
+      coolingDownKeys.push(k);
+    }
+  }
+
+  // Prioritize healthy keys; if all are in cooldown, try all keys anyway
+  const primaryPool = healthyKeys.length > 0 ? healthyKeys : allKeys;
+  const startIndex = keyRoundRobinIndex % primaryPool.length;
+  keyRoundRobinIndex = (keyRoundRobinIndex + 1) % primaryPool.length;
 
   const ordered: string[] = [];
-  for (let i = 0; i < allKeys.length; i++) {
-    ordered.push(allKeys[(startIndex + i) % allKeys.length]);
+  for (let i = 0; i < primaryPool.length; i++) {
+    ordered.push(primaryPool[(startIndex + i) % primaryPool.length]);
   }
+
+  // Add any cooling-down keys at the end as secondary fallbacks
+  for (const k of coolingDownKeys) {
+    if (!ordered.includes(k)) {
+      ordered.push(k);
+    }
+  }
+
   return ordered;
 }
 
@@ -751,11 +807,11 @@ async function callGeminiWithRetry(params: {
   primaryModel?: string;
 }): Promise<string> {
   const orderedKeys = getOrderedApiKeys();
+  // Primary: gemini-2.5-flash (high quota 1500 RPD, fast, top vision OCR, zero 20-request/day limits)
+  // Fallbacks: gemini-2.5-pro, gemini-flash-latest
   const modelsToTry = [
-    params.primaryModel || "gemini-3.6-flash",
-    "gemini-3.8-flash",
-    "gemini-3.1-flash-lite",
-    "gemini-2.5-flash",
+    params.primaryModel || "gemini-2.5-flash",
+    "gemini-2.5-pro",
     "gemini-flash-latest",
   ];
   let lastError: any = null;
@@ -826,8 +882,17 @@ async function callGeminiWithRetry(params: {
 
           if (isKeyOrQuotaError) {
             console.warn(
-              `[Gemini API] ${keyLabel} failed with key/quota error: ${errMsg.slice(0, 150)}`
+              `[Gemini API] ${keyLabel} failed on ${model}: ${errMsg.slice(0, 150)}`
             );
+
+            // Record cooldown on this key so next requests skip it immediately
+            let cooldownSec = 45;
+            const retryMatch = errMsg.match(/retry in ([\d.]+)s/i) || errMsg.match(/retryDelay":"(\d+)s/i);
+            if (retryMatch && retryMatch[1]) {
+              cooldownSec = Math.ceil(parseFloat(retryMatch[1])) + 2;
+            }
+            keyUnhealthyUntil.set(apiKey, Date.now() + cooldownSec * 1000);
+
             if (keyIdx < orderedKeys.length - 1) {
               const nextKey = orderedKeys[keyIdx + 1];
               console.log(
@@ -844,7 +909,7 @@ async function callGeminiWithRetry(params: {
             errMsg.includes("high demand");
 
           if (isTransient && attempt < 2) {
-            await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+            await new Promise((resolve) => setTimeout(resolve, 800 * attempt));
             continue;
           }
         }
@@ -1181,45 +1246,59 @@ async function startServer() {
     }
 
     const results = [];
+    const testModels = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-3.6-flash"];
+
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
-      const start = Date.now();
-      try {
-        const client = getClientForKey(key);
-        const response = await client.models.generateContent({
-          model: "gemini-3.6-flash",
-          contents: "Respond with only the single word: OK",
-        });
-        results.push({
-          keyNumber: i + 1,
-          maskedKey: `...${key.slice(-4)}`,
-          status: "ACTIVE & WORKING",
-          latencyMs: Date.now() - start,
-          model: "gemini-3.6-flash",
-          responsePreview: response.text?.trim() || "OK",
-        });
-      } catch (err: any) {
-        results.push({
-          keyNumber: i + 1,
-          maskedKey: `...${key.slice(-4)}`,
-          status: "FAILED",
-          latencyMs: Date.now() - start,
-          error: err?.message || String(err),
-        });
+      const client = getClientForKey(key);
+      const modelChecks = [];
+
+      for (const m of testModels) {
+        const start = Date.now();
+        try {
+          const response = await client.models.generateContent({
+            model: m,
+            contents: "Respond with only the single word: OK",
+          });
+          modelChecks.push({
+            model: m,
+            status: "ACTIVE & WORKING",
+            latencyMs: Date.now() - start,
+            preview: response.text?.trim() || "OK",
+          });
+        } catch (err: any) {
+          modelChecks.push({
+            model: m,
+            status: "FAILED / QUOTA EXHAUSTED",
+            latencyMs: Date.now() - start,
+            error: err?.message || String(err),
+          });
+        }
       }
+
+      const isWorking = modelChecks.some((c) => c.status.startsWith("ACTIVE"));
+      results.push({
+        keyNumber: i + 1,
+        maskedKey: `...${key.slice(-4)}`,
+        overallStatus: isWorking ? "ACTIVE & WORKING" : "EXHAUSTED / FAILED",
+        cooldownRemainingSec: Math.max(0, Math.ceil(((keyUnhealthyUntil.get(key) || 0) - Date.now()) / 1000)),
+        models: modelChecks,
+      });
     }
 
-    const workingCount = results.filter((r) => r.status.startsWith("ACTIVE")).length;
+    const workingCount = results.filter((r) => r.overallStatus.startsWith("ACTIVE")).length;
 
     res.json({
       success: workingCount > 0,
       totalKeysConfigured: keys.length,
       workingKeysCount: workingCount,
       failoverReady: workingCount > 1,
+      cachedPrescriptionsCount: prescriptionAnalysisCache.size,
+      cachedMedicinesCount: singleMedicineCache.size,
       keys: results,
       summary:
         workingCount > 1
-          ? `All ${workingCount} keys are active and verified. If Key 1 reaches its 429 quota or fails, the server will seamlessly failover to Key 2.`
+          ? `All ${workingCount} keys are active and verified. If Key 1 reaches its quota or fails, the server will seamlessly failover to Key 2.`
           : workingCount === 1
           ? `1 key is working. Add a second valid key to enable automatic failover.`
           : `No keys are working. Please check your Railway variables.`,
@@ -1243,6 +1322,34 @@ async function startServer() {
         res.status(400).json({
           error: "Please provide either a prescription photo or written prescription notes.",
         });
+        return;
+      }
+
+      let cleanBase64 = imageBase64;
+      let detectedMime = mimeType;
+      if (imageBase64) {
+        const match = imageBase64.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
+        if (match) {
+          detectedMime = match[1];
+          cleanBase64 = match[2];
+        }
+      }
+
+      // --- 1. Instant Cache Check for repeat / same prescription analyses ---
+      const cacheKey = computePrescriptionHash(cleanBase64, textNotes, patientContext);
+      const cached = prescriptionAnalysisCache.get(cacheKey);
+
+      if (cached && (Date.now() - cached.cachedAt) < PRESCRIPTION_CACHE_TTL_MS) {
+        console.log(`[Prescription Cache] Instant Cache HIT for hash ${cacheKey.slice(0, 12)}... (0ms response, zero API quota burned)`);
+        const cachedResponse = {
+          ...cached.data,
+          servedFromCache: true,
+          cacheAgeSeconds: Math.floor((Date.now() - cached.cachedAt) / 1000),
+        };
+        if (preprocessingReport && !cachedResponse.imagePreprocessingReport) {
+          cachedResponse.imagePreprocessingReport = preprocessingReport;
+        }
+        res.json({ success: true, data: cachedResponse, cached: true });
         return;
       }
 
@@ -1338,33 +1445,19 @@ LABORATORY & DIAGNOSTIC TESTS DETECTION:
 Scan the prescription thoroughly for any diagnostic workup written under "Adv:", "Inv:", "Investigations:", "Lab:", "Tests:", "Rx/Ix:":
 - Complete Blood Count (CBC / TLC / DLC), ESR, CRP
 - Liver Function Test (LFT: SGOT, SGPT, Bilirubin, ALP, Albumin)
-- Kidney / Renal Function Test (KFT / RFT: Creatinine, BUN, Uric Acid, eGFR)
-- Fasting & Post-Prandial Blood Sugar (FBS, PPBS), HbA1c
-- Fasting Lipid Profile (Total Cholesterol, LDL, HDL, Triglycerides)
-- Chest X-Ray (CXR PA View), 12-Lead ECG / EKG, 2D Echocardiography, TMT
-- Ultrasound (USG Abdomen & Pelvis), CT / HRCT Chest
-- Urine Routine & Microscopy (Urine R/M), Urine Culture & Sensitivity (Urine C/S)
-- Stool Routine (Stool R/M), Serum Electrolytes (Na/K/Cl), Thyroid Profile (TSH, FT3, FT4)
-- Serum Ferritin, Vitamin D3, Vitamin B12, D-Dimer, Cardiac Troponin, PT/INR, PSA, RA Factor, Anti-CCP, ANA.
-
-CHRONOLOGICAL MASTER TAKING PLAN:
-Generate an exact, patient-centric 'chronologicalTakingPlan' from waking to sleep (e.g. Morning Empty Stomach, Morning Post-Breakfast, Afternoon Post-Lunch, Evening, Bedtime, As-Needed).
-
-FOOD, DIETARY & DRUG INTERACTION RULES:
-Provide clear dietary instructions (probiotics/yogurt, hydration, foods to avoid like alcohol or grapefruit) and spacing intervals (e.g., antacids vs antibiotics 2 hours apart).`;
+- Kidney Function Test (KFT / RFT: Blood Urea, Serum Creatinine, Uric Acid, Electrolytes)
+- Lipid Profile (Cholesterol, Triglycerides, HDL, LDL, VLDL)
+- Blood Glucose: Fasting Blood Sugar (FBS), Postprandial (PPBS), Random (RBS), HbA1c
+- Thyroid Profile (T3, T4, TSH)
+- Urine Routine and Microscopy (Urine R/M, Culture & Sensitivity)
+- Stool Examination (Occult Blood, Ova, Cysts)
+- Radiology / Imaging: Chest X-Ray (CXR), Ultrasound Abdomen & Pelvis (USG), CT Scan, MRI, Mammography
+- Cardiology: Electrocardiogram (ECG / EKG), 2D Echocardiogram, TMT
+- Serology / Immunology: Widal Test, Dengue NS1 / IgM / IgG, Typhoid, Viral Markers (HBsAg, HCV, HIV), Vitamin D3, Vitamin B12, Serum Ferritin, Iron Studies.`;
 
       const parts: any[] = [];
 
-      // Multimodal image part if provided
-      if (imageBase64) {
-        let cleanBase64 = imageBase64;
-        let detectedMime = mimeType;
-        const match = imageBase64.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
-        if (match) {
-          detectedMime = match[1];
-          cleanBase64 = match[2];
-        }
-
+      if (cleanBase64) {
         parts.push({
           inlineData: {
             mimeType: detectedMime || "image/jpeg",
@@ -1405,14 +1498,12 @@ Provide clear dietary instructions (probiotics/yogurt, hydration, foods to avoid
 
       const responseText = await callGeminiWithRetry({
         contents: { parts },
+        primaryModel: "gemini-2.5-flash",
         config: {
           systemInstruction: systemPrompt,
           responseMimeType: "application/json",
           responseSchema: analysisSchema,
           temperature: 0.1,
-          thinkingConfig: {
-            thinkingLevel: ThinkingLevel.LOW,
-          },
         },
       });
 
@@ -1422,6 +1513,20 @@ Provide clear dietary instructions (probiotics/yogurt, hydration, foods to avoid
       if (preprocessingReport) {
         enrichedData.imagePreprocessingReport = preprocessingReport;
       }
+
+      // Save to in-memory cache for instant subsequent loading
+      if (enrichedData && enrichedData.medicines && enrichedData.medicines.length > 0 && !enrichedData.unableToDecipher) {
+        if (prescriptionAnalysisCache.size >= MAX_PRESCRIPTION_CACHE_SIZE) {
+          const oldest = prescriptionAnalysisCache.keys().next().value;
+          if (oldest) prescriptionAnalysisCache.delete(oldest);
+        }
+        prescriptionAnalysisCache.set(cacheKey, {
+          data: enrichedData,
+          cachedAt: Date.now(),
+        });
+        console.log(`[Prescription Cache] Cached clinical analysis for hash ${cacheKey.slice(0, 12)}... (Total cached: ${prescriptionAnalysisCache.size})`);
+      }
+
       res.json({ success: true, data: enrichedData });
     } catch (err: any) {
       console.error("Error analyzing prescription:", err);
@@ -1432,7 +1537,7 @@ Provide clear dietary instructions (probiotics/yogurt, hydration, foods to avoid
     }
   });
 
-  // API Endpoint: Look up single medicine usage & details
+  // API Endpoint: Look up single medicine usage & details with caching
   app.post("/api/check-single-medicine", async (req: Request, res: Response) => {
     try {
       const { medicineName } = req.body;
@@ -1441,23 +1546,36 @@ Provide clear dietary instructions (probiotics/yogurt, hydration, foods to avoid
         return;
       }
 
+      const normalizedMedName = medicineName.trim().toLowerCase();
+      const cachedMed = singleMedicineCache.get(normalizedMedName);
+      if (cachedMed && (Date.now() - cachedMed.cachedAt) < MEDICINE_CACHE_TTL_MS) {
+        console.log(`[Medicine Cache] Instant Cache HIT for "${medicineName}"`);
+        res.json({ success: true, data: cachedMed.data, cached: true });
+        return;
+      }
+
       const prompt = `Provide a comprehensive, patient-friendly medical profile and usage guide for the medicine: "${medicineName.trim()}".
 Include its generic name, primary uses, mechanism of action, typical dosage forms, food instructions, meal relations, precautions, common side effects, red-flag symptoms, interactions, and missed dose advice.`;
 
       const responseText = await callGeminiWithRetry({
         contents: prompt,
+        primaryModel: "gemini-2.5-flash",
         config: {
           systemInstruction: "You are an expert pharmacist creating patient education guides for medications.",
           responseMimeType: "application/json",
           responseSchema: singleMedicineSchema,
           temperature: 0.1,
-          thinkingConfig: {
-            thinkingLevel: ThinkingLevel.LOW,
-          },
         },
       });
 
       const parsedData = cleanAndParseJson(responseText);
+
+      // Save to cache for instant subsequent lookups
+      singleMedicineCache.set(normalizedMedName, {
+        data: parsedData,
+        cachedAt: Date.now(),
+      });
+
       res.json({ success: true, data: parsedData });
     } catch (err: any) {
       console.error("Error checking medicine:", err);
