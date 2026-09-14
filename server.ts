@@ -808,11 +808,9 @@ async function callGeminiWithRetry(params: {
 }): Promise<string> {
   const orderedKeys = getOrderedApiKeys();
   const modelsToTry = [
-    params.primaryModel || "gemini-3.7-flash",
-    "gemini-3.5-flash-lite",
+    params.primaryModel || "gemini-3.5-flash-lite",
     "gemini-3.1-flash-lite",
-    "gemini-3.6-flash",
-    "gemini-3.1-pro-preview",
+    "gemini-3.7-flash",
   ];
   let lastError: any = null;
 
@@ -828,7 +826,10 @@ async function callGeminiWithRetry(params: {
       for (let attempt = 1; attempt <= 2; attempt++) {
         try {
           const config = { ...params.config };
-          // ThinkingLevel is only supported on Gemini 3 series models
+          // If model is gemini-3.7-flash, cap thinking to low so it doesn't spend minutes on internal reasoning tokens
+          if (model.includes("3.7") && !config.thinkingConfig) {
+            config.thinkingConfig = { thinkingLevel: "low" };
+          }
           if (!model.startsWith("gemini-3") && config.thinkingConfig) {
             delete config.thinkingConfig;
           }
@@ -1518,7 +1519,7 @@ Scan the prescription thoroughly for any diagnostic workup written under "Adv:",
 
       const responseText = await callGeminiWithRetry({
         contents: { parts },
-        primaryModel: "gemini-3.7-flash",
+        primaryModel: "gemini-3.5-flash-lite",
         config: {
           systemInstruction: systemPrompt,
           responseMimeType: "application/json",
@@ -1579,7 +1580,7 @@ Include its generic name, primary uses, mechanism of action, typical dosage form
 
       const responseText = await callGeminiWithRetry({
         contents: prompt,
-        primaryModel: "gemini-3.7-flash",
+        primaryModel: "gemini-3.5-flash-lite",
         config: {
           systemInstruction: "You are an expert pharmacist creating patient education guides for medications.",
           responseMimeType: "application/json",
