@@ -807,12 +807,12 @@ async function callGeminiWithRetry(params: {
   primaryModel?: string;
 }): Promise<string> {
   const orderedKeys = getOrderedApiKeys();
-  // Primary: gemini-2.5-flash (high quota 1500 RPD, fast, top vision OCR, zero 20-request/day limits)
-  // Fallbacks: gemini-2.5-pro, gemini-flash-latest
   const modelsToTry = [
-    params.primaryModel || "gemini-2.5-flash",
-    "gemini-2.5-pro",
-    "gemini-flash-latest",
+    params.primaryModel || "gemini-3.7-flash",
+    "gemini-3.5-flash-lite",
+    "gemini-3.1-flash-lite",
+    "gemini-3.6-flash",
+    "gemini-3.1-pro-preview",
   ];
   let lastError: any = null;
 
@@ -820,10 +820,10 @@ async function callGeminiWithRetry(params: {
     const apiKey = orderedKeys[keyIdx];
     const ai = getClientForKey(apiKey);
     const keyLabel = `Key #${keyIdx + 1} (…${apiKey.slice(-4)})`;
-    let keyIsDead = false;
+    let keyIsInvalid = false;
 
     for (const model of modelsToTry) {
-      if (keyIsDead) break;
+      if (keyIsInvalid) break;
 
       for (let attempt = 1; attempt <= 2; attempt++) {
         try {
@@ -864,43 +864,38 @@ async function callGeminiWithRetry(params: {
             }
           }
 
-          // Check if error is related to key validity, rate limits, or quota exhaustion
-          const isKeyOrQuotaError =
-            errMsg.includes("429") ||
-            errMsg.includes("RESOURCE_EXHAUSTED") ||
-            errMsg.includes("quota") ||
-            errMsg.includes("rate limit") ||
-            errMsg.includes("RateLimitError") ||
-            errMsg.toLowerCase().includes("api key") ||
-            errMsg.toLowerCase().includes("apikey") ||
+          // Check if error is an invalid API key / authentication denial
+          const isAuthError =
             errMsg.includes("API_KEY_INVALID") ||
             errMsg.includes("PERMISSION_DENIED") ||
             errMsg.includes("Forbidden") ||
             errMsg.includes("401") ||
-            errMsg.includes("403") ||
-            errMsg.includes("400");
+            errMsg.includes("403");
 
-          if (isKeyOrQuotaError) {
-            console.warn(
-              `[Gemini API] ${keyLabel} failed on ${model}: ${errMsg.slice(0, 150)}`
-            );
+          if (isAuthError) {
+            console.warn(`[Gemini API] ${keyLabel} is unauthorized or invalid: ${errMsg.slice(0, 120)}`);
+            keyIsInvalid = true;
+            break; // Skip all models on this invalid key
+          }
 
-            // Record cooldown on this key so next requests skip it immediately
+          // Check if error is quota exhaustion / rate limit
+          const isRateLimit =
+            errMsg.includes("429") ||
+            errMsg.includes("RESOURCE_EXHAUSTED") ||
+            errMsg.includes("quota") ||
+            errMsg.includes("rate limit") ||
+            errMsg.includes("RateLimitError");
+
+          if (isRateLimit) {
+            console.warn(`[Gemini API] ${keyLabel} rate-limited on ${model}: ${errMsg.slice(0, 120)}`);
             let cooldownSec = 45;
             const retryMatch = errMsg.match(/retry in ([\d.]+)s/i) || errMsg.match(/retryDelay":"(\d+)s/i);
             if (retryMatch && retryMatch[1]) {
               cooldownSec = Math.ceil(parseFloat(retryMatch[1])) + 2;
             }
             keyUnhealthyUntil.set(apiKey, Date.now() + cooldownSec * 1000);
-
-            if (keyIdx < orderedKeys.length - 1) {
-              const nextKey = orderedKeys[keyIdx + 1];
-              console.log(
-                `[Gemini API] Auto-failover: Switching immediately to Key #${keyIdx + 2} (…${nextKey.slice(-4)}) to retry request seamlessly...`
-              );
-              keyIsDead = true;
-              break; // Break attempt loop, keyIsDead will break model loop immediately
-            }
+            // Don't kill the key immediately if other models might have different quota; break out of attempt loop to try next model
+            break;
           }
 
           const isTransient =
@@ -912,11 +907,16 @@ async function callGeminiWithRetry(params: {
             await new Promise((resolve) => setTimeout(resolve, 800 * attempt));
             continue;
           }
+
+          // If model is 404 / NOT_FOUND / not available, break attempt loop immediately to try next model
+          if (errMsg.includes("404") || errMsg.includes("NOT_FOUND") || errMsg.includes("no longer available")) {
+            break;
+          }
         }
       }
     }
 
-    if (keyIsDead && keyIdx < orderedKeys.length - 1) {
+    if (keyIsInvalid && keyIdx < orderedKeys.length - 1) {
       continue; // Move to next key immediately
     }
   }
@@ -1246,12 +1246,31 @@ async function startServer() {
     }
 
     const results = [];
-    const testModels = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-3.6-flash"];
+    const testModels = [
+      "gemini-3.7-flash",
+      "gemini-3.5-flash-lite",
+      "gemini-3.1-flash-lite",
+      "gemini-3.6-flash",
+      "gemini-3.1-pro-preview",
+    ];
 
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
       const client = getClientForKey(key);
       const modelChecks = [];
+      const discoveredModels: string[] = [];
+
+      try {
+        const pager = await client.models.list({ config: { pageSize: 50 } });
+        for await (const m of pager) {
+          if (m.name) {
+            const cleanName = m.name.replace(/^models\//, "");
+            discoveredModels.push(cleanName);
+          }
+        }
+      } catch (listErr: any) {
+        console.warn(`[test-keys] Could not list models for Key #${i + 1}:`, listErr?.message || listErr);
+      }
 
       for (const m of testModels) {
         const start = Date.now();
@@ -1283,6 +1302,7 @@ async function startServer() {
         overallStatus: isWorking ? "ACTIVE & WORKING" : "EXHAUSTED / FAILED",
         cooldownRemainingSec: Math.max(0, Math.ceil(((keyUnhealthyUntil.get(key) || 0) - Date.now()) / 1000)),
         models: modelChecks,
+        discoveredModels: discoveredModels.slice(0, 20),
       });
     }
 
@@ -1498,7 +1518,7 @@ Scan the prescription thoroughly for any diagnostic workup written under "Adv:",
 
       const responseText = await callGeminiWithRetry({
         contents: { parts },
-        primaryModel: "gemini-2.5-flash",
+        primaryModel: "gemini-3.7-flash",
         config: {
           systemInstruction: systemPrompt,
           responseMimeType: "application/json",
@@ -1559,7 +1579,7 @@ Include its generic name, primary uses, mechanism of action, typical dosage form
 
       const responseText = await callGeminiWithRetry({
         contents: prompt,
-        primaryModel: "gemini-2.5-flash",
+        primaryModel: "gemini-3.7-flash",
         config: {
           systemInstruction: "You are an expert pharmacist creating patient education guides for medications.",
           responseMimeType: "application/json",
