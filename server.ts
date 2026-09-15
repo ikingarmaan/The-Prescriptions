@@ -1792,13 +1792,47 @@ Scan the prescription thoroughly for any diagnostic workup written under "Adv:",
         });
       } catch (geminiErr: any) {
         if (getGroqApiKey()) {
-          console.warn(
-            "[Failover] All Gemini keys/models failed or throttled. Failing over seamlessly to Groq Llama 3.2 Vision...",
-            geminiErr?.message || geminiErr
-          );
+          const groqSystemPrompt =
+            systemPrompt +
+            `\n\nCRITICAL OUTPUT FORMAT REQUIREMENTS:
+You MUST respond with a single valid JSON object strictly matching this schema:
+{
+  "doctorSpecialtyOrClinic": "General Practice or identified specialty",
+  "prescriptionDate": "Date or Not specified",
+  "suspectedCondition": "Condition being treated",
+  "generalExplanation": "Empathetic explanation of the prescription",
+  "medicines": [
+    {
+      "name": "Brand name as written (e.g. Augmentin 625, Pantocid 40)",
+      "genericName": "Active chemical salt (e.g. Amoxicillin + Clavulanic Acid)",
+      "form": "Tablet | Capsule | Syrup | etc.",
+      "strength": "e.g. 500mg, 40mg",
+      "dosage": "1 tablet",
+      "frequency": "Twice daily (Morning & Night)",
+      "timingCode": "BD / 1-0-1",
+      "mealRelation": "after_meal",
+      "mealRelationText": "Take after food",
+      "duration": "5 days",
+      "scheduleTimes": { "morning": true, "afternoon": false, "evening": false, "bedtime": true, "asNeeded": false },
+      "purposeAndUsage": "Why this medicine is prescribed",
+      "howToTake": "Practical instructions on taking the medicine",
+      "precautions": ["Key precaution"],
+      "commonSideEffects": ["Mild side effect"],
+      "whenToContactDoctor": "Red flag symptoms"
+    }
+  ],
+  "drugInteractions": [],
+  "dietaryAdvice": [],
+  "lifestyleModifications": [],
+  "followUpAdvice": "Follow-up advice",
+  "suggestedQuestionsForDoctor": [],
+  "emergencyWarningSigns": [],
+  "labTestsRecommended": [],
+  "unableToDecipher": false
+}`;
           responseText = await callGroqWithRetry({
             promptText: userPrompt,
-            systemInstruction: systemPrompt,
+            systemInstruction: groqSystemPrompt,
             imageBase64: cleanBase64,
             mimeType: detectedMime,
           });
@@ -1808,6 +1842,41 @@ Scan the prescription thoroughly for any diagnostic workup written under "Adv:",
       }
 
       const parsedData = cleanAndParseJson(responseText);
+
+      // Normalize medicines if the backup model placed them in pharmacopeia_consensus or dosage_metrics
+      if (!Array.isArray(parsedData.medicines) || parsedData.medicines.length === 0) {
+        const altMeds =
+          parsedData.pharmacopeia_consensus?.validatedMedications ||
+          parsedData.dosage_metrics?.medications ||
+          [];
+        if (Array.isArray(altMeds) && altMeds.length > 0) {
+          parsedData.medicines = altMeds.map((m: any) => ({
+            name: m.brand || m.name || "Identified Medication",
+            genericName: m.genericName || m.generic_name || m.generic || "",
+            form: m.form || "Tablet",
+            strength: m.strength || "",
+            dosage: m.dosage || "1 dose",
+            frequency: m.frequency || "As prescribed",
+            timingCode: m.timingCode || m.timing || "",
+            mealRelation: m.mealRelation || (m.timing?.toLowerCase().includes("before") ? "before_meal" : "after_meal"),
+            mealRelationText: m.mealRelationText || m.timing || "Take with water as directed",
+            duration: m.duration || (m.durationDays ? `${m.durationDays} days` : "As prescribed"),
+            scheduleTimes: m.scheduleTimes || {
+              morning: true,
+              afternoon: false,
+              evening: false,
+              bedtime: false,
+              asNeeded: false,
+            },
+            purposeAndUsage: m.purposeAndUsage || `Prescribed medication for clinical treatment: ${m.brand || m.name || ""}`,
+            howToTake: m.howToTake || "Swallow whole with plenty of water. Do not crush or chew.",
+            precautions: m.precautions || ["Take strictly as prescribed", "Complete the full course"],
+            commonSideEffects: m.commonSideEffects || ["Mild nausea", "Mild stomach upset"],
+            whenToContactDoctor: m.whenToContactDoctor || "Severe allergic reaction, rash, or breathing difficulty.",
+          }));
+        }
+      }
+
       // Apply Smart NLP Post-Processing layer (RapidFuzz, Brand->Generic, Dictionary, Confidence Scoring)
       const enrichedData = postProcessPrescriptionResultWithNLP(parsedData);
       if (preprocessingReport) {
