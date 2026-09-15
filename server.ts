@@ -368,15 +368,30 @@ async function saveContactSubmissionToGoogleSheet(data: ContactFormData): Promis
   }
 }
 
+function cleanApiKey(raw?: string): string | null {
+  if (!raw) return null;
+  let cleaned = raw.trim();
+  // Strip surrounding quotes (double or single) if user copied quotes from examples
+  if (
+    (cleaned.startsWith('"') && cleaned.endsWith('"')) ||
+    (cleaned.startsWith("'") && cleaned.endsWith("'"))
+  ) {
+    cleaned = cleaned.slice(1, -1).trim();
+  }
+  // Remove any stray carriage returns, newlines, or control chars
+  cleaned = cleaned.replace(/[\r\n\t]+/g, "").trim();
+  return cleaned.length > 0 ? cleaned : null;
+}
+
 function getGeminiApiKeys(): string[] {
   const keys: string[] = [];
 
   // 1. GEMINI_API_KEY (supports comma or semicolon separated keys: key1,key2)
   if (process.env.GEMINI_API_KEY) {
     for (const k of process.env.GEMINI_API_KEY.split(/[,;]+/)) {
-      const trimmed = k.trim();
-      if (trimmed && !keys.includes(trimmed)) {
-        keys.push(trimmed);
+      const cleaned = cleanApiKey(k);
+      if (cleaned && !keys.includes(cleaned)) {
+        keys.push(cleaned);
       }
     }
   }
@@ -390,8 +405,9 @@ function getGeminiApiKeys(): string[] {
       process.env[`GEMINI_KEY${i}`],
     ];
     for (const k of candidates) {
-      if (k && k.trim() && !keys.includes(k.trim())) {
-        keys.push(k.trim());
+      const cleaned = cleanApiKey(k);
+      if (cleaned && !keys.includes(cleaned)) {
+        keys.push(cleaned);
       }
     }
   }
@@ -399,9 +415,9 @@ function getGeminiApiKeys(): string[] {
   // 3. GEMINI_API_KEYS (plural name support)
   if (process.env.GEMINI_API_KEYS) {
     for (const k of process.env.GEMINI_API_KEYS.split(/[,;]+/)) {
-      const trimmed = k.trim();
-      if (trimmed && !keys.includes(trimmed)) {
-        keys.push(trimmed);
+      const cleaned = cleanApiKey(k);
+      if (cleaned && !keys.includes(cleaned)) {
+        keys.push(cleaned);
       }
     }
   }
@@ -411,8 +427,8 @@ function getGeminiApiKeys(): string[] {
 
 function getGroqApiKey(): string | null {
   return (
-    process.env.GROQ_API_KEY?.trim() ||
-    process.env.GROK_API_KEY?.trim() ||
+    cleanApiKey(process.env.GROQ_API_KEY) ||
+    cleanApiKey(process.env.GROK_API_KEY) ||
     null
   );
 }
@@ -1406,7 +1422,8 @@ async function startServer() {
       const isWorking = modelChecks.some((c) => c.status.startsWith("ACTIVE"));
       results.push({
         keyNumber: i + 1,
-        maskedKey: `...${key.slice(-4)}`,
+        maskedKey: `${key.slice(0, 4)}...${key.slice(-4)}`,
+        keyLength: key.length,
         overallStatus: isWorking ? "ACTIVE & WORKING" : "EXHAUSTED / FAILED",
         cooldownRemainingSec: Math.max(0, Math.ceil(((keyUnhealthyUntil.get(key) || 0) - Date.now()) / 1000)),
         models: modelChecks,
