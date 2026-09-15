@@ -1169,7 +1169,15 @@ async function startServer() {
 
   // 2. Enterprise Security & CORS Middleware (Zscaler, corporate proxies, and modern browser standards)
   app.use((req: Request, res: Response, next) => {
+    const rawHost = (req.headers.host || req.hostname || "").toLowerCase().replace(/:\d+$/, "");
     const forwardedProto = req.headers["x-forwarded-proto"];
+
+    // Canonical redirect for apex domain theprescription.in and legacy railway host to https://www.theprescription.in
+    if (rawHost === "theprescription.in" || rawHost === "theprescriptions.up.railway.app") {
+      const cleanUrl = req.url.startsWith("/") ? req.url : `/${req.url}`;
+      return res.redirect(301, `https://www.theprescription.in${cleanUrl}`);
+    }
+
     if (forwardedProto && forwardedProto === "http") {
       const host = req.headers.host || req.hostname;
       return res.redirect(301, `https://${host}${req.url}`);
@@ -1369,7 +1377,7 @@ async function startServer() {
             <p style="margin-top: 28px; margin-bottom: 4px; font-size: 13px; color: #64748b;">
               With warm regards,<br/>
               <strong style="color: #0f172a;">Theprescription Team</strong><br/>
-              <a href="https://theprescriptions.up.railway.app/" style="color: #059669; text-decoration: none; font-weight: 500;">theprescriptions.up.railway.app</a>
+              <a href="https://www.theprescription.in/" style="color: #059669; text-decoration: none; font-weight: 500;">www.theprescription.in</a>
             </p>
           </div>
         </div>

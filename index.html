@@ -31,7 +31,7 @@
       "@context": "https://schema.org",
       "@type": "WebApplication",
       "name": "Theprescription",
-      "url": "https://theprescriptions.up.railway.app/",
+      "url": "https://www.theprescription.in/",
       "applicationCategory": "HealthApplication",
       "operatingSystem": "All modern web browsers",
       "description": "Educational clinical decision-support and patient empowerment platform that deciphers handwritten doctor prescriptions, provides generic salt breakdowns, and explains circadian dosage timings.",
@@ -54,7 +54,7 @@
       "@context": "https://schema.org",
       "@type": "MedicalWebPage",
       "name": "Prescription Deciphering & Medication Literacy Guide",
-      "url": "https://theprescriptions.up.railway.app/",
+      "url": "https://www.theprescription.in/",
       "description": "Comprehensive educational resource for understanding prescription notation, doctor handwriting variations, active pharmaceutical ingredients, and circadian dosage intervals.",
       "aspect": ["Prescription handwriting interpretation", "Active pharmaceutical ingredients", "Dosage scheduling"],
       "audience": {
@@ -74,25 +74,25 @@
           "@type": "ListItem",
           "position": 1,
           "name": "Home & Prescription Decipherer",
-          "item": "https://theprescriptions.up.railway.app/"
+          "item": "https://www.theprescription.in/"
         },
         {
           "@type": "ListItem",
           "position": 2,
           "name": "Medicine & Generic Salt Directory",
-          "item": "https://theprescriptions.up.railway.app/#lookup"
+          "item": "https://www.theprescription.in/#lookup"
         },
         {
           "@type": "ListItem",
           "position": 3,
           "name": "Doctor Abbreviation Dictionary",
-          "item": "https://theprescriptions.up.railway.app/#abbreviations"
+          "item": "https://www.theprescription.in/#abbreviations"
         },
         {
           "@type": "ListItem",
           "position": 4,
           "name": "Medical FAQs",
-          "item": "https://theprescriptions.up.railway.app/#faq"
+          "item": "https://www.theprescription.in/#faq"
         }
       ]
     }
@@ -116,16 +116,20 @@
 
       // Enterprise Proxy / Stale Cache Auto-Recovery Handler
       window.addEventListener('error', function(e) {
-        var target = e.target || e.srcElement;
-        if (target && (target.tagName === 'SCRIPT' || target.tagName === 'LINK')) {
-          var src = target.src || target.href;
-          if (src && src.indexOf('/assets/') !== -1) {
-            var retryKey = 'chunk_retry_' + src.split('/').pop();
-            if (!sessionStorage.getItem(retryKey)) {
-              sessionStorage.setItem(retryKey, '1');
-              window.location.reload();
+        try {
+          var target = e.target || e.srcElement;
+          if (target && (target.tagName === 'SCRIPT' || target.tagName === 'LINK')) {
+            var src = target.src || target.href;
+            if (src && src.indexOf('/assets/') !== -1) {
+              var retryKey = 'chunk_retry_' + src.split('/').pop();
+              if (window.sessionStorage && !window.sessionStorage.getItem(retryKey)) {
+                window.sessionStorage.setItem(retryKey, '1');
+                window.location.reload();
+              }
             }
           }
+        } catch (err) {
+          // Suppress storage exceptions on enterprise locked-down profiles
         }
       }, true);
     </script>

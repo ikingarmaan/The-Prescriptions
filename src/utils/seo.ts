@@ -16,7 +16,7 @@ export const SEO_METADATA_BY_TAB: Record<AppNavTab, PageSeoMetadata> = {
       'AI-powered prescription assistant that deciphers messy doctor handwriting, explains generic medicine salts, organizes dosage timing rules (1-0-1, BD, TDS), and creates printable schedules.',
     keywords:
       'AI prescription reader, decipher doctor handwriting online, understand handwritten prescription, medicine schedule generator, doctor handwriting decoder, prescription checker, pharmacy notes deciphering',
-    canonicalUrl: 'https://theprescriptions.up.railway.app/',
+    canonicalUrl: 'https://www.theprescription.in/',
   },
   lookup: {
     title: 'Medicine & Generic Salt Directory - Find Active Molecules & Brand Equivalents | Theprescription',
@@ -24,7 +24,7 @@ export const SEO_METADATA_BY_TAB: Record<AppNavTab, PageSeoMetadata> = {
       'Explore 5,000+ brand medicines and their active generic pharmaceutical salts. Learn therapeutic equivalents, dosage forms, safe food timings, and precautions.',
     keywords:
       'generic medicine lookup, active pharmaceutical salt, brand to generic converter, medicine directory, Augmentin generic, Metformin salt, drug food interactions, prescription salts catalog',
-    canonicalUrl: 'https://theprescriptions.up.railway.app/#lookup',
+    canonicalUrl: 'https://www.theprescription.in/#lookup',
   },
   abbreviations: {
     title: 'Doctor Abbreviation Dictionary - Latin Prescription Shorthand Decoded | Theprescription',
@@ -32,7 +32,7 @@ export const SEO_METADATA_BY_TAB: Record<AppNavTab, PageSeoMetadata> = {
       'Decipher doctor Latin abbreviations including 1-0-1, OD, BD, TDS, AC, PC, SOS, HS, and STAT. Understand physician handwriting codes and 24-hour daily timing schedules.',
     keywords:
       'doctor prescription abbreviations, 1-0-1 meaning, BD OD TDS medical meaning, Latin Rx shorthand dictionary, AC PC food timing, medical abbreviations decoder, prescription codes explained',
-    canonicalUrl: 'https://theprescriptions.up.railway.app/#abbreviations',
+    canonicalUrl: 'https://www.theprescription.in/#abbreviations',
   },
   blog: {
     title: 'Clinical Blog & Prescription Guides - 17 In-Depth Health Articles | Theprescription',
@@ -40,7 +40,7 @@ export const SEO_METADATA_BY_TAB: Record<AppNavTab, PageSeoMetadata> = {
       'Explore 17 comprehensive, human-researched clinical guides on deciphering doctor handwriting, generic vs. brand drugs, prescription Latin codes (OD, BD, 1-0-1), dangerous food-drug interactions, pediatric dosing, and patient safety.',
     keywords:
       'prescription blog, doctor handwriting mystery, generic vs brand drugs, Latin prescription codes, drug food interactions, 1-0-1 dosage meaning, LASA drugs, antibiotic resistance, chronotherapy, empty stomach medicine, pediatric dosing safety, polypharmacy elderly, healthcare AI OCR',
-    canonicalUrl: 'https://theprescriptions.up.railway.app/#blog',
+    canonicalUrl: 'https://www.theprescription.in/#blog',
   },
   about: {
     title: 'About Our Mission - Health Literacy & Prescription Safety | Theprescription',
@@ -48,7 +48,7 @@ export const SEO_METADATA_BY_TAB: Record<AppNavTab, PageSeoMetadata> = {
       'Discover why Theprescription was built to bridge the gap between doctor penmanship and patient understanding. Learn about our zero-retention privacy and patient safety philosophy.',
     keywords:
       'Theprescription mission, healthcare accessibility, health literacy platform, patient medication safety, medical handwriting technology, zero storage health AI',
-    canonicalUrl: 'https://theprescriptions.up.railway.app/#about',
+    canonicalUrl: 'https://www.theprescription.in/#about',
   },
   faq: {
     title: 'Medical & Prescription FAQs - 62 Clinical Questions Answered | Theprescription',
@@ -56,7 +56,7 @@ export const SEO_METADATA_BY_TAB: Record<AppNavTab, PageSeoMetadata> = {
       'Find answers to 62 essential questions regarding prescription deciphering, generic vs. brand medicines, food-drug interactions, storage protocols, and emergency safety.',
     keywords:
       'prescription FAQs, medicine questions and answers, medication safety guide, drug storage rules, missed dose protocol, antibiotic food spacing, patient health questions',
-    canonicalUrl: 'https://theprescriptions.up.railway.app/#faq',
+    canonicalUrl: 'https://www.theprescription.in/#faq',
   },
   contact: {
     title: 'Contact Clinical & Technical Support - Reach Our Team | Theprescription',
@@ -64,7 +64,7 @@ export const SEO_METADATA_BY_TAB: Record<AppNavTab, PageSeoMetadata> = {
       'Have questions, feedback on handwriting recognition, or clinical inquiries? Reach out to Theprescription team for support, bug reports, and partnership inquiries.',
     keywords:
       'contact Theprescription, prescription software support, medical feedback, pharmacist inquiries, handwriting recognition feedback',
-    canonicalUrl: 'https://theprescriptions.up.railway.app/#contact',
+    canonicalUrl: 'https://www.theprescription.in/#contact',
   },
   disclaimer: {
     title: 'Medical Application Disclaimer - Critical Safety Notice | Theprescription',
@@ -72,7 +72,7 @@ export const SEO_METADATA_BY_TAB: Record<AppNavTab, PageSeoMetadata> = {
       'Important regulatory, medical, and legal notice: Theprescription is an educational AI assistance platform and not a certified medical device. Always consult a doctor or pharmacist.',
     keywords:
       'medical disclaimer, AI health tool terms, not a medical device, clinical guidance policy, prescription verification requirement, patient safety warning',
-    canonicalUrl: 'https://theprescriptions.up.railway.app/#disclaimer',
+    canonicalUrl: 'https://www.theprescription.in/#disclaimer',
   },
   privacy: {
     title: 'Privacy Policy - Ephemeral Zero-Storage Architecture | Theprescription',
@@ -80,7 +80,7 @@ export const SEO_METADATA_BY_TAB: Record<AppNavTab, PageSeoMetadata> = {
       'Read our strict zero-data-retention privacy policy. We process prescription images ephemerally in RAM with zero cloud archiving, zero user profiling, and zero medical data storage.',
     keywords:
       'prescription privacy policy, HIPAA privacy standards, zero retention health AI, ephemeral image decryption, healthcare data protection, private medical tool',
-    canonicalUrl: 'https://theprescriptions.up.railway.app/#privacy',
+    canonicalUrl: 'https://www.theprescription.in/#privacy',
   },
   terms: {
     title: 'Terms & Conditions of Service - User Agreement | Theprescription',
@@ -88,7 +88,7 @@ export const SEO_METADATA_BY_TAB: Record<AppNavTab, PageSeoMetadata> = {
       'Review the terms of service governing access to Theprescription website, OCR handwriting deciphering utilities, intellectual property, and acceptable use policies.',
     keywords:
       'terms of service medical software, user agreement health app, digital prescription terms, legal conditions health literacy, acceptable use policy',
-    canonicalUrl: 'https://theprescriptions.up.railway.app/#terms',
+    canonicalUrl: 'https://www.theprescription.in/#terms',
   },
 };
 
