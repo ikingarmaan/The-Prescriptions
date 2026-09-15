@@ -520,8 +520,21 @@ function cleanAndParseJson(raw: string): any {
     throw new Error("Empty response received from AI model.");
   }
   let cleaned = raw.trim();
+  // Strip <think>...</think> reasoning blocks from Qwen / deepseek reasoning models
+  if (cleaned.includes("<think>")) {
+    cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+  }
   if (cleaned.startsWith("```")) {
     cleaned = cleaned.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
+  }
+  // Try to locate JSON object within text if wrapped
+  const jsonMatch = cleaned.match(/(\{[\s\S]*\})/);
+  if (jsonMatch) {
+    try {
+      return JSON.parse(jsonMatch[1]);
+    } catch {
+      // fallback to normal parse
+    }
   }
   return JSON.parse(cleaned);
 }
@@ -944,10 +957,13 @@ async function callGroqWithRetry(params: {
     throw new Error("GROQ_API_KEY is not configured.");
   }
 
-  // Active models on Groq: llama-3.2-90b-vision-preview for images, llama-3.3-70b-versatile / llama-3.1-8b-instant
-  const modelsToTry = params.imageBase64
-    ? ["llama-3.2-90b-vision-preview", "qwen/qwen3.6-27b", "llama-3.3-70b-versatile"]
-    : ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"];
+  // Active models on Groq: qwen/qwen3.8-27b, qwen/qwen3.6-27b, openai/gpt-oss-120b, groq/compound
+  const modelsToTry = [
+    "qwen/qwen3.8-27b",
+    "qwen/qwen3.6-27b",
+    "openai/gpt-oss-120b",
+    "groq/compound",
+  ];
 
   const userContent: any[] = [];
   userContent.push({
