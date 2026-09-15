@@ -102,6 +102,8 @@ export function postProcessPrescriptionResultWithNLP(
     if (enriched.multiEngineEnsemble) {
       enriched.multiEngineEnsemble.overallConfidence = 0.0;
     }
+  } else {
+    enriched.unableToDecipher = false;
   }
 
   return enriched;
