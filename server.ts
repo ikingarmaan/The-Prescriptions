@@ -1843,38 +1843,57 @@ You MUST respond with a single valid JSON object strictly matching this schema:
 
       const parsedData = cleanAndParseJson(responseText);
 
-      // Normalize medicines if the backup model placed them in pharmacopeia_consensus or dosage_metrics
+      // Normalize medicines if the backup model placed them under "medications" or other alternate keys
       if (!Array.isArray(parsedData.medicines) || parsedData.medicines.length === 0) {
         const altMeds =
+          parsedData.medications ||
           parsedData.pharmacopeia_consensus?.validatedMedications ||
           parsedData.dosage_metrics?.medications ||
           [];
         if (Array.isArray(altMeds) && altMeds.length > 0) {
-          parsedData.medicines = altMeds.map((m: any) => ({
-            name: m.brand || m.name || "Identified Medication",
-            genericName: m.genericName || m.generic_name || m.generic || "",
-            form: m.form || "Tablet",
-            strength: m.strength || "",
-            dosage: m.dosage || "1 dose",
-            frequency: m.frequency || "As prescribed",
-            timingCode: m.timingCode || m.timing || "",
-            mealRelation: m.mealRelation || (m.timing?.toLowerCase().includes("before") ? "before_meal" : "after_meal"),
-            mealRelationText: m.mealRelationText || m.timing || "Take with water as directed",
-            duration: m.duration || (m.durationDays ? `${m.durationDays} days` : "As prescribed"),
-            scheduleTimes: m.scheduleTimes || {
-              morning: true,
-              afternoon: false,
-              evening: false,
-              bedtime: false,
-              asNeeded: false,
-            },
-            purposeAndUsage: m.purposeAndUsage || `Prescribed medication for clinical treatment: ${m.brand || m.name || ""}`,
-            howToTake: m.howToTake || "Swallow whole with plenty of water. Do not crush or chew.",
-            precautions: m.precautions || ["Take strictly as prescribed", "Complete the full course"],
-            commonSideEffects: m.commonSideEffects || ["Mild nausea", "Mild stomach upset"],
-            whenToContactDoctor: m.whenToContactDoctor || "Severe allergic reaction, rash, or breathing difficulty.",
-          }));
+          parsedData.medicines = altMeds.map((m: any) => {
+            const rawName = m.name || m.medicineName || m.brand || "Identified Medication";
+            const timingText = m.timing || m.mealRelationText || "";
+            const isBeforeMeal = timingText.toLowerCase().includes("before") || timingText.toLowerCase().includes("empty");
+            const isAfterMeal = timingText.toLowerCase().includes("after") || timingText.toLowerCase().includes("with");
+            const mealRelation = m.mealRelation || (isBeforeMeal ? "before_meal" : isAfterMeal ? "after_meal" : "anytime");
+
+            return {
+              name: rawName,
+              genericName: m.genericName || m.generic_name || m.generic || "",
+              form: m.form || "Tablet",
+              strength: m.strength || (rawName.match(/(\d+\s*(?:mg|mcg|g|ml))/i)?.[1] || ""),
+              dosage: m.dosage || "1 dose",
+              frequency: m.frequency || "As prescribed",
+              timingCode: m.timingCode || (m.frequency?.includes("OD") ? "OD / 1-0-0" : m.frequency?.includes("BD") ? "BD / 1-0-1" : m.frequency?.includes("TDS") ? "TDS / 1-1-1" : ""),
+              mealRelation,
+              mealRelationText: timingText || (isBeforeMeal ? "Take before food" : "Take after food"),
+              duration: m.duration || (m.durationDays ? `${m.durationDays} days` : "As prescribed"),
+              scheduleTimes: m.scheduleTimes || {
+                morning: true,
+                afternoon: m.frequency?.includes("TDS") || false,
+                evening: false,
+                bedtime: m.frequency?.includes("BD") || m.frequency?.includes("TDS") || false,
+                asNeeded: false,
+              },
+              purposeAndUsage: m.purposeAndUsage || m.instructions || `Prescribed medication for clinical treatment: ${rawName}`,
+              howToTake: m.howToTake || m.instructions || "Swallow whole with plenty of water. Do not crush or chew.",
+              precautions: m.precautions || parsedData.warnings || ["Take strictly as prescribed", "Complete the full course"],
+              commonSideEffects: m.commonSideEffects || ["Mild nausea", "Mild stomach upset"],
+              whenToContactDoctor: m.whenToContactDoctor || "Severe allergic reaction, rash, or breathing difficulty.",
+            };
+          });
         }
+      }
+
+      if (!parsedData.generalExplanation && parsedData.prescriptionSummary) {
+        parsedData.generalExplanation = parsedData.prescriptionSummary;
+      }
+      if ((!parsedData.emergencyWarningSigns || parsedData.emergencyWarningSigns.length === 0) && parsedData.warnings) {
+        parsedData.emergencyWarningSigns = Array.isArray(parsedData.warnings) ? parsedData.warnings : [parsedData.warnings];
+      }
+      if ((!parsedData.dietaryAdvice || parsedData.dietaryAdvice.length === 0) && parsedData.patientAdvice) {
+        parsedData.dietaryAdvice = Array.isArray(parsedData.patientAdvice) ? parsedData.patientAdvice : [parsedData.patientAdvice];
       }
 
       // Apply Smart NLP Post-Processing layer (RapidFuzz, Brand->Generic, Dictionary, Confidence Scoring)
