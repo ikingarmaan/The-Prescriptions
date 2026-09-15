@@ -1430,7 +1430,10 @@ async function startServer() {
                 `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(key)}`,
                 {
                   method: "POST",
-                  headers: { "Content-Type": "application/json" },
+                  headers: {
+                    "Content-Type": "application/json",
+                    "x-goog-api-key": key,
+                  },
                   body: JSON.stringify({
                     contents: [{ parts: [{ text: "Respond with only the single word: OK" }] }],
                   }),
