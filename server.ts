@@ -386,51 +386,132 @@ function cleanApiKey(raw?: string): string | null {
 function getGeminiApiKeys(): string[] {
   const keys: string[] = [];
 
-  // 1. GEMINI_API_KEY (supports comma or semicolon separated keys: key1,key2)
-  if (process.env.GEMINI_API_KEY) {
-    for (const k of process.env.GEMINI_API_KEY.split(/[,;]+/)) {
-      const cleaned = cleanApiKey(k);
+  const addKey = (raw?: string) => {
+    if (!raw) return;
+    for (const part of raw.split(/[,;]+/)) {
+      const cleaned = cleanApiKey(part);
       if (cleaned && !keys.includes(cleaned)) {
         keys.push(cleaned);
       }
     }
-  }
+  };
 
-  // 2. GEMINI_API_KEY_1, GEMINI_API_KEY_2, GEMINI_API_KEY1, GEMINI_API_KEY2, etc.
+  // 1. Primary GEMINI_API_KEY (supports single key or comma-separated list: key1,key2,key3)
+  addKey(process.env.GEMINI_API_KEY);
+  addKey(process.env.GEMINI_KEY);
+  addKey(process.env.GOOGLE_API_KEY);
+  addKey(process.env.GOOGLE_GEMINI_API_KEY);
+
+  // 2. Individual numbered keys: GEMINI_API_KEY_1, GEMINI_API_KEY_2, GEMINI_API_KEY_3, etc.
   for (let i = 1; i <= 10; i++) {
     const candidates = [
       process.env[`GEMINI_API_KEY_${i}`],
       process.env[`GEMINI_API_KEY${i}`],
       process.env[`GEMINI_KEY_${i}`],
       process.env[`GEMINI_KEY${i}`],
+      process.env[`GEMINI_API_${i}`],
+      process.env[`GEMINI_API${i}`],
+      process.env[`GEMINI_${i}`],
+      process.env[`GEMINI${i}`],
+      process.env[`GOOGLE_API_KEY_${i}`],
+      process.env[`GOOGLE_API_KEY${i}`],
+      process.env[`GOOGLE_GEMINI_API_KEY_${i}`],
+      process.env[`GOOGLE_GEMINI_API_KEY${i}`],
     ];
     for (const k of candidates) {
-      const cleaned = cleanApiKey(k);
-      if (cleaned && !keys.includes(cleaned)) {
-        keys.push(cleaned);
-      }
+      addKey(k);
     }
   }
 
-  // 3. GEMINI_API_KEYS (plural name support)
-  if (process.env.GEMINI_API_KEYS) {
-    for (const k of process.env.GEMINI_API_KEYS.split(/[,;]+/)) {
-      const cleaned = cleanApiKey(k);
-      if (cleaned && !keys.includes(cleaned)) {
-        keys.push(cleaned);
-      }
-    }
-  }
+  // 3. GEMINI_API_KEYS (plural comma-separated list support)
+  addKey(process.env.GEMINI_API_KEYS);
+  addKey(process.env.GEMINI_KEYS);
 
   return keys;
 }
 
-function getGroqApiKey(): string | null {
-  return (
+// Unified Secondary Backup Provider Definition (supports both xAI Grok and Groq Cloud)
+interface BackupProviderConfig {
+  type: "xai" | "groq";
+  name: string;
+  apiKey: string;
+  endpoint: string;
+  models: string[];
+  supportsVision: boolean;
+}
+
+function getBackupProviders(): BackupProviderConfig[] {
+  const providers: BackupProviderConfig[] = [];
+
+  // Check all possible environment variable names for xAI Grok and Groq Cloud
+  const xaiKey =
+    cleanApiKey(process.env.XAI_API_KEY) ||
+    cleanApiKey(process.env.XAI_KEY) ||
+    (process.env.GROK_API_KEY && cleanApiKey(process.env.GROK_API_KEY)?.startsWith("xai-")
+      ? cleanApiKey(process.env.GROK_API_KEY)
+      : null);
+
+  const groqKey =
     cleanApiKey(process.env.GROQ_API_KEY) ||
-    cleanApiKey(process.env.GROK_API_KEY) ||
-    null
-  );
+    cleanApiKey(process.env.GROQ_KEY) ||
+    (process.env.GROK_API_KEY && cleanApiKey(process.env.GROK_API_KEY)?.startsWith("gsk_")
+      ? cleanApiKey(process.env.GROK_API_KEY)
+      : null);
+
+  // If user set GROK_API_KEY with a generic key (not explicitly xai- or gsk_), evaluate where it points
+  const rawGrokKey = cleanApiKey(process.env.GROK_API_KEY) || cleanApiKey(process.env.GROK_KEY);
+
+  // 1. xAI Grok (Native Vision Model: grok-2-vision-1212)
+  if (xaiKey) {
+    providers.push({
+      type: "xai",
+      name: "xAI Grok",
+      apiKey: xaiKey,
+      endpoint: "https://api.x.ai/v1/chat/completions",
+      models: ["grok-2-vision-1212", "grok-2-vision-latest", "grok-2"],
+      supportsVision: true,
+    });
+  } else if (rawGrokKey && !rawGrokKey.startsWith("gsk_")) {
+    providers.push({
+      type: "xai",
+      name: "xAI Grok",
+      apiKey: rawGrokKey,
+      endpoint: "https://api.x.ai/v1/chat/completions",
+      models: ["grok-2-vision-1212", "grok-2-vision-latest", "grok-2"],
+      supportsVision: true,
+    });
+  }
+
+  // 2. Groq Cloud (Ultra-fast LLMs: qwen/qwen3.8-27b, llama-3.3-70b-versatile, etc.)
+  if (groqKey) {
+    if (!providers.some((p) => p.apiKey === groqKey)) {
+      providers.push({
+        type: "groq",
+        name: "Groq Cloud",
+        apiKey: groqKey,
+        endpoint: "https://api.groq.com/openai/v1/chat/completions",
+        models: [
+          "qwen/qwen3.8-27b",
+          "qwen/qwen3.6-27b",
+          "llama-3.3-70b-versatile",
+          "openai/gpt-oss-120b",
+          "groq/compound",
+        ],
+        supportsVision: false,
+      });
+    }
+  }
+
+  return providers;
+}
+
+function hasBackupProvider(): boolean {
+  return getBackupProviders().length > 0;
+}
+
+function getGroqApiKey(): string | null {
+  const providers = getBackupProviders();
+  return providers.length > 0 ? providers[0].apiKey : null;
 }
 
 // Client instances cache per key
@@ -839,19 +920,22 @@ async function callGeminiWithRetry(params: {
   const orderedKeys = getOrderedApiKeys();
   const modelsToTry = [
     params.primaryModel || "gemini-3.5-flash-lite",
+    "gemini-3.6-flash",
     "gemini-3.1-flash-lite",
     "gemini-3.7-flash",
   ];
   let lastError: any = null;
+  const invalidKeys = new Set<string>();
 
-  for (let keyIdx = 0; keyIdx < orderedKeys.length; keyIdx++) {
-    const apiKey = orderedKeys[keyIdx];
-    const ai = getClientForKey(apiKey);
-    const keyLabel = `Key #${keyIdx + 1} (…${apiKey.slice(-4)})`;
-    let keyIsInvalid = false;
+  // Pass: Try primary (fastest) model across all healthy keys first.
+  // If Key 1 hits 429 quota exhaustion, instantly failover to Key 2, then Key 3!
+  for (const model of modelsToTry) {
+    for (let keyIdx = 0; keyIdx < orderedKeys.length; keyIdx++) {
+      const apiKey = orderedKeys[keyIdx];
+      if (invalidKeys.has(apiKey)) continue;
 
-    for (const model of modelsToTry) {
-      if (keyIsInvalid) break;
+      const ai = getClientForKey(apiKey);
+      const keyLabel = `Key #${keyIdx + 1} (…${apiKey.slice(-4)})`;
 
       for (let attempt = 1; attempt <= 2; attempt++) {
         try {
@@ -904,9 +988,9 @@ async function callGeminiWithRetry(params: {
             errMsg.includes("403");
 
           if (isAuthError) {
-            console.warn(`[Gemini API] ${keyLabel} is unauthorized or invalid: ${errMsg.slice(0, 120)}`);
-            keyIsInvalid = true;
-            break; // Skip all models on this invalid key
+            console.warn(`[Gemini API] ${keyLabel} is unauthorized or invalid: ${errMsg.slice(0, 100)}`);
+            invalidKeys.add(apiKey);
+            break; // Skip to next key immediately!
           }
 
           // Check if error is quota exhaustion / rate limit
@@ -918,146 +1002,162 @@ async function callGeminiWithRetry(params: {
             errMsg.includes("RateLimitError");
 
           if (isRateLimit) {
-            console.warn(`[Gemini API] ${keyLabel} rate-limited on ${model}: ${errMsg.slice(0, 120)}`);
-            let cooldownSec = 45;
+            let cooldownSec = 60;
             const retryMatch = errMsg.match(/retry in ([\d.]+)s/i) || errMsg.match(/retryDelay":"(\d+)s/i);
             if (retryMatch && retryMatch[1]) {
               cooldownSec = Math.ceil(parseFloat(retryMatch[1])) + 2;
             }
             keyUnhealthyUntil.set(apiKey, Date.now() + cooldownSec * 1000);
-            // Don't kill the key immediately if other models might have different quota; break out of attempt loop to try next model
-            break;
+            console.warn(
+              `[Gemini API] ${keyLabel} rate-limited (429) on ${model}. Cooldown ${cooldownSec}s. Instantly failing over to next available key...`
+            );
+            // If other keys exist, failover to next key immediately!
+            if (orderedKeys.length > 1) {
+              break;
+            }
           }
 
           const isTransient =
             errMsg.includes("503") ||
             errMsg.includes("UNAVAILABLE") ||
-            errMsg.includes("high demand");
+            errMsg.includes("high demand") ||
+            errMsg.includes("overloaded");
 
-          if (isTransient && attempt < 2) {
-            await new Promise((resolve) => setTimeout(resolve, 800 * attempt));
-            continue;
+          if (isTransient) {
+            console.warn(`[Gemini API] Model ${model} is experiencing high demand (503). Switching model...`);
+            break;
           }
 
-          // If model is 404 / NOT_FOUND / not available, break attempt loop immediately to try next model
+          // If model is 404 / NOT_FOUND / not available, break to try next model
           if (errMsg.includes("404") || errMsg.includes("NOT_FOUND") || errMsg.includes("no longer available")) {
             break;
           }
         }
       }
     }
+  }
 
-    if (keyIsInvalid && keyIdx < orderedKeys.length - 1) {
-      continue; // Move to next key immediately
+  throw lastError || new Error(`Failed to generate content from Gemini across all ${orderedKeys.length} configured API keys.`);
+}
+
+async function callSecondaryBackupWithRetry(params: {
+  promptText: string;
+  systemInstruction?: string;
+  imageBase64?: string;
+  mimeType?: string;
+}): Promise<string> {
+  const providers = getBackupProviders();
+  if (providers.length === 0) {
+    throw new Error(
+      "No secondary backup key configured. Set GROK_API_KEY, XAI_API_KEY, or GROQ_API_KEY in Railway Variables."
+    );
+  }
+
+  let lastErr: any = null;
+
+  for (const provider of providers) {
+    console.log(`[Backup Failover] Activating secondary backup provider: ${provider.name}...`);
+
+    for (const model of provider.models) {
+      // If provider supports vision (e.g. xAI Grok grok-2-vision-1212) and image is present, try multimodal first
+      const attempts = provider.supportsVision && params.imageBase64 ? [true, false] : [false];
+
+      for (const tryWithImage of attempts) {
+        try {
+          console.log(`[${provider.name}] Attempting analysis using model: ${model} (multimodal: ${tryWithImage})...`);
+          const messages: any[] = [];
+          if (params.systemInstruction) {
+            messages.push({
+              role: "system",
+              content:
+                params.systemInstruction +
+                "\n\nCRITICAL: Respond ONLY in valid, parseable JSON conforming to the requested schema. Do not enclose in markdown code fences (no ```json) or include explanatory text outside the JSON.",
+            });
+          }
+
+          if (tryWithImage && params.imageBase64) {
+            let cleanBase64 = params.imageBase64;
+            let detectedMime = params.mimeType || "image/jpeg";
+            const match = cleanBase64.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
+            if (match) {
+              detectedMime = match[1];
+              cleanBase64 = match[2];
+            }
+            messages.push({
+              role: "user",
+              content: [
+                { type: "text", text: params.promptText },
+                {
+                  type: "image_url",
+                  image_url: {
+                    url: `data:${detectedMime};base64,${cleanBase64}`,
+                  },
+                },
+              ],
+            });
+          } else {
+            messages.push({
+              role: "user",
+              content: params.promptText,
+            });
+          }
+
+          const response = await fetch(provider.endpoint, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${provider.apiKey}`,
+            },
+            body: JSON.stringify({
+              model,
+              messages,
+              response_format: { type: "json_object" },
+              temperature: 0.1,
+            }),
+          });
+
+          if (!response.ok) {
+            const errText = await response.text();
+            if (
+              tryWithImage &&
+              (errText.includes("must be a string") ||
+                errText.includes("image_url") ||
+                errText.includes("unsupported") ||
+                errText.includes("vision"))
+            ) {
+              console.log(
+                `[${provider.name}] Model ${model} does not accept image_url (${errText.slice(0, 80)}...). Falling back to text-only mode...`
+              );
+              continue;
+            }
+            throw new Error(`${provider.name} HTTP ${response.status}: ${errText}`);
+          }
+
+          const data = (await response.json()) as any;
+          const text = data?.choices?.[0]?.message?.content;
+          if (text) {
+            console.log(`[${provider.name}] Successfully generated medical analysis with ${model}!`);
+            return text;
+          }
+        } catch (err: any) {
+          lastErr = err;
+          console.warn(`[${provider.name}] Model ${model} failed (withImage: ${tryWithImage}):`, err?.message || err);
+        }
+      }
     }
   }
 
-  throw lastError || new Error("Failed to generate content from AI model across all available API keys.");
+  throw lastErr || new Error("Failed to generate content from secondary backup models.");
 }
 
+// Backward-compatible alias for existing call sites
 async function callGroqWithRetry(params: {
   promptText: string;
   systemInstruction?: string;
   imageBase64?: string;
   mimeType?: string;
 }): Promise<string> {
-  const groqApiKey = getGroqApiKey();
-  if (!groqApiKey) {
-    throw new Error("GROQ_API_KEY is not configured.");
-  }
-
-  // Active models on Groq: qwen/qwen3.8-27b, qwen/qwen3.6-27b, openai/gpt-oss-120b, groq/compound
-  const modelsToTry = [
-    "qwen/qwen3.8-27b",
-    "qwen/qwen3.6-27b",
-    "openai/gpt-oss-120b",
-    "groq/compound",
-  ];
-
-  const formatPayload = (includeImage: boolean) => {
-    const messages: any[] = [];
-    if (params.systemInstruction) {
-      messages.push({
-        role: "system",
-        content:
-          params.systemInstruction +
-          "\n\nCRITICAL: Respond ONLY in valid, parseable JSON conforming to the requested schema. Do not enclose in markdown code fences (no ```json) or include explanatory text outside the JSON.",
-      });
-    }
-
-    if (includeImage && params.imageBase64) {
-      let cleanBase64 = params.imageBase64;
-      let detectedMime = params.mimeType || "image/jpeg";
-      const match = cleanBase64.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
-      if (match) {
-        detectedMime = match[1];
-        cleanBase64 = match[2];
-      }
-      messages.push({
-        role: "user",
-        content: [
-          { type: "text", text: params.promptText },
-          {
-            type: "image_url",
-            image_url: {
-              url: `data:${detectedMime};base64,${cleanBase64}`,
-            },
-          },
-        ],
-      });
-    } else {
-      messages.push({
-        role: "user",
-        content: params.promptText,
-      });
-    }
-    return messages;
-  };
-
-  let lastErr: any = null;
-  for (const model of modelsToTry) {
-    const attempts = params.imageBase64 ? [true, false] : [false];
-    for (const tryWithImage of attempts) {
-      try {
-        console.log(`[Groq Backup] Attempting failover using model: ${model} (multimodal: ${tryWithImage})...`);
-        const messages = formatPayload(tryWithImage);
-        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${groqApiKey}`,
-          },
-          body: JSON.stringify({
-            model,
-            messages,
-            response_format: { type: "json_object" },
-            temperature: 0.1,
-          }),
-        });
-
-        if (!response.ok) {
-          const errText = await response.text();
-          if (tryWithImage && (errText.includes("must be a string") || errText.includes("image_url") || errText.includes("unsupported"))) {
-            console.log(`[Groq Backup] Model ${model} does not accept image_url (${errText.slice(0, 80)}...). Falling back to text-only mode...`);
-            continue;
-          }
-          throw new Error(`Groq HTTP ${response.status}: ${errText}`);
-        }
-
-        const data = (await response.json()) as any;
-        const text = data?.choices?.[0]?.message?.content;
-        if (text) {
-          console.log(`[Groq Backup] Successfully analyzed prescription with ${model}!`);
-          return text;
-        }
-      } catch (err: any) {
-        lastErr = err;
-        console.warn(`[Groq Backup] Model ${model} failed (withImage: ${tryWithImage}):`, err?.message || err);
-      }
-    }
-  }
-
-  throw lastErr || new Error("Failed to generate content from Groq secondary models.");
+  return callSecondaryBackupWithRetry(params);
 }
 
 async function startServer() {
@@ -1370,8 +1470,8 @@ async function startServer() {
     }
   });
 
-  // API Endpoint: Live-test all configured keys & failover readiness
-  app.get("/api/test-keys", async (_req: Request, res: Response) => {
+  // API Endpoint: Live-test all configured keys & failover readiness (aliased to /api/key-status)
+  app.get(["/api/test-keys", "/api/key-status"], async (_req: Request, res: Response) => {
     const keys = getGeminiApiKeys();
     if (keys.length === 0) {
       res.status(500).json({
@@ -1383,11 +1483,10 @@ async function startServer() {
 
     const results = [];
     const testModels = [
-      "gemini-3.7-flash",
       "gemini-3.5-flash-lite",
-      "gemini-3.1-flash-lite",
       "gemini-3.6-flash",
-      "gemini-3.1-pro-preview",
+      "gemini-3.1-flash-lite",
+      "gemini-3.7-flash",
     ];
 
     for (let i = 0; i < keys.length; i++) {
@@ -1423,7 +1522,7 @@ async function startServer() {
           });
         } catch (err: any) {
           const errStr = err?.message || String(err);
-          // If SDK failed with ACCESS_TOKEN_TYPE_UNSUPPORTED, test if direct REST with ?key= query works
+          // If SDK failed with ACCESS_TOKEN_TYPE_UNSUPPORTED, test if direct REST with ?key= and x-goog-api-key works
           if (errStr.includes("ACCESS_TOKEN_TYPE_UNSUPPORTED")) {
             try {
               const restRes = await fetch(
@@ -1486,107 +1585,98 @@ async function startServer() {
 
     const workingCount = results.filter((r) => r.overallStatus.startsWith("ACTIVE")).length;
 
-    // Test secondary backup model (Groq) if configured
-    const groqKey = getGroqApiKey();
-    let groqBackup: any = {
-      configured: Boolean(groqKey),
-      status: groqKey ? "CHECKING" : "NOT_CONFIGURED",
-      instructions: "Add GROQ_API_KEY in Railway Variables to enable 100% free secondary emergency backup failover.",
-    };
+    // Test all configured secondary backup providers (xAI Grok & Groq Cloud)
+    const backupProviders = getBackupProviders();
+    const backupChecks = [];
 
-    if (groqKey) {
-      const groqStart = Date.now();
-      let discoveredGroqModels: string[] = [];
-
+    for (const provider of backupProviders) {
+      const backupStart = Date.now();
+      const testModel = provider.models[0];
       try {
-        // 1. Discover all active models supported by Groq
-        const listRes = await fetch("https://api.groq.com/openai/v1/models", {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${groqKey}`,
-          },
-        });
-        if (listRes.ok) {
-          const listData = (await listRes.json()) as any;
-          if (Array.isArray(listData?.data)) {
-            discoveredGroqModels = listData.data.map((m: any) => m.id);
-          }
-        }
-
-        // 2. Select model to test (prefer multimodal/versatile models)
-        const candidates = [
-          "llama-3.3-70b-versatile",
-          "llama-3.1-8b-instant",
-          "qwen/qwen3.6-27b",
-          "llama-3.2-90b-vision-preview",
-          ...discoveredGroqModels,
-        ];
-        const modelToTest = candidates.find((c) => discoveredGroqModels.includes(c)) || candidates[0];
-
-        const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        const testRes = await fetch(provider.endpoint, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${groqKey}`,
+            "Authorization": `Bearer ${provider.apiKey}`,
           },
           body: JSON.stringify({
-            model: modelToTest,
+            model: testModel,
             messages: [{ role: "user", content: "Respond with only the single word: OK" }],
             max_tokens: 10,
           }),
         });
 
-        if (groqRes.ok) {
-          const gData = (await groqRes.json()) as any;
-          groqBackup = {
+        if (testRes.ok) {
+          const testData = (await testRes.json()) as any;
+          backupChecks.push({
+            name: provider.name,
+            type: provider.type,
             configured: true,
             status: "ACTIVE & WORKING",
-            maskedKey: `...${groqKey.slice(-4)}`,
-            latencyMs: Date.now() - groqStart,
-            model: modelToTest,
-            preview: gData?.choices?.[0]?.message?.content?.trim() || "OK",
-            availableModels: discoveredGroqModels,
-          };
+            maskedKey: `...${provider.apiKey.slice(-4)}`,
+            latencyMs: Date.now() - backupStart,
+            model: testModel,
+            supportsVision: provider.supportsVision,
+            preview: testData?.choices?.[0]?.message?.content?.trim() || "OK",
+          });
         } else {
-          const errText = await groqRes.text();
-          groqBackup = {
+          const errText = await testRes.text();
+          backupChecks.push({
+            name: provider.name,
+            type: provider.type,
             configured: true,
             status: "FAILED",
-            maskedKey: `...${groqKey.slice(-4)}`,
-            latencyMs: Date.now() - groqStart,
+            maskedKey: `...${provider.apiKey.slice(-4)}`,
+            latencyMs: Date.now() - backupStart,
+            model: testModel,
+            supportsVision: provider.supportsVision,
             error: errText.slice(0, 200),
-            availableModels: discoveredGroqModels,
-          };
+          });
         }
-      } catch (gErr: any) {
-        groqBackup = {
+      } catch (backupErr: any) {
+        backupChecks.push({
+          name: provider.name,
+          type: provider.type,
           configured: true,
           status: "FAILED / NETWORK_ERROR",
-          maskedKey: `...${groqKey.slice(-4)}`,
-          latencyMs: Date.now() - groqStart,
-          error: gErr?.message || String(gErr),
-          availableModels: discoveredGroqModels,
-        };
+          maskedKey: `...${provider.apiKey.slice(-4)}`,
+          latencyMs: Date.now() - backupStart,
+          model: testModel,
+          supportsVision: provider.supportsVision,
+          error: backupErr?.message || String(backupErr),
+        });
       }
     }
 
+    const primaryBackup = backupChecks.length > 0 ? backupChecks[0] : {
+      name: "Secondary Backup (Grok / Groq)",
+      configured: false,
+      status: "NOT_CONFIGURED",
+      instructions: "Add GROK_API_KEY, XAI_API_KEY, or GROQ_API_KEY in Railway Variables to enable secondary emergency backup failover.",
+    };
+
+    const hasWorkingBackup = backupChecks.some((b) => b.status === "ACTIVE & WORKING");
+
     res.json({
-      success: workingCount > 0 || groqBackup.status === "ACTIVE & WORKING",
+      success: workingCount > 0 || hasWorkingBackup,
       totalKeysConfigured: keys.length,
       workingKeysCount: workingCount,
-      failoverReady: workingCount > 1 || groqBackup.status === "ACTIVE & WORKING",
+      failoverReady: workingCount > 1 || hasWorkingBackup,
       cachedPrescriptionsCount: prescriptionAnalysisCache.size,
       cachedMedicinesCount: singleMedicineCache.size,
       keys: results,
-      secondaryBackup: groqBackup,
+      secondaryBackup: primaryBackup,
+      allSecondaryBackups: backupChecks,
       summary:
-        workingCount > 1
-          ? `All ${workingCount} Gemini keys are active and verified. If Key 1 reaches its quota or fails, the server will seamlessly failover to Key 2${groqBackup.status === 'ACTIVE & WORKING' ? ', followed by Groq Llama 3.2 Vision' : ''}.`
+        workingCount >= 3
+          ? `All ${workingCount} Gemini API keys are active & verified! Ultra-fast load balancing is active across all 3 keys (Failover: Key 1 -> Key 2 -> Key 3${hasWorkingBackup ? ` -> ${backupChecks.map((b) => b.name).join(', ')}` : ''}).`
+          : workingCount === 2
+          ? `2 Gemini API keys are active & verified (Failover: Key 1 -> Key 2${hasWorkingBackup ? ` -> ${backupChecks.map((b) => b.name).join(', ')}` : ''}).`
           : workingCount === 1
-          ? `1 Gemini key is working. ${groqBackup.status === 'ACTIVE & WORKING' ? 'Groq backup is active for failover.' : 'Add GROQ_API_KEY or a second Gemini key to enable automatic failover.'}`
-          : groqBackup.status === 'ACTIVE & WORKING'
-          ? `Gemini keys are exhausted, but Groq backup is ACTIVE & WORKING!`
-          : `No AI keys are currently working. Please check your Railway variables.`,
+          ? `1 Gemini key is active. ${hasWorkingBackup ? `${backupChecks[0].name} backup is active for failover.` : 'Add a second/third Gemini key or GROK_API_KEY for automatic failover.'}`
+          : hasWorkingBackup
+          ? `Gemini keys are currently exhausted, but ${backupChecks[0].name} backup is ACTIVE & WORKING!`
+          : `No AI keys are currently working. Please verify your Railway environment variables.`,
     });
   });
 
@@ -2060,7 +2150,16 @@ Include its generic name, primary uses, mechanism of action, typical dosage form
   }
 
   const server = app.listen(PORT, "0.0.0.0", () => {
+    const keys = getGeminiApiKeys();
+    const backupProviders = getBackupProviders();
     console.log(`Prescription Medicine Checker server listening on http://0.0.0.0:${PORT} (env: ${process.env.NODE_ENV || "development"})`);
+    console.log(`[AI Architecture] Configured Gemini keys: ${keys.length} key(s) active.`);
+    keys.forEach((k, idx) => console.log(`  -> Gemini Key #${idx + 1}: ${k.slice(0, 4)}...${k.slice(-4)}`));
+    if (backupProviders.length > 0) {
+      console.log(`[AI Architecture] Secondary Failover Backup: ${backupProviders.map((p) => `${p.name} (...${p.apiKey.slice(-4)}, vision: ${p.supportsVision})`).join(", ")}`);
+    } else {
+      console.log(`[AI Architecture] Secondary Backup: None configured (Set GROK_API_KEY, XAI_API_KEY, or GROQ_API_KEY for emergency failover).`);
+    }
   });
 
   // Graceful shutdown for container environments (Railway, Docker, etc.)
