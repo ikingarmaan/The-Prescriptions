@@ -974,74 +974,86 @@ async function callGroqWithRetry(params: {
     "groq/compound",
   ];
 
-  const userContent: any[] = [];
-  userContent.push({
-    type: "text",
-    text: params.promptText,
-  });
-
-  if (params.imageBase64) {
-    let cleanBase64 = params.imageBase64;
-    let detectedMime = params.mimeType || "image/jpeg";
-    const match = cleanBase64.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
-    if (match) {
-      detectedMime = match[1];
-      cleanBase64 = match[2];
+  const formatPayload = (includeImage: boolean) => {
+    const messages: any[] = [];
+    if (params.systemInstruction) {
+      messages.push({
+        role: "system",
+        content:
+          params.systemInstruction +
+          "\n\nCRITICAL: Respond ONLY in valid, parseable JSON conforming to the requested schema. Do not enclose in markdown code fences (no ```json) or include explanatory text outside the JSON.",
+      });
     }
-    userContent.push({
-      type: "image_url",
-      image_url: {
-        url: `data:${detectedMime};base64,${cleanBase64}`,
-      },
-    });
-  }
 
-  const messages: any[] = [];
-  if (params.systemInstruction) {
-    messages.push({
-      role: "system",
-      content:
-        params.systemInstruction +
-        "\n\nCRITICAL: Respond ONLY in valid, parseable JSON conforming to the requested schema. Do not enclose in markdown code fences (no ```json) or include explanatory text outside the JSON.",
-    });
-  }
-  messages.push({
-    role: "user",
-    content: userContent,
-  });
+    if (includeImage && params.imageBase64) {
+      let cleanBase64 = params.imageBase64;
+      let detectedMime = params.mimeType || "image/jpeg";
+      const match = cleanBase64.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
+      if (match) {
+        detectedMime = match[1];
+        cleanBase64 = match[2];
+      }
+      messages.push({
+        role: "user",
+        content: [
+          { type: "text", text: params.promptText },
+          {
+            type: "image_url",
+            image_url: {
+              url: `data:${detectedMime};base64,${cleanBase64}`,
+            },
+          },
+        ],
+      });
+    } else {
+      messages.push({
+        role: "user",
+        content: params.promptText,
+      });
+    }
+    return messages;
+  };
 
   let lastErr: any = null;
   for (const model of modelsToTry) {
-    try {
-      console.log(`[Groq Backup] Attempting failover using model: ${model}...`);
-      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${groqApiKey}`,
-        },
-        body: JSON.stringify({
-          model,
-          messages,
-          response_format: { type: "json_object" },
-          temperature: 0.1,
-        }),
-      });
+    const attempts = params.imageBase64 ? [true, false] : [false];
+    for (const tryWithImage of attempts) {
+      try {
+        console.log(`[Groq Backup] Attempting failover using model: ${model} (multimodal: ${tryWithImage})...`);
+        const messages = formatPayload(tryWithImage);
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${groqApiKey}`,
+          },
+          body: JSON.stringify({
+            model,
+            messages,
+            response_format: { type: "json_object" },
+            temperature: 0.1,
+          }),
+        });
 
-      if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Groq HTTP ${response.status}: ${errText}`);
-      }
+        if (!response.ok) {
+          const errText = await response.text();
+          if (tryWithImage && (errText.includes("must be a string") || errText.includes("image_url") || errText.includes("unsupported"))) {
+            console.log(`[Groq Backup] Model ${model} does not accept image_url (${errText.slice(0, 80)}...). Falling back to text-only mode...`);
+            continue;
+          }
+          throw new Error(`Groq HTTP ${response.status}: ${errText}`);
+        }
 
-      const data = (await response.json()) as any;
-      const text = data?.choices?.[0]?.message?.content;
-      if (text) {
-        console.log(`[Groq Backup] Successfully analyzed prescription with ${model}!`);
-        return text;
+        const data = (await response.json()) as any;
+        const text = data?.choices?.[0]?.message?.content;
+        if (text) {
+          console.log(`[Groq Backup] Successfully analyzed prescription with ${model}!`);
+          return text;
+        }
+      } catch (err: any) {
+        lastErr = err;
+        console.warn(`[Groq Backup] Model ${model} failed (withImage: ${tryWithImage}):`, err?.message || err);
       }
-    } catch (err: any) {
-      lastErr = err;
-      console.warn(`[Groq Backup] Model ${model} failed:`, err?.message || err);
     }
   }
 
