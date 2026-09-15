@@ -63,11 +63,11 @@ ${result.medicines
   .join('\n')}
 
 Daily Routine:
-- Morning: ${result.scheduleSummary.morning.join(', ') || 'None'}
-- Afternoon: ${result.scheduleSummary.afternoon.join(', ') || 'None'}
-- Evening: ${result.scheduleSummary.evening.join(', ') || 'None'}
-- Bedtime: ${result.scheduleSummary.bedtime.join(', ') || 'None'}
-- As Needed: ${result.scheduleSummary.asNeeded.join(', ') || 'None'}
+- Morning: ${result.scheduleSummary?.morning?.join(', ') || 'None'}
+- Afternoon: ${result.scheduleSummary?.afternoon?.join(', ') || 'None'}
+- Evening: ${result.scheduleSummary?.evening?.join(', ') || 'None'}
+- Bedtime: ${result.scheduleSummary?.bedtime?.join(', ') || 'None'}
+- As Needed: ${result.scheduleSummary?.asNeeded?.join(', ') || 'None'}
 
 ${
   result.labTests && result.labTests.length > 0

@@ -14,8 +14,14 @@ interface DailyScheduleTimelineProps {
 }
 
 export const DailyScheduleTimeline: React.FC<DailyScheduleTimelineProps> = ({
-  medicines,
-  scheduleSummary,
+  medicines = [],
+  scheduleSummary = {
+    morning: [],
+    afternoon: [],
+    evening: [],
+    bedtime: [],
+    asNeeded: [],
+  },
 }) => {
   // Let user toggle checkmarks for today's doses as an interactive routine aid
   const [takenDoses, setTakenDoses] = useState<Record<string, boolean>>({});
@@ -23,6 +29,16 @@ export const DailyScheduleTimeline: React.FC<DailyScheduleTimelineProps> = ({
   const toggleDose = (key: string) => {
     setTakenDoses((prev) => ({ ...prev, [key]: !prev[key] }));
   };
+
+  const safeSummary = {
+    morning: Array.isArray(scheduleSummary?.morning) ? scheduleSummary.morning : [],
+    afternoon: Array.isArray(scheduleSummary?.afternoon) ? scheduleSummary.afternoon : [],
+    evening: Array.isArray(scheduleSummary?.evening) ? scheduleSummary.evening : [],
+    bedtime: Array.isArray(scheduleSummary?.bedtime) ? scheduleSummary.bedtime : [],
+    asNeeded: Array.isArray(scheduleSummary?.asNeeded) ? scheduleSummary.asNeeded : [],
+  };
+
+  const safeMedicines = Array.isArray(medicines) ? medicines : [];
 
   const timeSlots = [
     {
@@ -33,8 +49,8 @@ export const DailyScheduleTimeline: React.FC<DailyScheduleTimelineProps> = ({
       color: 'amber',
       bgHeader: 'bg-amber-500/10 text-amber-900 border-amber-200',
       iconColor: 'text-amber-600',
-      items: scheduleSummary.morning,
-      medicinesList: medicines.filter((m) => m.scheduleTimes.morning),
+      items: safeSummary.morning,
+      medicinesList: safeMedicines.filter((m) => m?.scheduleTimes?.morning),
     },
     {
       id: 'afternoon',
@@ -44,8 +60,8 @@ export const DailyScheduleTimeline: React.FC<DailyScheduleTimelineProps> = ({
       color: 'sky',
       bgHeader: 'bg-sky-500/10 text-sky-900 border-sky-200',
       iconColor: 'text-sky-600',
-      items: scheduleSummary.afternoon,
-      medicinesList: medicines.filter((m) => m.scheduleTimes.afternoon),
+      items: safeSummary.afternoon,
+      medicinesList: safeMedicines.filter((m) => m?.scheduleTimes?.afternoon),
     },
     {
       id: 'evening',
@@ -55,8 +71,8 @@ export const DailyScheduleTimeline: React.FC<DailyScheduleTimelineProps> = ({
       color: 'indigo',
       bgHeader: 'bg-indigo-500/10 text-indigo-900 border-indigo-200',
       iconColor: 'text-indigo-600',
-      items: scheduleSummary.evening,
-      medicinesList: medicines.filter((m) => m.scheduleTimes.evening),
+      items: safeSummary.evening,
+      medicinesList: safeMedicines.filter((m) => m?.scheduleTimes?.evening),
     },
     {
       id: 'bedtime',
@@ -66,8 +82,8 @@ export const DailyScheduleTimeline: React.FC<DailyScheduleTimelineProps> = ({
       color: 'purple',
       bgHeader: 'bg-purple-500/10 text-purple-900 border-purple-200',
       iconColor: 'text-purple-600',
-      items: scheduleSummary.bedtime,
-      medicinesList: medicines.filter((m) => m.scheduleTimes.bedtime),
+      items: safeSummary.bedtime,
+      medicinesList: safeMedicines.filter((m) => m?.scheduleTimes?.bedtime),
     },
     {
       id: 'asNeeded',
@@ -77,8 +93,8 @@ export const DailyScheduleTimeline: React.FC<DailyScheduleTimelineProps> = ({
       color: 'rose',
       bgHeader: 'bg-rose-500/10 text-rose-900 border-rose-200',
       iconColor: 'text-rose-600',
-      items: scheduleSummary.asNeeded,
-      medicinesList: medicines.filter((m) => m.scheduleTimes.asNeeded),
+      items: safeSummary.asNeeded,
+      medicinesList: safeMedicines.filter((m) => m?.scheduleTimes?.asNeeded),
     },
   ];
 
@@ -125,7 +141,7 @@ export const DailyScheduleTimeline: React.FC<DailyScheduleTimelineProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {timeSlots.map((slot) => {
           const Icon = slot.icon;
-          const hasMeds = slot.items.length > 0 || slot.medicinesList.length > 0;
+          const hasMeds = (slot.items?.length || 0) > 0 || (slot.medicinesList?.length || 0) > 0;
 
           return (
             <div

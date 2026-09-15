@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Navbar, AppNavTab } from './components/Navbar';
 import { PrescriptionUploader } from './components/PrescriptionUploader';
 import { PrescriptionResultView } from './components/PrescriptionResultView';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { InteractiveMedicalBackground } from './components/InteractiveMedicalBackground';
 import { GlowingCursor } from './components/GlowingCursor';
 import { SamplePrescription, SAMPLE_PRESCRIPTIONS } from './data/medicalData';
@@ -514,12 +515,14 @@ export default function App() {
                 <HomeSeoArticle onNavigateToTab={(tab) => setActiveTab(tab as AppNavTab)} />
               </>
             ) : (
-              <PrescriptionResultView
-                result={analysisResult}
-                onReset={handleReset}
-                onOpenPrintModal={() => setIsPrintModalOpen(true)}
-                onConfirmOrEditMedicine={handleConfirmOrEditMedicine}
-              />
+              <ErrorBoundary onReset={handleReset} fallbackTitle="Prescription Display Error">
+                <PrescriptionResultView
+                  result={analysisResult}
+                  onReset={handleReset}
+                  onOpenPrintModal={() => setIsPrintModalOpen(true)}
+                  onConfirmOrEditMedicine={handleConfirmOrEditMedicine}
+                />
+              </ErrorBoundary>
             )}
           </div>
         )}
