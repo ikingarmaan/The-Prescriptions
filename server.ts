@@ -944,11 +944,10 @@ async function callGroqWithRetry(params: {
     throw new Error("GROQ_API_KEY is not configured.");
   }
 
-  // Vision capable models on Groq: llama-3.2-90b-vision-preview, llama-3.2-11b-vision-preview
-  const modelsToTry = [
-    "llama-3.2-90b-vision-preview",
-    "llama-3.2-11b-vision-preview",
-  ];
+  // Active models on Groq: llama-3.2-90b-vision-preview for images, llama-3.3-70b-versatile / llama-3.1-8b-instant
+  const modelsToTry = params.imageBase64
+    ? ["llama-3.2-90b-vision-preview", "qwen/qwen3.6-27b", "llama-3.3-70b-versatile"]
+    : ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"];
 
   const userContent: any[] = [];
   userContent.push({
@@ -1418,7 +1417,33 @@ async function startServer() {
 
     if (groqKey) {
       const groqStart = Date.now();
+      let discoveredGroqModels: string[] = [];
+
       try {
+        // 1. Discover all active models supported by Groq
+        const listRes = await fetch("https://api.groq.com/openai/v1/models", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${groqKey}`,
+          },
+        });
+        if (listRes.ok) {
+          const listData = (await listRes.json()) as any;
+          if (Array.isArray(listData?.data)) {
+            discoveredGroqModels = listData.data.map((m: any) => m.id);
+          }
+        }
+
+        // 2. Select model to test (prefer multimodal/versatile models)
+        const candidates = [
+          "llama-3.3-70b-versatile",
+          "llama-3.1-8b-instant",
+          "qwen/qwen3.6-27b",
+          "llama-3.2-90b-vision-preview",
+          ...discoveredGroqModels,
+        ];
+        const modelToTest = candidates.find((c) => discoveredGroqModels.includes(c)) || candidates[0];
+
         const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
           method: "POST",
           headers: {
@@ -1426,9 +1451,9 @@ async function startServer() {
             "Authorization": `Bearer ${groqKey}`,
           },
           body: JSON.stringify({
-            model: "llama-3.2-11b-vision-preview",
+            model: modelToTest,
             messages: [{ role: "user", content: "Respond with only the single word: OK" }],
-            max_tokens: 5,
+            max_tokens: 10,
           }),
         });
 
@@ -1439,17 +1464,19 @@ async function startServer() {
             status: "ACTIVE & WORKING",
             maskedKey: `...${groqKey.slice(-4)}`,
             latencyMs: Date.now() - groqStart,
-            model: "llama-3.2-11b-vision-preview",
+            model: modelToTest,
             preview: gData?.choices?.[0]?.message?.content?.trim() || "OK",
+            availableModels: discoveredGroqModels,
           };
         } else {
           const errText = await groqRes.text();
           groqBackup = {
             configured: true,
-            status: "FAILED / INVALID_KEY",
+            status: "FAILED",
             maskedKey: `...${groqKey.slice(-4)}`,
             latencyMs: Date.now() - groqStart,
-            error: errText.slice(0, 150),
+            error: errText.slice(0, 200),
+            availableModels: discoveredGroqModels,
           };
         }
       } catch (gErr: any) {
@@ -1459,6 +1486,7 @@ async function startServer() {
           maskedKey: `...${groqKey.slice(-4)}`,
           latencyMs: Date.now() - groqStart,
           error: gErr?.message || String(gErr),
+          availableModels: discoveredGroqModels,
         };
       }
     }
