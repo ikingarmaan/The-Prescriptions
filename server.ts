@@ -1622,9 +1622,9 @@ async function startServer() {
       const cached = prescriptionAnalysisCache.get(cacheKey);
 
       if (cached && (Date.now() - cached.cachedAt) < PRESCRIPTION_CACHE_TTL_MS) {
-        console.log(`[Prescription Cache] Instant Cache HIT for hash ${cacheKey.slice(0, 12)}... (0ms response, zero API quota burned)`);
+        const enrichedCached = postProcessPrescriptionResultWithNLP(cached.data);
         const cachedResponse = {
-          ...cached.data,
+          ...enrichedCached,
           servedFromCache: true,
           cacheAgeSeconds: Math.floor((Date.now() - cached.cachedAt) / 1000),
         };
