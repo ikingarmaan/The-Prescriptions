@@ -1167,8 +1167,7 @@ async function startServer() {
   // 1. Trust reverse proxies (Railway, Cloudflare, etc.) for correct x-forwarded-proto detection
   app.set("trust proxy", true);
 
-  // 2. HTTPS Redirection Middleware (Equivalent to FastAPI https_redirect middleware)
-  // Automatically redirects incoming plain HTTP traffic to secure HTTPS on Railway/production
+  // 2. Enterprise Security & CORS Middleware (Zscaler, corporate proxies, and modern browser standards)
   app.use((req: Request, res: Response, next) => {
     const forwardedProto = req.headers["x-forwarded-proto"];
     if (forwardedProto && forwardedProto === "http") {
@@ -1176,9 +1175,43 @@ async function startServer() {
       return res.redirect(301, `https://${host}${req.url}`);
     }
 
-    // Add HSTS security header for secure connections
+    // Modern Enterprise Security Headers
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "SAMEORIGIN");
+    res.setHeader("X-XSS-Protection", "1; mode=block");
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    res.setHeader("Permissions-Policy", "camera=(self), microphone=(), geolocation=()");
+    res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+
     if (req.secure || forwardedProto === "https") {
       res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+    }
+
+    // Permissive, valid Content-Security-Policy approved by Corporate Firewalls
+    res.setHeader(
+      "Content-Security-Policy",
+      [
+        "default-src 'self'",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "font-src 'self' https://fonts.gstatic.com data:",
+        "img-src 'self' data: blob: https:",
+        "connect-src 'self' https://www.googletagmanager.com https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://generativelanguage.googleapis.com https://api.groq.com https://api.x.ai",
+        "worker-src 'self' blob:",
+        "child-src 'self' blob:",
+        "frame-ancestors 'self'",
+      ].join("; ")
+    );
+
+    // Standard CORS for API routes
+    if (req.path.startsWith("/api/")) {
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+      res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, x-goog-api-key");
+      if (req.method === "OPTIONS") {
+        return res.sendStatus(204);
+      }
     }
 
     next();
@@ -2130,6 +2163,7 @@ Include its generic name, primary uses, mechanism of action, typical dosage form
     });
     app.use(vite.middlewares);
   } else {
+    // 1. Static asset serving with strict cache control
     app.use(
       express.static(distPath, {
         maxAge: "1y",
@@ -2143,7 +2177,19 @@ Include its generic name, primary uses, mechanism of action, typical dosage form
         },
       })
     );
-    app.get("*", (_req: Request, res: Response) => {
+
+    // 2. Explicit 404 for missing static chunks under /assets/
+    // Strictly prevents "SyntaxError: Unexpected token '<'" caused by sending HTML as JS
+    app.use("/assets", (_req: Request, res: Response) => {
+      res.setHeader("Cache-Control", "no-store");
+      res.status(404).send("Asset not found");
+    });
+
+    // 3. SPA Fallback (Only serves index.html for page navigation, never for API or static assets)
+    app.get("*", (req: Request, res: Response) => {
+      if (req.path.startsWith("/api/") || req.path.startsWith("/assets/")) {
+        return res.status(404).send("Not Found");
+      }
       res.setHeader("Cache-Control", "public, max-age=0, must-revalidate");
       res.sendFile(path.join(distPath, "index.html"));
     });

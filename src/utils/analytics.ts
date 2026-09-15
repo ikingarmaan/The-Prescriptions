@@ -59,13 +59,20 @@ export const initGA = (customId?: string): boolean => {
   });
 
   // Inject script tag if not already present
-  const existingScript = document.getElementById('ga-gtag-script');
-  if (!existingScript) {
-    const script = document.createElement('script');
-    script.id = 'ga-gtag-script';
-    script.async = true;
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
-    document.head.appendChild(script);
+  try {
+    const existingScript = document.getElementById('ga-gtag-script');
+    if (!existingScript) {
+      const script = document.createElement('script');
+      script.id = 'ga-gtag-script';
+      script.async = true;
+      script.onerror = () => {
+        // Silently ignore if blocked by adblockers, DNS filters, or corporate firewalls
+      };
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
+      document.head.appendChild(script);
+    }
+  } catch {
+    // Ignore DOM injection errors on restricted environments
   }
 
   isInitialized = true;
@@ -76,17 +83,21 @@ export const initGA = (customId?: string): boolean => {
  * Tracks virtual pageviews in Single Page Application (SPA)
  */
 export const trackPageView = (path?: string, title?: string): void => {
-  if (typeof window === 'undefined' || !window.gtag) return;
+  try {
+    if (typeof window === 'undefined' || typeof window.gtag !== 'function') return;
 
-  const pagePath = path || (window.location.pathname + (window.location.hash || ''));
-  const pageTitle = title || document.title;
-  const pageLocation = window.location.href;
+    const pagePath = path || (window.location.pathname + (window.location.hash || ''));
+    const pageTitle = title || document.title;
+    const pageLocation = window.location.href;
 
-  window.gtag('event', 'page_view', {
-    page_path: pagePath,
-    page_title: pageTitle,
-    page_location: pageLocation,
-  });
+    window.gtag('event', 'page_view', {
+      page_path: pagePath,
+      page_title: pageTitle,
+      page_location: pageLocation,
+    });
+  } catch {
+    // Suppress analytics error if corporate firewall or adblocker blocks tracking
+  }
 };
 
 /**
@@ -96,17 +107,21 @@ export const trackEvent = (
   eventName: string,
   eventParams: Record<string, string | number | boolean | undefined> = {}
 ): void => {
-  if (typeof window === 'undefined' || !window.gtag) return;
+  try {
+    if (typeof window === 'undefined' || typeof window.gtag !== 'function') return;
 
-  // Filter out undefined parameters
-  const cleanParams: Record<string, string | number | boolean> = {};
-  Object.entries(eventParams).forEach(([key, val]) => {
-    if (val !== undefined && val !== null) {
-      cleanParams[key] = val;
-    }
-  });
+    // Filter out undefined parameters
+    const cleanParams: Record<string, string | number | boolean> = {};
+    Object.entries(eventParams).forEach(([key, val]) => {
+      if (val !== undefined && val !== null) {
+        cleanParams[key] = val;
+      }
+    });
 
-  window.gtag('event', eventName, cleanParams);
+    window.gtag('event', eventName, cleanParams);
+  } catch {
+    // Suppress analytics error if blocked
+  }
 };
 
 // ============================================================================

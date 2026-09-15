@@ -164,9 +164,15 @@ export function InteractiveMedicalBackground() {
   // Track mouse coordinates normalized (-1 to 1 from center)
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      const x = (e.clientX / window.innerWidth) * 2 - 1;
-      const y = (e.clientY / window.innerHeight) * 2 - 1;
-      setMousePos({ x, y });
+      try {
+        const w = (typeof window !== 'undefined' && window.innerWidth) ? window.innerWidth : 1200;
+        const h = (typeof window !== 'undefined' && window.innerHeight) ? window.innerHeight : 800;
+        const x = (e.clientX / w) * 2 - 1;
+        const y = (e.clientY / h) * 2 - 1;
+        setMousePos({ x: isNaN(x) ? 0 : x, y: isNaN(y) ? 0 : y });
+      } catch {
+        // Ignore coordinate calculation errors
+      }
     };
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });

@@ -9,21 +9,21 @@
     <meta name="keywords" content="AI prescription reader, decipher doctor handwriting online, understand handwritten prescription, medicine schedule generator, doctor handwriting decoder, prescription checker, pharmacy notes deciphering, generic medicine lookup" />
     <meta name="author" content="Mohd Armaan" />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://theprescriptions.up.railway.app/" />
+    <link rel="canonical" href="https://www.theprescription.in/" />
 
     <!-- Open Graph / Social Sharing -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Theprescription - AI Prescription & Doctor Handwriting Deciphering Assistant" />
     <meta property="og:description" content="AI-powered prescription assistant that deciphers messy doctor handwriting, explains generic medicine salts, organizes dosage timing rules, and creates printable schedules." />
-    <meta property="og:url" content="https://theprescriptions.up.railway.app/" />
+    <meta property="og:url" content="https://www.theprescription.in/" />
     <meta property="og:site_name" content="Theprescription" />
-    <meta property="og:image" content="https://theprescriptions.up.railway.app/theprescription-logo.svg" />
+    <meta property="og:image" content="https://www.theprescription.in/theprescription-logo.svg" />
 
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Theprescription - AI Prescription & Doctor Handwriting Deciphering Assistant" />
     <meta name="twitter:description" content="AI-powered prescription assistant that deciphers messy doctor handwriting, explains generic medicine salts, organizes dosage timing rules, and creates printable schedules." />
-    <meta name="twitter:image" content="https://theprescriptions.up.railway.app/theprescription-logo.svg" />
+    <meta name="twitter:image" content="https://www.theprescription.in/theprescription-logo.svg" />
 
     <!-- Structured Data: WebApplication Schema -->
     <script type="application/ld+json">
@@ -104,20 +104,51 @@
     <link rel="preconnect" href="https://www.google-analytics.com" crossorigin />
     <link rel="dns-prefetch" href="https://www.google-analytics.com" />
 
-    <!-- Google Analytics 4 (GA4): gtag.js -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-2ESSBNEX33"></script>
+    <!-- Google Analytics 4 (GA4): gtag.js with resilient fallback -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-2ESSBNEX33" onerror="this.onerror=null;"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       window.gtag = gtag;
       gtag('js', new Date());
-      // SPA pageviews managed via src/utils/analytics.ts & src/utils/seo.ts
       gtag('config', 'G-2ESSBNEX33', { send_page_view: false });
       window.GA_MEASUREMENT_ID = 'G-2ESSBNEX33';
+
+      // Enterprise Proxy / Stale Cache Auto-Recovery Handler
+      window.addEventListener('error', function(e) {
+        var target = e.target || e.srcElement;
+        if (target && (target.tagName === 'SCRIPT' || target.tagName === 'LINK')) {
+          var src = target.src || target.href;
+          if (src && src.indexOf('/assets/') !== -1) {
+            var retryKey = 'chunk_retry_' + src.split('/').pop();
+            if (!sessionStorage.getItem(retryKey)) {
+              sessionStorage.setItem(retryKey, '1');
+              window.location.reload();
+            }
+          }
+        }
+      }, true);
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Instant Clinical Pre-Loader (Prevents Blank Screen while JS initializes) -->
+      <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; color: #0f172a; padding: 24px; text-align: center;">
+        <div style="width: 56px; height: 56px; border-radius: 18px; background: #ecfdf5; border: 2px solid #a7f3d0; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.15);">
+          <svg style="width: 28px; height: 28px; color: #059669;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+          </svg>
+        </div>
+        <h2 style="font-size: 1.15rem; font-weight: 800; margin: 0 0 8px 0; letter-spacing: -0.02em; color: #0f172a;">Theprescription</h2>
+        <p style="font-size: 0.8125rem; color: #64748b; margin: 0; max-width: 300px; line-height: 1.5;">Securing workspace & initializing clinical handwriting model...</p>
+      </div>
+    </div>
+    <noscript>
+      <div style="padding: 24px; text-align: center; background: #fffbeb; border: 2px solid #fcd34d; border-radius: 16px; margin: 24px auto; max-width: 520px; color: #92400e; font-family: sans-serif;">
+        <h3 style="margin-top: 0; font-size: 1.125rem; font-weight: 700;">JavaScript Required</h3>
+        <p style="font-size: 0.875rem; line-height: 1.5;">Your browser or corporate network policy has disabled JavaScript. Please enable JavaScript in your browser settings to access Theprescription.</p>
+      </div>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

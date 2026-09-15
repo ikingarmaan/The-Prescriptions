@@ -13,29 +13,39 @@ export function GlowingCursor() {
   const requestRef = useRef<number | null>(null);
 
   useEffect(() => {
-    // Check if touch device
-    if (window.matchMedia('(pointer: coarse)').matches) {
-      setIsTouchDevice(true);
-      return;
+    // Check if touch device or virtual environment where pointer media query is unsupported
+    try {
+      if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+        if (window.matchMedia('(pointer: coarse)').matches) {
+          setIsTouchDevice(true);
+          return;
+        }
+      }
+    } catch {
+      // Safely ignore media query errors on enterprise/VDI systems
     }
 
     const onMouseMove = (e: MouseEvent) => {
-      targetPos.current = { x: e.clientX, y: e.clientY };
-      if (!isVisible) setIsVisible(true);
+      try {
+        targetPos.current = { x: e.clientX, y: e.clientY };
+        if (!isVisible) setIsVisible(true);
 
-      // Check if hovering interactive element
-      const target = e.target as HTMLElement | null;
-      if (target) {
-        const isInteractive =
-          target.closest('button') ||
-          target.closest('a') ||
-          target.closest('input') ||
-          target.closest('textarea') ||
-          target.closest('select') ||
-          target.closest('[role="button"]') ||
-          target.closest('.interactive-medical-item') ||
-          target.closest('.cursor-pointer');
-        setIsHovered(Boolean(isInteractive));
+        // Check if hovering interactive element safely
+        const target = e.target as HTMLElement | null;
+        if (target && typeof target.closest === 'function') {
+          const isInteractive =
+            target.closest('button') ||
+            target.closest('a') ||
+            target.closest('input') ||
+            target.closest('textarea') ||
+            target.closest('select') ||
+            target.closest('[role="button"]') ||
+            target.closest('.interactive-medical-item') ||
+            target.closest('.cursor-pointer');
+          setIsHovered(Boolean(isInteractive));
+        }
+      } catch {
+        // Ignore inspection errors
       }
     };
 
@@ -47,7 +57,6 @@ export function GlowingCursor() {
 
     // Smooth animation loop for the trailing glow
     const animate = () => {
-      // Linear interpolation for smooth trailing physics
       const ease = 0.22;
       currentPos.current.x += (targetPos.current.x - currentPos.current.x) * ease;
       currentPos.current.y += (targetPos.current.y - currentPos.current.y) * ease;
@@ -57,24 +66,38 @@ export function GlowingCursor() {
         y: currentPos.current.y,
       });
 
-      requestRef.current = requestAnimationFrame(animate);
+      if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+        requestRef.current = requestAnimationFrame(animate);
+      }
     };
 
-    window.addEventListener('mousemove', onMouseMove, { passive: true });
-    window.addEventListener('mousedown', onMouseDown);
-    window.addEventListener('mouseup', onMouseUp);
-    document.addEventListener('mouseleave', onMouseLeave);
-    document.addEventListener('mouseenter', onMouseEnter);
+    try {
+      window.addEventListener('mousemove', onMouseMove, { passive: true });
+      window.addEventListener('mousedown', onMouseDown);
+      window.addEventListener('mouseup', onMouseUp);
+      document.addEventListener('mouseleave', onMouseLeave);
+      document.addEventListener('mouseenter', onMouseEnter);
 
-    requestRef.current = requestAnimationFrame(animate);
+      if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+        requestRef.current = requestAnimationFrame(animate);
+      }
+    } catch {
+      // Ignore listener attachment failures in restricted security sandboxes
+    }
 
     return () => {
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mousedown', onMouseDown);
-      window.removeEventListener('mouseup', onMouseUp);
-      document.removeEventListener('mouseleave', onMouseLeave);
-      document.removeEventListener('mouseenter', onMouseEnter);
-      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+      try {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mousedown', onMouseDown);
+        window.removeEventListener('mouseup', onMouseUp);
+        document.removeEventListener('mouseleave', onMouseLeave);
+        document.removeEventListener('mouseenter', onMouseEnter);
+        if (requestRef.current && typeof window !== 'undefined' && typeof window.cancelAnimationFrame === 'function') {
+          cancelAnimationFrame(requestRef.current);
+        }
+      } catch {
+        // Ignore cleanup errors
+      }
     };
   }, [isVisible]);
 
