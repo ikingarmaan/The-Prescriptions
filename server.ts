@@ -423,14 +423,7 @@ const clientCache = new Map<string, GoogleGenAI>();
 function getClientForKey(apiKey: string): GoogleGenAI {
   let client = clientCache.get(apiKey);
   if (!client) {
-    client = new GoogleGenAI({
-      apiKey,
-      httpOptions: {
-        headers: {
-          "User-Agent": "the-prescription-multi-key",
-        },
-      },
-    });
+    client = new GoogleGenAI({ apiKey });
     clientCache.set(apiKey, client);
   }
   return client;
