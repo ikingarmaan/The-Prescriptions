@@ -409,6 +409,14 @@ function getGeminiApiKeys(): string[] {
   return keys;
 }
 
+function getGroqApiKey(): string | null {
+  return (
+    process.env.GROQ_API_KEY?.trim() ||
+    process.env.GROK_API_KEY?.trim() ||
+    null
+  );
+}
+
 // Client instances cache per key
 const clientCache = new Map<string, GoogleGenAI>();
 
@@ -925,6 +933,97 @@ async function callGeminiWithRetry(params: {
   throw lastError || new Error("Failed to generate content from AI model across all available API keys.");
 }
 
+async function callGroqWithRetry(params: {
+  promptText: string;
+  systemInstruction?: string;
+  imageBase64?: string;
+  mimeType?: string;
+}): Promise<string> {
+  const groqApiKey = getGroqApiKey();
+  if (!groqApiKey) {
+    throw new Error("GROQ_API_KEY is not configured.");
+  }
+
+  // Vision capable models on Groq: llama-3.2-90b-vision-preview, llama-3.2-11b-vision-preview
+  const modelsToTry = [
+    "llama-3.2-90b-vision-preview",
+    "llama-3.2-11b-vision-preview",
+  ];
+
+  const userContent: any[] = [];
+  userContent.push({
+    type: "text",
+    text: params.promptText,
+  });
+
+  if (params.imageBase64) {
+    let cleanBase64 = params.imageBase64;
+    let detectedMime = params.mimeType || "image/jpeg";
+    const match = cleanBase64.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
+    if (match) {
+      detectedMime = match[1];
+      cleanBase64 = match[2];
+    }
+    userContent.push({
+      type: "image_url",
+      image_url: {
+        url: `data:${detectedMime};base64,${cleanBase64}`,
+      },
+    });
+  }
+
+  const messages: any[] = [];
+  if (params.systemInstruction) {
+    messages.push({
+      role: "system",
+      content:
+        params.systemInstruction +
+        "\n\nCRITICAL: Respond ONLY in valid, parseable JSON conforming to the requested schema. Do not enclose in markdown code fences (no ```json) or include explanatory text outside the JSON.",
+    });
+  }
+  messages.push({
+    role: "user",
+    content: userContent,
+  });
+
+  let lastErr: any = null;
+  for (const model of modelsToTry) {
+    try {
+      console.log(`[Groq Backup] Attempting failover using model: ${model}...`);
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${groqApiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          response_format: { type: "json_object" },
+          temperature: 0.1,
+        }),
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`Groq HTTP ${response.status}: ${errText}`);
+      }
+
+      const data = (await response.json()) as any;
+      const text = data?.choices?.[0]?.message?.content;
+      if (text) {
+        console.log(`[Groq Backup] Successfully analyzed prescription with ${model}!`);
+        return text;
+      }
+    } catch (err: any) {
+      lastErr = err;
+      console.warn(`[Groq Backup] Model ${model} failed:`, err?.message || err);
+    }
+  }
+
+  throw lastErr || new Error("Failed to generate content from Groq secondary models.");
+}
+
 async function startServer() {
   const app = express();
   const PORT = parseInt(process.env.PORT || "3000", 10) || 3000;
@@ -1309,20 +1408,78 @@ async function startServer() {
 
     const workingCount = results.filter((r) => r.overallStatus.startsWith("ACTIVE")).length;
 
+    // Test secondary backup model (Groq) if configured
+    const groqKey = getGroqApiKey();
+    let groqBackup: any = {
+      configured: Boolean(groqKey),
+      status: groqKey ? "CHECKING" : "NOT_CONFIGURED",
+      instructions: "Add GROQ_API_KEY in Railway Variables to enable 100% free secondary emergency backup failover.",
+    };
+
+    if (groqKey) {
+      const groqStart = Date.now();
+      try {
+        const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${groqKey}`,
+          },
+          body: JSON.stringify({
+            model: "llama-3.2-11b-vision-preview",
+            messages: [{ role: "user", content: "Respond with only the single word: OK" }],
+            max_tokens: 5,
+          }),
+        });
+
+        if (groqRes.ok) {
+          const gData = (await groqRes.json()) as any;
+          groqBackup = {
+            configured: true,
+            status: "ACTIVE & WORKING",
+            maskedKey: `...${groqKey.slice(-4)}`,
+            latencyMs: Date.now() - groqStart,
+            model: "llama-3.2-11b-vision-preview",
+            preview: gData?.choices?.[0]?.message?.content?.trim() || "OK",
+          };
+        } else {
+          const errText = await groqRes.text();
+          groqBackup = {
+            configured: true,
+            status: "FAILED / INVALID_KEY",
+            maskedKey: `...${groqKey.slice(-4)}`,
+            latencyMs: Date.now() - groqStart,
+            error: errText.slice(0, 150),
+          };
+        }
+      } catch (gErr: any) {
+        groqBackup = {
+          configured: true,
+          status: "FAILED / NETWORK_ERROR",
+          maskedKey: `...${groqKey.slice(-4)}`,
+          latencyMs: Date.now() - groqStart,
+          error: gErr?.message || String(gErr),
+        };
+      }
+    }
+
     res.json({
-      success: workingCount > 0,
+      success: workingCount > 0 || groqBackup.status === "ACTIVE & WORKING",
       totalKeysConfigured: keys.length,
       workingKeysCount: workingCount,
-      failoverReady: workingCount > 1,
+      failoverReady: workingCount > 1 || groqBackup.status === "ACTIVE & WORKING",
       cachedPrescriptionsCount: prescriptionAnalysisCache.size,
       cachedMedicinesCount: singleMedicineCache.size,
       keys: results,
+      secondaryBackup: groqBackup,
       summary:
         workingCount > 1
-          ? `All ${workingCount} keys are active and verified. If Key 1 reaches its quota or fails, the server will seamlessly failover to Key 2.`
+          ? `All ${workingCount} Gemini keys are active and verified. If Key 1 reaches its quota or fails, the server will seamlessly failover to Key 2${groqBackup.status === 'ACTIVE & WORKING' ? ', followed by Groq Llama 3.2 Vision' : ''}.`
           : workingCount === 1
-          ? `1 key is working. Add a second valid key to enable automatic failover.`
-          : `No keys are working. Please check your Railway variables.`,
+          ? `1 Gemini key is working. ${groqBackup.status === 'ACTIVE & WORKING' ? 'Groq backup is active for failover.' : 'Add GROQ_API_KEY or a second Gemini key to enable automatic failover.'}`
+          : groqBackup.status === 'ACTIVE & WORKING'
+          ? `Gemini keys are exhausted, but Groq backup is ACTIVE & WORKING!`
+          : `No AI keys are currently working. Please check your Railway variables.`,
     });
   });
 
@@ -1517,16 +1674,34 @@ Scan the prescription thoroughly for any diagnostic workup written under "Adv:",
 
       parts.push({ text: userPrompt });
 
-      const responseText = await callGeminiWithRetry({
-        contents: { parts },
-        primaryModel: "gemini-3.5-flash-lite",
-        config: {
-          systemInstruction: systemPrompt,
-          responseMimeType: "application/json",
-          responseSchema: analysisSchema,
-          temperature: 0.1,
-        },
-      });
+      let responseText: string;
+      try {
+        responseText = await callGeminiWithRetry({
+          contents: { parts },
+          primaryModel: "gemini-3.5-flash-lite",
+          config: {
+            systemInstruction: systemPrompt,
+            responseMimeType: "application/json",
+            responseSchema: analysisSchema,
+            temperature: 0.1,
+          },
+        });
+      } catch (geminiErr: any) {
+        if (getGroqApiKey()) {
+          console.warn(
+            "[Failover] All Gemini keys/models failed or throttled. Failing over seamlessly to Groq Llama 3.2 Vision...",
+            geminiErr?.message || geminiErr
+          );
+          responseText = await callGroqWithRetry({
+            promptText: userPrompt,
+            systemInstruction: systemPrompt,
+            imageBase64: cleanBase64,
+            mimeType: detectedMime,
+          });
+        } else {
+          throw geminiErr;
+        }
+      }
 
       const parsedData = cleanAndParseJson(responseText);
       // Apply Smart NLP Post-Processing layer (RapidFuzz, Brand->Generic, Dictionary, Confidence Scoring)
@@ -1578,16 +1753,32 @@ Scan the prescription thoroughly for any diagnostic workup written under "Adv:",
       const prompt = `Provide a comprehensive, patient-friendly medical profile and usage guide for the medicine: "${medicineName.trim()}".
 Include its generic name, primary uses, mechanism of action, typical dosage forms, food instructions, meal relations, precautions, common side effects, red-flag symptoms, interactions, and missed dose advice.`;
 
-      const responseText = await callGeminiWithRetry({
-        contents: prompt,
-        primaryModel: "gemini-3.5-flash-lite",
-        config: {
-          systemInstruction: "You are an expert pharmacist creating patient education guides for medications.",
-          responseMimeType: "application/json",
-          responseSchema: singleMedicineSchema,
-          temperature: 0.1,
-        },
-      });
+      let responseText: string;
+      try {
+        responseText = await callGeminiWithRetry({
+          contents: prompt,
+          primaryModel: "gemini-3.5-flash-lite",
+          config: {
+            systemInstruction: "You are an expert pharmacist creating patient education guides for medications.",
+            responseMimeType: "application/json",
+            responseSchema: singleMedicineSchema,
+            temperature: 0.1,
+          },
+        });
+      } catch (geminiErr: any) {
+        if (getGroqApiKey()) {
+          console.warn(
+            "[Failover] Gemini failed for medicine lookup. Failing over seamlessly to Groq...",
+            geminiErr?.message || geminiErr
+          );
+          responseText = await callGroqWithRetry({
+            promptText: prompt,
+            systemInstruction: "You are an expert pharmacist creating patient education guides for medications.",
+          });
+        } else {
+          throw geminiErr;
+        }
+      }
 
       const parsedData = cleanAndParseJson(responseText);
 
