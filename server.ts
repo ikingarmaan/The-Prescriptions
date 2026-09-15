@@ -1410,11 +1410,49 @@ async function startServer() {
             preview: response.text?.trim() || "OK",
           });
         } catch (err: any) {
+          const errStr = err?.message || String(err);
+          // If SDK failed with ACCESS_TOKEN_TYPE_UNSUPPORTED, test if direct REST with ?key= query works
+          if (errStr.includes("ACCESS_TOKEN_TYPE_UNSUPPORTED")) {
+            try {
+              const restRes = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(key)}`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    contents: [{ parts: [{ text: "Respond with only the single word: OK" }] }],
+                  }),
+                }
+              );
+              if (restRes.ok) {
+                const restData = (await restRes.json()) as any;
+                const outText = restData?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "OK";
+                modelChecks.push({
+                  model: m,
+                  status: "ACTIVE & WORKING",
+                  latencyMs: Date.now() - start,
+                  preview: outText,
+                });
+                continue;
+              } else {
+                const restErr = await restRes.text();
+                modelChecks.push({
+                  model: m,
+                  status: "FAILED / QUOTA EXHAUSTED",
+                  latencyMs: Date.now() - start,
+                  error: `REST HTTP ${restRes.status}: ${restErr}`,
+                });
+                continue;
+              }
+            } catch {
+              // fallback to standard error logging below
+            }
+          }
           modelChecks.push({
             model: m,
             status: "FAILED / QUOTA EXHAUSTED",
             latencyMs: Date.now() - start,
-            error: err?.message || String(err),
+            error: errStr,
           });
         }
       }
