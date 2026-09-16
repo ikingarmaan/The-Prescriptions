@@ -1183,43 +1183,26 @@ async function startServer() {
       return res.redirect(301, `https://${host}${req.url}`);
     }
 
-    // Modern Enterprise Security Headers
+    // Global CORS headers for all requests (prevents corporate proxy CORS blocks on module scripts)
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, HEAD");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, x-goog-api-key, Range, Origin, X-Requested-With, Accept");
+    res.setHeader("Access-Control-Expose-Headers", "Content-Length, Content-Range");
+
+    if (req.method === "OPTIONS") {
+      return res.sendStatus(204);
+    }
+
+    // Modern Enterprise Security Headers (Safe for all corporate proxies & VDI environments)
     res.setHeader("X-Content-Type-Options", "nosniff");
     res.setHeader("X-Frame-Options", "SAMEORIGIN");
     res.setHeader("X-XSS-Protection", "1; mode=block");
     res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
     res.setHeader("Permissions-Policy", "camera=(self), microphone=(), geolocation=()");
-    res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
     res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
 
     if (req.secure || forwardedProto === "https") {
       res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
-    }
-
-    // Permissive, valid Content-Security-Policy approved by Corporate Firewalls
-    res.setHeader(
-      "Content-Security-Policy",
-      [
-        "default-src 'self'",
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com",
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-        "font-src 'self' https://fonts.gstatic.com data:",
-        "img-src 'self' data: blob: https:",
-        "connect-src 'self' https://www.googletagmanager.com https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://generativelanguage.googleapis.com https://api.groq.com https://api.x.ai",
-        "worker-src 'self' blob:",
-        "child-src 'self' blob:",
-        "frame-ancestors 'self'",
-      ].join("; ")
-    );
-
-    // Standard CORS for API routes
-    if (req.path.startsWith("/api/")) {
-      res.setHeader("Access-Control-Allow-Origin", "*");
-      res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-      res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, x-goog-api-key");
-      if (req.method === "OPTIONS") {
-        return res.sendStatus(204);
-      }
     }
 
     next();
@@ -2186,9 +2169,29 @@ Include its generic name, primary uses, mechanism of action, typical dosage form
       })
     );
 
-    // 2. Explicit 404 for missing static chunks under /assets/
-    // Strictly prevents "SyntaxError: Unexpected token '<'" caused by sending HTML as JS
-    app.use("/assets", (_req: Request, res: Response) => {
+    // 2. Intelligent Stale Chunk Recovery under /assets/
+    // If a corporate proxy or client with cached index.html requests an old chunk hash (e.g. index-OLD.js),
+    // serve the current active matching chunk instead of failing with 404!
+    app.use("/assets", (req: Request, res: Response) => {
+      const requestedFile = req.path.replace(/^\//, "");
+      const assetsDir = path.join(distPath, "assets");
+      try {
+        if (fs.existsSync(assetsDir)) {
+          const files = fs.readdirSync(assetsDir);
+          const prefix = requestedFile.split("-")[0];
+          const ext = path.extname(requestedFile);
+          if (prefix && ext) {
+            const matched = files.find((f) => f.startsWith(prefix + "-") && f.endsWith(ext));
+            if (matched) {
+              res.setHeader("Cache-Control", "no-cache, must-revalidate");
+              res.setHeader("Access-Control-Allow-Origin", "*");
+              return res.sendFile(path.join(assetsDir, matched));
+            }
+          }
+        }
+      } catch {
+        // Fall through
+      }
       res.setHeader("Cache-Control", "no-store");
       res.status(404).send("Asset not found");
     });
