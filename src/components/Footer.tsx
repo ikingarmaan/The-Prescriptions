@@ -50,8 +50,10 @@ export const Footer: React.FC<FooterProps> = ({ activeTab, setActiveTab, onOpenP
 
   return (
     <footer className="relative z-30 mt-auto border-t border-slate-700/70 bg-gradient-to-b from-slate-900 via-[#0b1626] to-[#07101e] text-slate-100 text-xs sm:text-sm print:hidden pb-20 md:pb-6 shadow-2xl overflow-hidden">
-      {/* Decorative Top Multi-Color Glowing Gradient Bar */}
-      <div className="h-1.5 w-full bg-gradient-to-r from-emerald-400 via-teal-300 via-cyan-400 via-indigo-400 to-emerald-400 animate-gradient-shift shadow-[0_0_20px_rgba(52,211,153,0.5)]" />
+      {/* Decorative Top Multi-Color Glowing Gradient Bar (GPU-composited translate3d) */}
+      <div className="h-1.5 w-full overflow-hidden relative shadow-[0_0_20px_rgba(52,211,153,0.5)]">
+        <div className="absolute inset-y-0 -left-[50%] w-[200%] bg-gradient-to-r from-emerald-400 via-teal-300 via-cyan-400 via-indigo-400 to-emerald-400 animate-gpu-slide" />
+      </div>
 
       {/* Dynamic Animated Ambient Background Glow Orbs */}
       <div className="absolute top-0 left-1/4 -translate-x-1/2 w-[480px] h-[280px] bg-emerald-500/10 rounded-full blur-[90px] animate-pulse-glow pointer-events-none" />

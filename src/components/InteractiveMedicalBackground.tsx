@@ -161,22 +161,33 @@ export function InteractiveMedicalBackground() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Track mouse coordinates normalized (-1 to 1 from center)
+  // Track mouse coordinates normalized (-1 to 1 from center) with RAF throttle
   useEffect(() => {
+    // Disable active mouse tracking on touch devices / mobile to save CPU & battery
+    if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(pointer: coarse)').matches) {
+      return;
+    }
+
+    let rafId: number | null = null;
     const handleMouseMove = (e: MouseEvent) => {
-      try {
-        const w = (typeof window !== 'undefined' && window.innerWidth) ? window.innerWidth : 1200;
-        const h = (typeof window !== 'undefined' && window.innerHeight) ? window.innerHeight : 800;
-        const x = (e.clientX / w) * 2 - 1;
-        const y = (e.clientY / h) * 2 - 1;
-        setMousePos({ x: isNaN(x) ? 0 : x, y: isNaN(y) ? 0 : y });
-      } catch {
-        // Ignore coordinate calculation errors
-      }
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => {
+        try {
+          const w = (typeof window !== 'undefined' && window.innerWidth) ? window.innerWidth : 1200;
+          const h = (typeof window !== 'undefined' && window.innerHeight) ? window.innerHeight : 800;
+          const x = (e.clientX / w) * 2 - 1;
+          const y = (e.clientY / h) * 2 - 1;
+          setMousePos({ x: isNaN(x) ? 0 : x, y: isNaN(y) ? 0 : y });
+        } catch {}
+        rafId = null;
+      });
     };
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, []);
 
   const triggerItemReaction = useCallback((id: string) => {
@@ -225,8 +236,8 @@ export function InteractiveMedicalBackground() {
         }}
       />
 
-      {/* 3. Floating Medical Entities (Syringes, Injections, Pills, Stethoscopes) */}
-      {MEDICAL_ITEMS.map((item, index) => {
+      {/* 3. Floating Medical Entities (Optimized count on mobile to reduce DOM elements) */}
+      {(windowSize.width < 768 ? MEDICAL_ITEMS.slice(0, 4) : MEDICAL_ITEMS).map((item, index) => {
         // Calculate coordinate in pixels
         const itemPixelX = (item.baseX / 100) * windowSize.width;
         const itemPixelY = (item.baseY / 100) * windowSize.height;

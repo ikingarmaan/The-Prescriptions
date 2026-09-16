@@ -2146,6 +2146,21 @@ Include its generic name, primary uses, mechanism of action, typical dosage form
     }
   });
 
+  // Agentic Browsing & AI Crawler endpoint (llmstxt.org specification)
+  app.get("/llms.txt", (_req: Request, res: Response) => {
+    const file = path.join(distPath, "llms.txt");
+    const fallbackPath = path.join(process.cwd(), "public", "llms.txt");
+    const targetFile = fs.existsSync(file) ? file : fallbackPath;
+
+    if (fs.existsSync(targetFile)) {
+      res.setHeader("Content-Type", "text/plain; charset=utf-8");
+      res.setHeader("Cache-Control", "public, max-age=86400");
+      res.sendFile(targetFile);
+    } else {
+      res.status(404).send("Not found");
+    }
+  });
+
   if (!isProduction) {
     const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({

@@ -1,40 +1,17 @@
 @import "tailwindcss";
 
-@keyframes gradientShift {
+@keyframes gpuSlide {
   0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
+    transform: translate3d(-30%, 0, 0);
   }
   100% {
-    background-position: 0% 50%;
+    transform: translate3d(0%, 0, 0);
   }
 }
 
-@keyframes pulseGlow {
-  0%, 100% {
-    opacity: 0.2;
-    transform: scale(1) translate(0, 0);
-  }
-  50% {
-    opacity: 0.4;
-    transform: scale(1.1) translate(12px, -8px);
-  }
-}
-
-@keyframes ecgPulse {
-  0% {
-    stroke-dashoffset: 400;
-  }
-  100% {
-    stroke-dashoffset: 0;
-  }
-}
-
-.animate-gradient-shift {
-  background-size: 250% 250%;
-  animation: gradientShift 6s ease infinite;
+.animate-gpu-slide {
+  animation: gpuSlide 6s ease-in-out infinite alternate;
+  will-change: transform;
 }
 
 .animate-pulse-glow {

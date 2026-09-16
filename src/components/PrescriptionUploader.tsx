@@ -177,14 +177,14 @@ export const PrescriptionUploader: React.FC<PrescriptionUploaderProps> = ({
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 relative z-10">
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold mb-2.5 border border-emerald-400/30 backdrop-blur-xs">
-                <Stethoscope className="w-3.5 h-3.5 text-emerald-400" />
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-900/60 text-emerald-200 text-xs font-semibold mb-2.5 border border-emerald-500/50 backdrop-blur-xs">
+                <Stethoscope className="w-3.5 h-3.5 text-emerald-300" />
                 <span>AI Clinical Handwriting & Prescription Decryption</span>
               </div>
               <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight">
                 Decode Your Doctor's Prescription
               </h2>
-              <p className="text-xs sm:text-sm text-emerald-100/80 mt-1.5 max-w-2xl leading-relaxed">
+              <p className="text-xs sm:text-sm text-emerald-100 mt-1.5 max-w-2xl leading-relaxed font-normal">
                 Upload a photo of your doctor's handwritten slip or paste notes. Our 5-stage clinical handwriting engine deciphers cursive doctor shorthand, confirms active medicine salts, and verifies safe dosage timings.
               </p>
             </div>
@@ -290,7 +290,7 @@ export const PrescriptionUploader: React.FC<PrescriptionUploaderProps> = ({
                         e.stopPropagation();
                         setIsCameraOpen(true);
                       }}
-                      className="px-5 py-3.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
+                      className="px-5 py-3.5 bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white text-xs sm:text-sm font-bold rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
                     >
                       <Camera className="w-4 h-4" />
                       Take Photo with Camera
@@ -456,7 +456,7 @@ Adv / Inv:
               >
                 Optional Patient Context / Symptoms
               </label>
-              <span className="text-[11px] text-slate-400">Optional</span>
+              <span className="text-[11px] text-slate-600 font-medium">Optional</span>
             </div>
             <input
               id="patient-context-input"

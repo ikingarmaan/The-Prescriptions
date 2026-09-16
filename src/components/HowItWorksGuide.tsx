@@ -216,11 +216,11 @@ export const HowItWorksGuide: React.FC<HowItWorksGuideProps> = ({
                   : 'bg-slate-900/60 border-slate-800/80 hover:bg-slate-800/50 hover:border-slate-700'
               }`}
             >
-              {/* Progress Bar inside active step */}
+              {/* Progress Bar inside active step (GPU-composited scaleX to prevent forced reflow) */}
               {isActive && (
                 <div
-                  className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-emerald-400 to-cyan-400 transition-all"
-                  style={{ width: `${isPlaying ? progress : 100}%` }}
+                  className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 to-cyan-400 origin-left transition-transform duration-100 ease-linear"
+                  style={{ transform: `scaleX(${isPlaying ? progress / 100 : 1})` }}
                 />
               )}
 
@@ -309,7 +309,7 @@ export const HowItWorksGuide: React.FC<HowItWorksGuideProps> = ({
             <button
               type="button"
               onClick={() => handleSelectStep((activeStepIndex + 1) % USER_STEPS.length)}
-              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-colors cursor-pointer flex items-center gap-1.5"
+              className="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
             >
               <span>Next Step</span>
               <ArrowRight className="w-3.5 h-3.5" />

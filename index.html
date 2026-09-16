@@ -104,8 +104,7 @@
     <link rel="preconnect" href="https://www.google-analytics.com" crossorigin />
     <link rel="dns-prefetch" href="https://www.google-analytics.com" />
 
-    <!-- Google Analytics 4 (GA4): gtag.js with resilient fallback -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-2ESSBNEX33" onerror="this.onerror=null;"></script>
+    <!-- Google Analytics 4 (GA4): gtag.js with deferred non-blocking loader -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
@@ -113,6 +112,26 @@
       gtag('js', new Date());
       gtag('config', 'G-2ESSBNEX33', { send_page_view: false });
       window.GA_MEASUREMENT_ID = 'G-2ESSBNEX33';
+
+      // Load GTM lazily so it never blocks LCP, FCP, or main-thread evaluation
+      function __loadAnalytics() {
+        if (window.__gtagScriptLoaded) return;
+        window.__gtagScriptLoaded = true;
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-2ESSBNEX33';
+        s.onerror = function() {};
+        document.head.appendChild(s);
+      }
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(function() { setTimeout(__loadAnalytics, 1200); }, { timeout: 3000 });
+      } else {
+        window.addEventListener('load', function() { setTimeout(__loadAnalytics, 1200); });
+      }
+      ['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach(function(evt) {
+        window.addEventListener(evt, __loadAnalytics, { once: true, passive: true });
+      });
+    </script>
 
       // Enterprise Watchdog & Resource Error Handler
       window.__appMounted = false;

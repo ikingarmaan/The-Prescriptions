@@ -1,6 +1,4 @@
 import { PrescriptionAnalysisResult } from '../types';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 
 /**
  * Generates a clean, standalone, beautifully styled HTML document of the medication card
@@ -548,7 +546,13 @@ export function generateMedicationCardText(prescription: PrescriptionAnalysisRes
  * Generates an authentic, professionally designed multi-page PDF document (.pdf)
  * of the medication card and triggers immediate browser download.
  */
-export function generateAndDownloadMedicationCardPdf(prescription: PrescriptionAnalysisResult): void {
+export async function generateAndDownloadMedicationCardPdf(prescription: PrescriptionAnalysisResult): Promise<void> {
+  const [{ default: jsPDF }, autoTableModule] = await Promise.all([
+    import('jspdf'),
+    import('jspdf-autotable'),
+  ]);
+  const autoTable = (autoTableModule as any).default || autoTableModule;
+
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',

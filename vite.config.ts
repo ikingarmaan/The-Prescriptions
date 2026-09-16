@@ -14,6 +14,7 @@ export default defineConfig(() => {
     build: {
       target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari14'],
       cssTarget: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari14'],
+      modulePreload: false,
       rollupOptions: {
         output: {
           manualChunks(id) {
