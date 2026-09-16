@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BookOpen, Search, Filter } from 'lucide-react';
-import { MEDICAL_ABBREVIATIONS } from '../data/medicalData';
+import { MEDICAL_ABBREVIATIONS } from '../data/abbreviationsData';
 
 export const AbbreviationDictionary: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');

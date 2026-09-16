@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar, AppNavTab } from './components/Navbar';
 import { PrescriptionUploader } from './components/PrescriptionUploader';
-import { PrescriptionResultView } from './components/PrescriptionResultView';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { InteractiveMedicalBackground } from './components/InteractiveMedicalBackground';
 import { GlowingCursor } from './components/GlowingCursor';
@@ -11,17 +10,18 @@ import { ShieldCheck, Stethoscope, Heart, AlertCircle, Sparkles, AlertTriangle, 
 import { postProcessPrescriptionResultWithNLP } from './utils/smartNlpEngine';
 import { createSamplePreprocessingReport } from './utils/imagePreprocessing';
 import { getLearnedCorrections } from './utils/hitlLearningEngine';
-import { UnunderstoodMedicinePopup } from './components/UnunderstoodMedicinePopup';
-import { PrescriptionAnalyzingInteractiveModal } from './components/PrescriptionAnalyzingInteractiveModal';
 import type { InfoPageType } from './components/InfoPages';
-import { FaqSection } from './components/FaqSection';
 import { ThePrescriptionLogo } from './components/ThePrescriptionLogo';
-import { HowItWorksGuide } from './components/HowItWorksGuide';
 import { Footer } from './components/Footer';
 import { HomeSeoArticle } from './components/HomeSeoArticle';
 import { useSeoMetadata } from './utils/seo';
 
-// Lazy-load non-critical tabs and heavy PDF generation bundles to minimize initial load time
+// Lazy-load non-critical tabs, result views, and below-the-fold sections to achieve ultra-low initial JS payload
+const PrescriptionResultView = React.lazy(() => import('./components/PrescriptionResultView').then((m) => ({ default: m.PrescriptionResultView })));
+const HowItWorksGuide = React.lazy(() => import('./components/HowItWorksGuide').then((m) => ({ default: m.HowItWorksGuide })));
+const FaqSection = React.lazy(() => import('./components/FaqSection').then((m) => ({ default: m.FaqSection })));
+const PrescriptionAnalyzingInteractiveModal = React.lazy(() => import('./components/PrescriptionAnalyzingInteractiveModal').then((m) => ({ default: m.PrescriptionAnalyzingInteractiveModal })));
+const UnunderstoodMedicinePopup = React.lazy(() => import('./components/UnunderstoodMedicinePopup').then((m) => ({ default: m.UnunderstoodMedicinePopup })));
 const MedicineLookup = React.lazy(() => import('./components/MedicineLookup').then((m) => ({ default: m.MedicineLookup })));
 const AbbreviationDictionary = React.lazy(() => import('./components/AbbreviationDictionary').then((m) => ({ default: m.AbbreviationDictionary })));
 const PrintableMedicationCard = React.lazy(() => import('./components/PrintableMedicationCard').then((m) => ({ default: m.PrintableMedicationCard })));
@@ -376,29 +376,35 @@ export default function App() {
                   error={error}
                 />
                 {isPrescriptionUnunderstood && (
-                  <UnunderstoodMedicinePopup
-                    onClose={handleReset}
-                    onUploadNew={handleReset}
-                    onSelectSample={handleSelectSample}
-                    onConfirmMedicine={(newName, canonicalGeneric, extraDetails) => {
-                      handleConfirmOrEditMedicine(0, newName, canonicalGeneric, extraDetails);
-                    }}
-                  />
+                  <React.Suspense fallback={null}>
+                    <UnunderstoodMedicinePopup
+                      onClose={handleReset}
+                      onUploadNew={handleReset}
+                      onSelectSample={handleSelectSample}
+                      onConfirmMedicine={(newName, canonicalGeneric, extraDetails) => {
+                        handleConfirmOrEditMedicine(0, newName, canonicalGeneric, extraDetails);
+                      }}
+                    />
+                  </React.Suspense>
                 )}
 
                 {/* Interactive Animated "How It Works" Guide - Displayed ONLY on Home Page */}
-                <HowItWorksGuide
-                  onStartUpload={() => {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  onSelectSample={handleSelectSample}
-                />
+                <React.Suspense fallback={<div className="min-h-[100px]" />}>
+                  <HowItWorksGuide
+                    onStartUpload={() => {
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    onSelectSample={handleSelectSample}
+                  />
+                </React.Suspense>
 
                 {/* Homepage Embedded FAQ Section */}
-                <FaqSection
-                  variant="homepage"
-                  onNavigateToTab={(tab) => setActiveTab(tab as AppNavTab)}
-                />
+                <React.Suspense fallback={<div className="min-h-[100px]" />}>
+                  <FaqSection
+                    variant="homepage"
+                    onNavigateToTab={(tab) => setActiveTab(tab as AppNavTab)}
+                  />
+                </React.Suspense>
 
                 {/* High-Visibility Clinical Tools & Quick Actions directly below FAQ */}
                 <div className="pt-6 pb-2">
@@ -516,12 +522,14 @@ export default function App() {
               </>
             ) : (
               <ErrorBoundary onReset={handleReset} fallbackTitle="Prescription Display Error">
-                <PrescriptionResultView
-                  result={analysisResult}
-                  onReset={handleReset}
-                  onOpenPrintModal={() => setIsPrintModalOpen(true)}
-                  onConfirmOrEditMedicine={handleConfirmOrEditMedicine}
-                />
+                <React.Suspense fallback={<TabLoadingFallback />}>
+                  <PrescriptionResultView
+                    result={analysisResult}
+                    onReset={handleReset}
+                    onOpenPrintModal={() => setIsPrintModalOpen(true)}
+                    onConfirmOrEditMedicine={handleConfirmOrEditMedicine}
+                  />
+                </React.Suspense>
               </ErrorBoundary>
             )}
           </div>
@@ -547,10 +555,14 @@ export default function App() {
       </main>
 
       {/* Interactive HUD during Prescription Analysis */}
-      <PrescriptionAnalyzingInteractiveModal
-        isLoading={isLoading}
-        uploadedImage={analyzingImage}
-      />
+      {isLoading && (
+        <React.Suspense fallback={null}>
+          <PrescriptionAnalyzingInteractiveModal
+            isLoading={isLoading}
+            uploadedImage={analyzingImage}
+          />
+        </React.Suspense>
+      )}
 
       {/* Printable Medication Card Modal */}
       {isPrintModalOpen && analysisResult && (

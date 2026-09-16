@@ -45,32 +45,44 @@ export const initGA = (customId?: string): boolean => {
     return true;
   }
 
-  // Initialize dataLayer and gtag function
+  // Ensure dataLayer and gtag function exist
   window.dataLayer = window.dataLayer || [];
-  window.gtag = function () {
-    window.dataLayer.push(arguments);
-  };
+  if (typeof window.gtag !== 'function') {
+    window.gtag = function () {
+      window.dataLayer.push(arguments);
+    };
+    window.gtag('js', new Date());
+    window.gtag('config', measurementId, {
+      send_page_view: false, // We dispatch virtual pageviews manually on tab/route changes
+    });
+  }
 
-  window.gtag('js', new Date());
+  // Prevent duplicate script injection if already loaded or managed by index.html
+  const existingScript =
+    document.getElementById('ga-gtag-script') ||
+    document.querySelector(`script[src*="googletagmanager.com/gtag/js"]`);
 
-  // Configure GA4 with manual SPA pageview management
-  window.gtag('config', measurementId, {
-    send_page_view: false, // We dispatch virtual pageviews manually on tab/route changes
-  });
+  if (existingScript || (window as any).__gtagScriptLoaded) {
+    isInitialized = true;
+    return true;
+  }
 
-  // Inject script tag if not already present
+  // If index.html has defined the deferred loader, do not inject eagerly here
+  if (typeof (window as any).__loadAnalytics === 'function') {
+    isInitialized = true;
+    return true;
+  }
+
+  // Fallback injection only if no loader is configured in index.html
   try {
-    const existingScript = document.getElementById('ga-gtag-script');
-    if (!existingScript) {
-      const script = document.createElement('script');
-      script.id = 'ga-gtag-script';
-      script.async = true;
-      script.onerror = () => {
-        // Silently ignore if blocked by adblockers, DNS filters, or corporate firewalls
-      };
-      script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
-      document.head.appendChild(script);
-    }
+    const script = document.createElement('script');
+    script.id = 'ga-gtag-script';
+    script.async = true;
+    script.onerror = () => {
+      // Silently ignore if blocked by adblockers, DNS filters, or corporate firewalls
+    };
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
+    document.head.appendChild(script);
   } catch {
     // Ignore DOM injection errors on restricted environments
   }

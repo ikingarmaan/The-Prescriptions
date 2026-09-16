@@ -25,9 +25,6 @@ export default defineConfig(() => {
               if (id.includes('lucide-react')) {
                 return 'vendor-icons';
               }
-              if (id.includes('jspdf') || id.includes('html2canvas') || id.includes('purify')) {
-                return 'vendor-pdf';
-              }
             }
           },
         },

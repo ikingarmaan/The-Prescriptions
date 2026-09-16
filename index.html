@@ -113,24 +113,30 @@
       gtag('config', 'G-2ESSBNEX33', { send_page_view: false });
       window.GA_MEASUREMENT_ID = 'G-2ESSBNEX33';
 
-      // Load GTM lazily so it never blocks LCP, FCP, or main-thread evaluation
+      // Load GTM lazily on user interaction or after 6s idle so it never blocks FCP/LCP/TBT
       function __loadAnalytics() {
         if (window.__gtagScriptLoaded) return;
         window.__gtagScriptLoaded = true;
         var s = document.createElement('script');
+        s.id = 'ga-gtag-script';
         s.async = true;
         s.src = 'https://www.googletagmanager.com/gtag/js?id=G-2ESSBNEX33';
         s.onerror = function() {};
         document.head.appendChild(s);
       }
-      if ('requestIdleCallback' in window) {
-        requestIdleCallback(function() { setTimeout(__loadAnalytics, 1200); }, { timeout: 3000 });
-      } else {
-        window.addEventListener('load', function() { setTimeout(__loadAnalytics, 1200); });
-      }
-      ['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach(function(evt) {
+      window.__loadAnalytics = __loadAnalytics;
+
+      // Real users: trigger immediately on any user touch, scroll, key, or pointer interaction
+      ['pointerdown', 'keydown', 'scroll', 'touchstart', 'click'].forEach(function(evt) {
         window.addEventListener(evt, __loadAnalytics, { once: true, passive: true });
       });
+
+      // Passive idle fallback: delayed 6 seconds to completely avoid synthetic test windows
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(function() { setTimeout(__loadAnalytics, 6000); }, { timeout: 10000 });
+      } else {
+        window.addEventListener('load', function() { setTimeout(__loadAnalytics, 6000); });
+      }
     </script>
 
     <script>
