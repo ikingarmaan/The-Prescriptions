@@ -110,9 +110,9 @@ ${
                 )}
               </div>
 
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight">
                 {result.suspectedCondition || 'Prescription Analysis & Medicine Guide'}
-              </h2>
+              </h1>
 
               <p className="text-xs sm:text-sm text-emerald-100/80 leading-relaxed">
                 {result.generalExplanation}

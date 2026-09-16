@@ -46,9 +46,9 @@ export const AbbreviationDictionary: React.FC = () => {
               <BookOpen className="w-3.5 h-3.5 text-purple-400" />
               <span>Prescription Latin Shorthand Codex</span>
             </div>
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight">
               Doctor Abbreviation Dictionary
-            </h2>
+            </h1>
             <p className="text-xs sm:text-sm text-purple-100/80 mt-1.5 max-w-2xl leading-relaxed">
               Look up shorthand Latin medical symbols, timing directives, and dosage codes (OD, BD, TDS, AC, PC, SOS) written by physicians.
             </p>

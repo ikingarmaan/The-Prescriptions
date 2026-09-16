@@ -181,9 +181,9 @@ export const PrescriptionUploader: React.FC<PrescriptionUploaderProps> = ({
                 <Stethoscope className="w-3.5 h-3.5 text-emerald-300" />
                 <span>AI Clinical Handwriting & Prescription Decryption</span>
               </div>
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight">
                 Decode Your Doctor's Prescription
-              </h2>
+              </h1>
               <p className="text-xs sm:text-sm text-emerald-100 mt-1.5 max-w-2xl leading-relaxed font-normal">
                 Upload a photo of your doctor's handwritten slip or paste notes. Our 5-stage clinical handwriting engine deciphers cursive doctor shorthand, confirms active medicine salts, and verifies safe dosage timings.
               </p>

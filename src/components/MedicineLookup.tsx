@@ -111,9 +111,9 @@ export const MedicineLookup: React.FC = () => {
               <Pill className="w-3.5 h-3.5 text-blue-400" />
               <span>Medicine & Salt Verification Encyclopedia</span>
             </div>
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight">
               Check Any Medicine & Its Usage
-            </h2>
+            </h1>
             <p className="text-xs sm:text-sm text-blue-100/80 mt-1.5 max-w-2xl leading-relaxed">
               Search any brand name or generic compound to understand its clinical purpose, food interactions, safety precautions, and side effects.
             </p>
