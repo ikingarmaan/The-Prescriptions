@@ -13,15 +13,15 @@ export const SEO_METADATA_BY_TAB: Record<AppNavTab, PageSeoMetadata> = {
   prescription: {
     title: 'Theprescription - AI Prescription & Doctor Handwriting Deciphering Assistant',
     description:
-      'AI-powered prescription assistant that deciphers messy doctor handwriting, explains generic medicine salts, organizes dosage timing rules (1-0-1, BD, TDS), and creates printable schedules.',
+      'Read doctor handwriting and prescriptions online with AI. Find generic medicines, decode dosage timings (1-0-1, BD), and get a printable schedule.',
     keywords:
-      'AI prescription reader, decipher doctor handwriting online, understand handwritten prescription, medicine schedule generator, doctor handwriting decoder, prescription checker, pharmacy notes deciphering',
+      'AI prescription reader, read doctor handwriting online, understand handwritten prescription, medicine schedule generator, doctor handwriting decoder, prescription checker, pharmacy notes deciphering',
     canonicalUrl: 'https://www.theprescription.in/',
   },
   lookup: {
     title: 'Medicine & Generic Salt Directory - Find Active Molecules & Brand Equivalents | Theprescription',
     description:
-      'Explore 5,000+ brand medicines and their active generic pharmaceutical salts. Learn therapeutic equivalents, dosage forms, safe food timings, and precautions.',
+      'Search 5,000+ brand medicines and active generic salts. Find affordable equivalents, dosage forms, side effects, and safe food timing rules.',
     keywords:
       'generic medicine lookup, active pharmaceutical salt, brand to generic converter, medicine directory, Augmentin generic, Metformin salt, drug food interactions, prescription salts catalog',
     canonicalUrl: 'https://www.theprescription.in/#lookup',
@@ -29,7 +29,7 @@ export const SEO_METADATA_BY_TAB: Record<AppNavTab, PageSeoMetadata> = {
   abbreviations: {
     title: 'Doctor Abbreviation Dictionary - Latin Prescription Shorthand Decoded | Theprescription',
     description:
-      'Decipher doctor Latin abbreviations including 1-0-1, OD, BD, TDS, AC, PC, SOS, HS, and STAT. Understand physician handwriting codes and 24-hour daily timing schedules.',
+      'Decode doctor prescription abbreviations like 1-0-1, OD, BD, TDS, AC, and PC. Understand Latin medical shorthand and 24-hour daily dosage rules.',
     keywords:
       'doctor prescription abbreviations, 1-0-1 meaning, BD OD TDS medical meaning, Latin Rx shorthand dictionary, AC PC food timing, medical abbreviations decoder, prescription codes explained',
     canonicalUrl: 'https://www.theprescription.in/#abbreviations',
@@ -37,7 +37,7 @@ export const SEO_METADATA_BY_TAB: Record<AppNavTab, PageSeoMetadata> = {
   blog: {
     title: 'Clinical Blog & Prescription Guides - 17 In-Depth Health Articles | Theprescription',
     description:
-      'Explore 17 comprehensive, human-researched clinical guides on deciphering doctor handwriting, generic vs. brand drugs, prescription Latin codes (OD, BD, 1-0-1), dangerous food-drug interactions, pediatric dosing, and patient safety.',
+      'Read expert clinical guides on deciphering doctor handwriting, generic vs brand drugs, 1-0-1 dosage codes, food-drug interactions, and safety.',
     keywords:
       'prescription blog, doctor handwriting mystery, generic vs brand drugs, Latin prescription codes, drug food interactions, 1-0-1 dosage meaning, LASA drugs, antibiotic resistance, chronotherapy, empty stomach medicine, pediatric dosing safety, polypharmacy elderly, healthcare AI OCR',
     canonicalUrl: 'https://www.theprescription.in/#blog',
@@ -45,7 +45,7 @@ export const SEO_METADATA_BY_TAB: Record<AppNavTab, PageSeoMetadata> = {
   about: {
     title: 'About Our Mission - Health Literacy & Prescription Safety | Theprescription',
     description:
-      'Discover why Theprescription was built to bridge the gap between doctor penmanship and patient understanding. Learn about our zero-retention privacy and patient safety philosophy.',
+      'Learn how Theprescription helps patients understand messy doctor handwriting and prescriptions. Explore our mission and zero-data-retention privacy.',
     keywords:
       'Theprescription mission, healthcare accessibility, health literacy platform, patient medication safety, medical handwriting technology, zero storage health AI',
     canonicalUrl: 'https://www.theprescription.in/#about',
@@ -53,7 +53,7 @@ export const SEO_METADATA_BY_TAB: Record<AppNavTab, PageSeoMetadata> = {
   faq: {
     title: 'Medical & Prescription FAQs - 62 Clinical Questions Answered | Theprescription',
     description:
-      'Find answers to 62 essential questions regarding prescription deciphering, generic vs. brand medicines, food-drug interactions, storage protocols, and emergency safety.',
+      'Find answers to 62 common questions on prescription handwriting, generic medicines, food interactions, drug storage, and dosage safety.',
     keywords:
       'prescription FAQs, medicine questions and answers, medication safety guide, drug storage rules, missed dose protocol, antibiotic food spacing, patient health questions',
     canonicalUrl: 'https://www.theprescription.in/#faq',
@@ -61,7 +61,7 @@ export const SEO_METADATA_BY_TAB: Record<AppNavTab, PageSeoMetadata> = {
   contact: {
     title: 'Contact Clinical & Technical Support - Reach Our Team | Theprescription',
     description:
-      'Have questions, feedback on handwriting recognition, or clinical inquiries? Reach out to Theprescription team for support, bug reports, and partnership inquiries.',
+      'Contact Theprescription team for support, handwriting recognition feedback, or clinical questions. We are here to help patients and caregivers.',
     keywords:
       'contact Theprescription, prescription software support, medical feedback, pharmacist inquiries, handwriting recognition feedback',
     canonicalUrl: 'https://www.theprescription.in/#contact',
@@ -69,7 +69,7 @@ export const SEO_METADATA_BY_TAB: Record<AppNavTab, PageSeoMetadata> = {
   disclaimer: {
     title: 'Medical Application Disclaimer - Critical Safety Notice | Theprescription',
     description:
-      'Important regulatory, medical, and legal notice: Theprescription is an educational AI assistance platform and not a certified medical device. Always consult a doctor or pharmacist.',
+      'Educational notice: Theprescription is an AI health literacy tool and not a substitute for licensed medical advice. Always consult your doctor.',
     keywords:
       'medical disclaimer, AI health tool terms, not a medical device, clinical guidance policy, prescription verification requirement, patient safety warning',
     canonicalUrl: 'https://www.theprescription.in/#disclaimer',
@@ -77,7 +77,7 @@ export const SEO_METADATA_BY_TAB: Record<AppNavTab, PageSeoMetadata> = {
   privacy: {
     title: 'Privacy Policy - Ephemeral Zero-Storage Architecture | Theprescription',
     description:
-      'Read our strict zero-data-retention privacy policy. We process prescription images ephemerally in RAM with zero cloud archiving, zero user profiling, and zero medical data storage.',
+      'Our zero-storage privacy policy guarantees that prescription images are processed ephemerally in RAM. No photos or medical data are ever saved.',
     keywords:
       'prescription privacy policy, HIPAA privacy standards, zero retention health AI, ephemeral image decryption, healthcare data protection, private medical tool',
     canonicalUrl: 'https://www.theprescription.in/#privacy',
@@ -85,7 +85,7 @@ export const SEO_METADATA_BY_TAB: Record<AppNavTab, PageSeoMetadata> = {
   terms: {
     title: 'Terms & Conditions of Service - User Agreement | Theprescription',
     description:
-      'Review the terms of service governing access to Theprescription website, OCR handwriting deciphering utilities, intellectual property, and acceptable use policies.',
+      'Review the terms of service governing access to Theprescription website, OCR handwriting deciphering utilities, and acceptable use policies.',
     keywords:
       'terms of service medical software, user agreement health app, digital prescription terms, legal conditions health literacy, acceptable use policy',
     canonicalUrl: 'https://www.theprescription.in/#terms',
