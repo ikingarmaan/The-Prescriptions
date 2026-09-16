@@ -14,6 +14,7 @@ import type { InfoPageType } from './components/InfoPages';
 import { ThePrescriptionLogo } from './components/ThePrescriptionLogo';
 import { Footer } from './components/Footer';
 import { HomeSeoArticle } from './components/HomeSeoArticle';
+import { LazyOnVisible } from './components/LazyOnVisible';
 import { useSeoMetadata } from './utils/seo';
 
 // Lazy-load non-critical tabs, result views, and below-the-fold sections to achieve ultra-low initial JS payload
@@ -388,23 +389,27 @@ export default function App() {
                   </React.Suspense>
                 )}
 
-                {/* Interactive Animated "How It Works" Guide - Displayed ONLY on Home Page */}
-                <React.Suspense fallback={<div className="min-h-[100px]" />}>
-                  <HowItWorksGuide
-                    onStartUpload={() => {
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }}
-                    onSelectSample={handleSelectSample}
-                  />
-                </React.Suspense>
+                {/* Interactive Animated "How It Works" Guide - Viewport-deferred */}
+                <LazyOnVisible minHeight="200px">
+                  <React.Suspense fallback={<div className="min-h-[100px]" />}>
+                    <HowItWorksGuide
+                      onStartUpload={() => {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      onSelectSample={handleSelectSample}
+                    />
+                  </React.Suspense>
+                </LazyOnVisible>
 
-                {/* Homepage Embedded FAQ Section */}
-                <React.Suspense fallback={<div className="min-h-[100px]" />}>
-                  <FaqSection
-                    variant="homepage"
-                    onNavigateToTab={(tab) => setActiveTab(tab as AppNavTab)}
-                  />
-                </React.Suspense>
+                {/* Homepage Embedded FAQ Section - Viewport-deferred */}
+                <LazyOnVisible minHeight="200px">
+                  <React.Suspense fallback={<div className="min-h-[100px]" />}>
+                    <FaqSection
+                      variant="homepage"
+                      onNavigateToTab={(tab) => setActiveTab(tab as AppNavTab)}
+                    />
+                  </React.Suspense>
+                </LazyOnVisible>
 
                 {/* High-Visibility Clinical Tools & Quick Actions directly below FAQ */}
                 <div className="pt-6 pb-2">
@@ -517,8 +522,10 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Comprehensive SEO & Patient Health Literacy Guide (1,800+ Words) */}
-                <HomeSeoArticle onNavigateToTab={(tab) => setActiveTab(tab as AppNavTab)} />
+                {/* Comprehensive SEO & Patient Health Literacy Guide (1,800+ Words) - Viewport-deferred */}
+                <LazyOnVisible minHeight="200px">
+                  <HomeSeoArticle onNavigateToTab={(tab) => setActiveTab(tab as AppNavTab)} />
+                </LazyOnVisible>
               </>
             ) : (
               <ErrorBoundary onReset={handleReset} fallbackTitle="Prescription Display Error">

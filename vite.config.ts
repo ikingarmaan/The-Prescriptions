@@ -3,9 +3,30 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import {defineConfig} from 'vite';
 
+function nonBlockingCssPlugin() {
+  return {
+    name: 'non-blocking-css-plugin',
+    apply: 'build' as const,
+    enforce: 'post' as const,
+    transformIndexHtml(html: string) {
+      return html.replace(
+        /<link\s+rel=["']stylesheet["']\s+crossorigin\s+href=["']([^"']+\.css)["']\s*\/?>|<link\s+rel=["']stylesheet["']\s+href=["']([^"']+\.css)["']\s*\/?>/gi,
+        (_match, p1, p2) => {
+          const href = p1 || p2;
+          return [
+            `<link rel="preload" href="${href}" as="style" crossorigin />`,
+            `<link rel="stylesheet" href="${href}" media="print" onload="this.media='all'" crossorigin />`,
+            `<noscript><link rel="stylesheet" href="${href}" /></noscript>`
+          ].join('\n    ');
+        }
+      );
+    },
+  };
+}
+
 export default defineConfig(() => {
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [react(), tailwindcss(), nonBlockingCssPlugin()],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

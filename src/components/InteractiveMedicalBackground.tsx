@@ -148,6 +148,11 @@ export function InteractiveMedicalBackground() {
     height: typeof window !== 'undefined' ? window.innerHeight : 800,
   });
   const [activeBounceId, setActiveBounceId] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Track window resize
   useEffect(() => {
@@ -236,8 +241,8 @@ export function InteractiveMedicalBackground() {
         }}
       />
 
-      {/* 3. Floating Medical Entities (Optimized count on mobile to reduce DOM elements) */}
-      {(windowSize.width < 768 ? MEDICAL_ITEMS.slice(0, 4) : MEDICAL_ITEMS).map((item, index) => {
+      {/* 3. Floating Medical Entities (Mounted after initial hero render) */}
+      {isMounted && (windowSize.width < 768 ? MEDICAL_ITEMS.slice(0, 4) : MEDICAL_ITEMS).map((item, index) => {
         // Calculate coordinate in pixels
         const itemPixelX = (item.baseX / 100) * windowSize.width;
         const itemPixelY = (item.baseY / 100) * windowSize.height;
