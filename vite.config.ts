@@ -9,17 +9,23 @@ function nonBlockingCssPlugin() {
     apply: 'build' as const,
     enforce: 'post' as const,
     transformIndexHtml(html: string) {
-      return html.replace(
+      let transformed = html.replace(
         /<link\s+rel=["']stylesheet["']\s+crossorigin\s+href=["']([^"']+\.css)["']\s*\/?>|<link\s+rel=["']stylesheet["']\s+href=["']([^"']+\.css)["']\s*\/?>/gi,
         (_match, p1, p2) => {
           const href = p1 || p2;
           return [
-            `<link rel="preload" href="${href}" as="style" crossorigin />`,
-            `<link rel="stylesheet" href="${href}" media="print" onload="this.media='all'" crossorigin />`,
+            `<link rel="preload" href="${href}" as="style" />`,
+            `<link rel="stylesheet" href="${href}" media="print" onload="this.media='all'" />`,
             `<noscript><link rel="stylesheet" href="${href}" /></noscript>`
           ].join('\n    ');
         }
       );
+      // Remove crossorigin from same-origin entry script to prevent corporate proxy / firewall CORS blocks
+      transformed = transformed.replace(
+        /<script\s+type=["']module["']\s+crossorigin\s+src=["'](\/assets\/[^"']+)["']\s*><\/script>/gi,
+        '<script type="module" src="$1"></script>'
+      );
+      return transformed;
     },
   };
 }

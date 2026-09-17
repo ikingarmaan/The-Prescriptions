@@ -2176,9 +2176,14 @@ Include its generic name, primary uses, mechanism of action, typical dosage form
         immutable: true,
         setHeaders: (res, filePath) => {
           if (filePath.endsWith(".html")) {
-            res.setHeader("Cache-Control", "public, max-age=0, must-revalidate");
+            // Strictly forbid HTML caching so clients and corporate proxies always fetch the active version
+            res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0");
+            res.setHeader("Pragma", "no-cache");
+            res.setHeader("Expires", "0");
+            res.setHeader("Surrogate-Control", "no-store");
           } else if (filePath.match(/\.(js|css|webp|png|jpg|jpeg|svg|woff2?|ico)$/i)) {
             res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+            res.setHeader("Access-Control-Allow-Origin", "*");
           }
         },
       })
@@ -2186,17 +2191,24 @@ Include its generic name, primary uses, mechanism of action, typical dosage form
 
     // 2. Intelligent Stale Chunk Recovery under /assets/
     // If a corporate proxy or client with cached index.html requests an old chunk hash (e.g. index-OLD.js),
-    // serve the current active matching chunk instead of failing with 404!
+    // serve the current active matching chunk or an automatic-reload script instead of failing with 404!
     app.use("/assets", (req: Request, res: Response) => {
       const requestedFile = req.path.replace(/^\//, "");
       const assetsDir = path.join(distPath, "assets");
       try {
         if (fs.existsSync(assetsDir)) {
           const files = fs.readdirSync(assetsDir);
-          const prefix = requestedFile.split("-")[0];
           const ext = path.extname(requestedFile);
+          const lastHyphen = requestedFile.lastIndexOf("-");
+          const prefix = lastHyphen !== -1 ? requestedFile.slice(0, lastHyphen) : requestedFile.split(".")[0];
+
           if (prefix && ext) {
-            const matched = files.find((f) => f.startsWith(prefix + "-") && f.endsWith(ext));
+            // First look for exact prefix match (e.g. "vendor-react-")
+            let matched = files.find((f) => f.startsWith(prefix + "-") && f.endsWith(ext));
+            // Fallback: if not found, look for main index chunk if an index bundle was requested
+            if (!matched && prefix.startsWith("index")) {
+              matched = files.find((f) => f.startsWith("index-") && f.endsWith(".js"));
+            }
             if (matched) {
               res.setHeader("Cache-Control", "no-cache, must-revalidate");
               res.setHeader("Access-Control-Allow-Origin", "*");
@@ -2204,9 +2216,34 @@ Include its generic name, primary uses, mechanism of action, typical dosage form
             }
           }
         }
-      } catch {
-        // Fall through
+      } catch (err) {
+        console.warn("[Asset Recovery] Error finding fallback asset:", err);
       }
+
+      // If a JavaScript module was requested and no file could be matched on disk,
+      // return a graceful self-recovery script with HTTP 200 instead of 404 so corporate proxies don't break
+      if (req.path.endsWith(".js")) {
+        res.setHeader("Content-Type", "application/javascript; charset=utf-8");
+        res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        return res.send(
+          `/* Outdated bundle detected: Auto-refreshing fresh release */\n` +
+          `console.warn('[Theprescription] Outdated bundle requested: ${req.path}. Auto-reloading fresh version...');\n` +
+          `if (typeof window !== 'undefined' && window.location) {\n` +
+          `  try { if (window.sessionStorage) window.sessionStorage.clear(); } catch(e){}\n` +
+          `  var freshUrl = window.location.pathname + '?fresh=' + Date.now();\n` +
+          `  if (window.location.search.indexOf('fresh=') === -1) { window.location.replace(freshUrl); }\n` +
+          `}`
+        );
+      }
+
+      if (req.path.endsWith(".css")) {
+        res.setHeader("Content-Type", "text/css; charset=utf-8");
+        res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        return res.send(`/* Outdated CSS fallback */`);
+      }
+
       res.setHeader("Cache-Control", "no-store");
       res.status(404).send("Asset not found");
     });
@@ -2216,7 +2253,10 @@ Include its generic name, primary uses, mechanism of action, typical dosage form
       if (req.path.startsWith("/api/") || req.path.startsWith("/assets/")) {
         return res.status(404).send("Not Found");
       }
-      res.setHeader("Cache-Control", "public, max-age=0, must-revalidate");
+      res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0");
+      res.setHeader("Pragma", "no-cache");
+      res.setHeader("Expires", "0");
+      res.setHeader("Surrogate-Control", "no-store");
       res.sendFile(path.join(distPath, "index.html"));
     });
   }

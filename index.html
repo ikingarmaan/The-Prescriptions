@@ -160,14 +160,18 @@
         if (e.message) {
           msg = e.message;
         } else if (e.target && (e.target.src || e.target.href)) {
-          var assetName = (e.target.src || e.target.href).split('/').pop();
+          var srcUrl = e.target.src || e.target.href;
+          var assetName = srcUrl.split('/').pop() || 'asset';
           msg = 'Failed to load: ' + assetName;
-          // Auto-recover missing chunk if possible
+
+          // Seamless auto-recovery: If a script chunk failed (e.g. proxy cache or stale HTML during deploy),
+          // flush session storage and immediately reload fresh latest release
           try {
-            var retryKey = 'chunk_retry_' + assetName;
-            if (window.sessionStorage && !window.sessionStorage.getItem(retryKey)) {
-              window.sessionStorage.setItem(retryKey, '1');
-              window.location.href = window.location.pathname + '?reload=' + Date.now();
+            var reloadCount = parseInt(window.sessionStorage ? (window.sessionStorage.getItem('__chunk_retry_cnt') || '0') : '0', 10);
+            if (reloadCount < 2) {
+              if (window.sessionStorage) window.sessionStorage.setItem('__chunk_retry_cnt', String(reloadCount + 1));
+              window.location.replace(window.location.pathname + '?fresh=' + Date.now());
+              return;
             }
           } catch (err) {}
         } else {
@@ -191,7 +195,7 @@
         }
       });
 
-      // Watchdog: If React doesn't mount within 3.5 seconds, display diagnostic box
+      // Watchdog: If React doesn't mount within 4.5 seconds, display diagnostic box
       setTimeout(function() {
         if (!window.__appMounted) {
           var diag = document.getElementById('preloader-diagnostic');
@@ -206,7 +210,7 @@
             }
           }
         }
-      }, 3500);
+      }, 4500);
     </script>
   </head>
   <body>
@@ -221,15 +225,15 @@
         <h1 style="font-size: 1.15rem; font-weight: 800; margin: 0 0 8px 0; letter-spacing: -0.02em; color: #0f172a;">Theprescription</h1>
         <p style="font-size: 0.8125rem; color: #64748b; margin: 0; max-width: 300px; line-height: 1.5;">Securing workspace & initializing clinical handwriting model...</p>
 
-        <!-- Live Diagnostic Box (Appears automatically after 3.5s if React hasn't mounted) -->
+        <!-- Live Diagnostic Box (Appears automatically after 4.5s if React hasn't mounted) -->
         <div id="preloader-diagnostic" style="display: none; margin-top: 20px; padding: 14px 18px; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 14px; max-width: 380px; box-shadow: 0 8px 24px -4px rgba(0,0,0,0.06); text-align: center;">
           <div style="font-size: 0.8125rem; font-weight: 600; color: #0f172a; margin-bottom: 6px;">Taking longer than expected?</div>
           <p id="preloader-error-detail" style="font-size: 0.75rem; color: #dc2626; margin: 0 0 12px 0; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; word-break: break-word; line-height: 1.4; display: none;"></p>
           <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
-            <button onclick="window.location.href = window.location.pathname + '?reload=' + Date.now();" style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.8125rem; font-weight: 600; background: #059669; color: #ffffff; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer;">
+            <button onclick="try{if(window.sessionStorage)window.sessionStorage.clear();}catch(e){}window.location.replace(window.location.pathname + '?fresh=' + Date.now());" style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.8125rem; font-weight: 600; background: #059669; color: #ffffff; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer;">
               ↻ Refresh Fresh Version
             </button>
-            <button onclick="try{if(window.sessionStorage)window.sessionStorage.clear();if(window.localStorage)window.localStorage.clear();}catch(e){}window.location.href=window.location.pathname+'?fresh='+Date.now();" style="font-size: 0.8125rem; font-weight: 500; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 8px 12px; border-radius: 8px; cursor: pointer;">
+            <button onclick="try{if(window.sessionStorage)window.sessionStorage.clear();if(window.localStorage)window.localStorage.removeItem('theprescription_theme');}catch(e){}window.location.replace(window.location.pathname+'?reset='+Date.now());" style="font-size: 0.8125rem; font-weight: 500; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 8px 12px; border-radius: 8px; cursor: pointer;">
               Clear Cache
             </button>
           </div>
