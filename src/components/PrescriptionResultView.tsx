@@ -248,7 +248,7 @@ ${
 
       {/* Critical Spacing & Interaction Advice - Crimson & Coral Warning Theme */}
       {result.potentialInteractionsOrSpacingAdvice && result.potentialInteractionsOrSpacingAdvice.length > 0 && (
-        <div className="bg-white rounded-3xl border-2 border-rose-500/40 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border-2 border-rose-500/40 shadow-sm overflow-hidden transition-colors">
           <div className="p-5 sm:p-6 bg-gradient-to-r from-slate-950 via-rose-950 to-red-950 text-white relative overflow-hidden">
             <div className="absolute -top-12 -right-12 w-44 h-44 bg-rose-500/15 rounded-full blur-2xl pointer-events-none" />
             <div className="relative z-10 flex items-center gap-3">
@@ -273,7 +273,7 @@ ${
             {result.potentialInteractionsOrSpacingAdvice.map((rule, idx) => (
               <div
                 key={idx}
-                className="p-3.5 rounded-xl bg-rose-50/70 border border-rose-200/80 text-xs text-rose-950 flex items-start gap-3"
+                className="p-3.5 rounded-xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-900/40 text-xs text-rose-950 dark:text-rose-200 flex items-start gap-3"
               >
                 <span className="w-2 h-2 rounded-full bg-rose-600 shrink-0 mt-1.5" />
                 <span className="leading-relaxed font-semibold">{rule}</span>
@@ -291,7 +291,7 @@ ${
 
       {/* Food, Dietary & Hydration Rules - Lush Mint & Sage Wellness Theme */}
       {result.foodAndDietaryRules && (
-        <div className="bg-white rounded-3xl border-2 border-emerald-500/40 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border-2 border-emerald-500/40 shadow-sm overflow-hidden transition-colors">
           <div className="p-5 sm:p-6 bg-gradient-to-r from-slate-950 via-teal-950 to-emerald-950 text-white relative overflow-hidden">
             <div className="absolute -top-12 -right-12 w-44 h-44 bg-teal-500/15 rounded-full blur-2xl pointer-events-none" />
             <div className="relative z-10 flex items-center gap-3">
@@ -316,16 +316,16 @@ ${
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Foods to Eat */}
               {result.foodAndDietaryRules.foodsToEat && result.foodAndDietaryRules.foodsToEat.length > 0 && (
-                <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 space-y-2.5">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-900 flex items-center gap-1.5">
-                    <Apple className="w-4 h-4 text-emerald-600" />
+                <div className="p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-900/40 space-y-2.5">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-300 flex items-center gap-1.5">
+                    <Apple className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     Recommended Foods To Eat
                   </h4>
-                  <ul className="space-y-2 text-xs text-slate-700">
+                  <ul className="space-y-2 text-xs text-slate-700 dark:text-slate-300">
                     {result.foodAndDietaryRules.foodsToEat.map((food, idx) => (
                       <li key={idx} className="flex items-start gap-2">
                         <span className="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">✓</span>
-                        <span className="font-medium text-slate-800">{food}</span>
+                        <span className="font-medium text-slate-800 dark:text-slate-200">{food}</span>
                       </li>
                     ))}
                   </ul>
@@ -333,17 +333,17 @@ ${
               )}
 
               {/* Foods to Avoid */}
-              {result.foodAndDietaryRules.foodsToAvoidOrLimit && result.foodAndDietaryRules.foodsToAvoidOrLimit.length > 0 && (
-                <div className="p-4 rounded-2xl bg-rose-50/70 border border-rose-200/80 space-y-2.5">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-rose-900 flex items-center gap-1.5">
-                    <Ban className="w-4 h-4 text-rose-600" />
-                    Foods & Drinks To Avoid / Limit
+              {result.foodAndDietaryRules.foodsToAvoid && result.foodAndDietaryRules.foodsToAvoid.length > 0 && (
+                <div className="p-4 rounded-2xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-900/40 space-y-2.5">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-rose-900 dark:text-rose-300 flex items-center gap-1.5">
+                    <AlertTriangle className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+                    Foods & Substances to Avoid
                   </h4>
-                  <ul className="space-y-2 text-xs text-slate-700">
-                    {result.foodAndDietaryRules.foodsToAvoidOrLimit.map((food, idx) => (
+                  <ul className="space-y-2 text-xs text-slate-700 dark:text-slate-300">
+                    {result.foodAndDietaryRules.foodsToAvoid.map((food, idx) => (
                       <li key={idx} className="flex items-start gap-2">
                         <span className="w-4 h-4 rounded-full bg-rose-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">✕</span>
-                        <span className="font-medium text-slate-800">{food}</span>
+                        <span className="font-medium text-slate-800 dark:text-slate-200">{food}</span>
                       </li>
                     ))}
                   </ul>
@@ -351,14 +351,17 @@ ${
               )}
             </div>
 
-            {result.foodAndDietaryRules.hydrationAdvice && (
-              <div className="p-4 rounded-2xl bg-sky-50 border border-sky-200 text-xs text-sky-950 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-sky-100 flex items-center justify-center shrink-0">
-                  <Droplets className="w-4 h-4 text-sky-600" />
-                </div>
+            {/* Hydration & Water Intake */}
+            {result.foodAndDietaryRules.hydrationAndFluids && (
+              <div className="p-4 rounded-2xl bg-teal-50/60 dark:bg-teal-950/30 border border-teal-200/80 dark:border-teal-900/40 flex items-start gap-3 text-xs text-teal-950 dark:text-teal-200">
+                <GlassWater className="w-5 h-5 text-teal-600 dark:text-teal-400 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-bold text-sky-900 block">Hydration Guidance: </span>
-                  <span className="text-slate-700 leading-relaxed">{result.foodAndDietaryRules.hydrationAdvice}</span>
+                  <h4 className="font-bold text-teal-900 dark:text-teal-300 mb-0.5">
+                    Circadian Hydration Strategy
+                  </h4>
+                  <p className="leading-relaxed text-slate-700 dark:text-slate-300">
+                    {result.foodAndDietaryRules.hydrationAndFluids}
+                  </p>
                 </div>
               </div>
             )}
@@ -368,7 +371,7 @@ ${
 
       {/* All Medicines Detailed Breakdown */}
       <div className="space-y-4">
-        <div className="p-5 sm:p-6 bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950 text-white rounded-3xl border border-slate-200 shadow-xs relative overflow-hidden">
+        <div className="p-5 sm:p-6 bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950 text-white rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs relative overflow-hidden">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10">
             <div>
               <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-bold border border-blue-400/30 uppercase tracking-wider mb-1">
@@ -398,7 +401,7 @@ ${
 
       {/* Lifestyle & Home Care Advice - Turquoise & Aqua Recovery Theme */}
       {result.lifestyleAdvice && result.lifestyleAdvice.length > 0 && (
-        <div className="bg-white rounded-3xl border-2 border-teal-500/40 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border-2 border-teal-500/40 shadow-sm overflow-hidden transition-colors">
           <div className="p-5 sm:p-6 bg-gradient-to-r from-slate-950 via-cyan-950 to-teal-950 text-white relative overflow-hidden">
             <div className="absolute -top-12 -right-12 w-44 h-44 bg-cyan-500/15 rounded-full blur-2xl pointer-events-none" />
             <div className="relative z-10 flex items-center gap-3">
@@ -424,7 +427,7 @@ ${
               {result.lifestyleAdvice.map((tip, idx) => (
                 <div
                   key={idx}
-                  className="p-4 rounded-xl bg-slate-50 border border-teal-100 hover:border-teal-200 text-xs text-slate-800 leading-relaxed font-semibold transition-colors"
+                  className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-teal-100 dark:border-teal-900/40 hover:border-teal-200 dark:hover:border-teal-800 text-xs text-slate-800 dark:text-slate-200 leading-relaxed font-semibold transition-colors"
                 >
                   {tip}
                 </div>
@@ -435,10 +438,10 @@ ${
       )}
 
       {/* Official Medical Disclaimer */}
-      <div className="p-5 rounded-2xl bg-slate-100/80 border border-slate-200 text-xs text-slate-600 flex items-start gap-3">
-        <Info className="w-5 h-5 text-slate-500 shrink-0 mt-0.5" />
+      <div className="p-5 rounded-2xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 flex items-start gap-3 transition-colors">
+        <Info className="w-5 h-5 text-slate-500 dark:text-slate-400 shrink-0 mt-0.5" />
         <div>
-          <span className="font-bold text-slate-800 block mb-0.5">Medical Disclaimer</span>
+          <span className="font-bold text-slate-800 dark:text-slate-200 block mb-0.5">Medical Disclaimer</span>
           <p className="leading-relaxed">
             {result.medicalDisclaimer ||
               'This prescription review is generated to help you understand your medications and their general administration guidelines. It does not replace clinical consultation. Always double-check dosage and instructions with your dispensing pharmacist or treating doctor.'}

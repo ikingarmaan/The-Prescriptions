@@ -158,14 +158,14 @@ export const ThePrescriptionLogo: React.FC<ThePrescriptionLogoProps> = ({
         <div className="flex flex-col leading-none">
           <div className="flex items-center gap-1.5">
             <span className={`font-black tracking-tight ${wordmarkSizeClasses}`}>
-              <span className={variant === 'dark' ? 'text-white drop-shadow-sm' : 'text-slate-900'}>
+              <span className={variant === 'dark' ? 'text-white drop-shadow-sm' : 'text-slate-900 dark:text-white'}>
                 The
               </span>
               <span
                 className={
                   variant === 'dark'
                     ? 'text-emerald-400 drop-shadow-[0_0_12px_rgba(52,211,153,0.5)]'
-                    : 'text-emerald-600'
+                    : 'text-emerald-600 dark:text-emerald-400 dark:drop-shadow-[0_0_10px_rgba(52,211,153,0.3)]'
                 }
               >
                 prescription
@@ -177,7 +177,7 @@ export const ThePrescriptionLogo: React.FC<ThePrescriptionLogoProps> = ({
                 className={`px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider rounded-md border shadow-xs ${
                   variant === 'dark'
                     ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-[0_0_8px_rgba(16,185,129,0.25)]'
-                    : 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                    : 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/40'
                 }`}
               >
                 Rx AI
@@ -188,7 +188,7 @@ export const ThePrescriptionLogo: React.FC<ThePrescriptionLogoProps> = ({
           {showSubtitle && (
             <span
               className={`text-[10px] sm:text-xs font-medium tracking-tight mt-0.5 ${
-                variant === 'dark' ? 'text-slate-300' : 'text-slate-500'
+                variant === 'dark' ? 'text-slate-300' : 'text-slate-500 dark:text-slate-400'
               }`}
             >
               Clinical Handwriting Deciphering &amp; Safety

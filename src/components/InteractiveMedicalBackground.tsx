@@ -209,11 +209,11 @@ export function InteractiveMedicalBackground() {
       aria-hidden="true"
     >
       {/* 1. Medical High-Tech Background Canvas Grid */}
-      <div className="absolute inset-0 bg-slate-50/70" />
+      <div className="absolute inset-0 bg-slate-50/70 dark:bg-slate-950/85 transition-colors duration-150" />
 
       {/* Subtle Clinical Dot Matrix Grid */}
       <div
-        className="absolute inset-0 opacity-[0.45]"
+        className="absolute inset-0 opacity-[0.45] dark:opacity-[0.18]"
         style={{
           backgroundImage: `radial-gradient(#94a3b8 0.85px, transparent 0.85px), radial-gradient(#cbd5e1 0.85px, #f8fafc 0.85px)`,
           backgroundSize: '32px 32px',
@@ -223,19 +223,19 @@ export function InteractiveMedicalBackground() {
 
       {/* 2. Soft Ambient Fluid Medical Light Orbs (Cyan, Emerald, Sapphire, Amethyst) */}
       <div
-        className="absolute -top-32 -left-32 w-[550px] h-[550px] rounded-full bg-emerald-300/15 blur-[120px] transition-transform duration-1000 ease-out"
+        className="absolute -top-32 -left-32 w-[550px] h-[550px] rounded-full bg-emerald-300/15 dark:bg-emerald-500/12 blur-[120px] transition-transform duration-1000 ease-out"
         style={{
           transform: `translate3d(${mousePos.x * 35}px, ${mousePos.y * 35}px, 0)`,
         }}
       />
       <div
-        className="absolute top-1/3 -right-32 w-[500px] h-[500px] rounded-full bg-cyan-300/15 blur-[110px] transition-transform duration-1000 ease-out"
+        className="absolute top-1/3 -right-32 w-[500px] h-[500px] rounded-full bg-cyan-300/15 dark:bg-cyan-500/12 blur-[110px] transition-transform duration-1000 ease-out"
         style={{
           transform: `translate3d(${mousePos.x * -40}px, ${mousePos.y * -40}px, 0)`,
         }}
       />
       <div
-        className="absolute -bottom-32 left-1/4 w-[600px] h-[600px] rounded-full bg-blue-300/15 blur-[130px] transition-transform duration-1000 ease-out"
+        className="absolute -bottom-32 left-1/4 w-[600px] h-[600px] rounded-full bg-blue-300/15 dark:bg-blue-500/12 blur-[130px] transition-transform duration-1000 ease-out"
         style={{
           transform: `translate3d(${mousePos.x * 25}px, ${mousePos.y * -25}px, 0)`,
         }}

@@ -45,7 +45,7 @@ export const LabTestsSection: React.FC<LabTestsSectionProps> = ({
   return (
     <section
       id="laboratory-tests-section"
-      className="bg-white rounded-3xl border-2 border-amber-500/40 shadow-sm overflow-hidden"
+      className="bg-white dark:bg-slate-900 rounded-3xl border-2 border-amber-500/40 dark:border-amber-500/50 shadow-sm overflow-hidden"
     >
       {/* Header Banner with Warm Amber & Solar Orange Theme */}
       <div className="bg-gradient-to-r from-slate-950 via-amber-950 to-orange-950 text-white p-5 sm:p-7 md:p-8 relative overflow-hidden">
@@ -97,7 +97,7 @@ export const LabTestsSection: React.FC<LabTestsSectionProps> = ({
         {hasTests ? (
           <>
             {/* Filter and Search Bar */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
                 <button
                   type="button"
@@ -105,7 +105,7 @@ export const LabTestsSection: React.FC<LabTestsSectionProps> = ({
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                     activeFilter === 'all'
                       ? 'bg-linear-to-r from-amber-600 to-orange-600 text-white shadow-xs'
-                      : 'bg-slate-100 text-slate-600 hover:bg-amber-50 hover:text-amber-800'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-800 dark:hover:text-amber-300'
                   }`}
                 >
                   All ({labTests.length})
@@ -116,7 +116,7 @@ export const LabTestsSection: React.FC<LabTestsSectionProps> = ({
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                     activeFilter === 'blood'
                       ? 'bg-linear-to-r from-amber-600 to-orange-600 text-white shadow-xs'
-                      : 'bg-slate-100 text-slate-600 hover:bg-amber-50 hover:text-amber-800'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-800 dark:hover:text-amber-300'
                   }`}
                 >
                   Blood Work
@@ -127,7 +127,7 @@ export const LabTestsSection: React.FC<LabTestsSectionProps> = ({
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                     activeFilter === 'radiology'
                       ? 'bg-linear-to-r from-amber-600 to-orange-600 text-white shadow-xs'
-                      : 'bg-slate-100 text-slate-600 hover:bg-amber-50 hover:text-amber-800'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-800 dark:hover:text-amber-300'
                   }`}
                 >
                   Imaging / Scans
@@ -135,10 +135,10 @@ export const LabTestsSection: React.FC<LabTestsSectionProps> = ({
                 <button
                   type="button"
                   onClick={() => setActiveFilter('fasting')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors whitespace-nowrap ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors whitespace-nowrap cursor-pointer ${
                     activeFilter === 'fasting'
                       ? 'bg-indigo-600 text-white'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                   }`}
                 >
                   Fasting Required
@@ -146,13 +146,13 @@ export const LabTestsSection: React.FC<LabTestsSectionProps> = ({
               </div>
 
               <div className="relative sm:w-60">
-                <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400" />
+                <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400 dark:text-slate-500" />
                 <input
                   type="text"
                   placeholder="Search tests..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-hidden focus:border-indigo-500"
+                  className="w-full pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-hidden focus:border-indigo-500"
                 />
               </div>
             </div>
@@ -162,32 +162,32 @@ export const LabTestsSection: React.FC<LabTestsSectionProps> = ({
               {filteredTests.map((test, idx) => (
                 <div
                   key={idx}
-                  className="p-5 rounded-2xl border border-indigo-100/90 bg-slate-50/50 hover:bg-white hover:border-indigo-300 hover:shadow-xs transition-all space-y-3.5"
+                  className="p-5 rounded-2xl border border-indigo-100/90 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-white dark:hover:bg-slate-800 hover:border-indigo-300 dark:hover:border-slate-700 hover:shadow-xs transition-all space-y-3.5"
                 >
                   {/* Top Badges */}
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-200/70 px-2 py-0.5 rounded-md">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200/70 dark:border-indigo-800/60 px-2 py-0.5 rounded-md">
                         {test.category}
                       </span>
-                      <h3 className="text-base font-black text-slate-900 mt-1.5">
+                      <h3 className="text-base font-black text-slate-900 dark:text-white mt-1.5">
                         {test.testName}
                       </h3>
                     </div>
 
                     <div className="flex flex-col items-end gap-1 shrink-0">
                       {test.urgency === 'urgent' && (
-                        <span className="px-2 py-0.5 rounded-md bg-rose-100 text-rose-800 text-[10px] font-extrabold flex items-center gap-1 border border-rose-200">
+                        <span className="px-2 py-0.5 rounded-md bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 text-[10px] font-extrabold flex items-center gap-1 border border-rose-200 dark:border-rose-800">
                           <AlertTriangle className="w-3 h-3" />
                           Urgent
                         </span>
                       )}
                       {test.fastingRequired ? (
-                        <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 text-[10px] font-bold border border-amber-200">
+                        <span className="px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 text-[10px] font-bold border border-amber-200 dark:border-amber-800/60">
                           Fasting Needed
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[10px] font-medium">
+                        <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-medium">
                           No Fasting
                         </span>
                       )}
@@ -195,36 +195,36 @@ export const LabTestsSection: React.FC<LabTestsSectionProps> = ({
                   </div>
 
                   {/* Why Doctor Ordered */}
-                  <div className="p-3 rounded-xl bg-white border border-slate-100 text-xs space-y-1">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
-                      <Activity className="w-3 h-3 text-indigo-600" />
+                  <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs space-y-1">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                      <Activity className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
                       Why Doctor Prescribed This Test
                     </div>
-                    <p className="text-slate-700 font-medium leading-relaxed">
+                    <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
                       {test.whyDoctorOrdered}
                     </p>
                   </div>
 
                   {/* Preparation Instructions */}
-                  <div className="p-3 rounded-xl bg-amber-50/60 border border-amber-200/60 text-xs space-y-1">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-amber-900 flex items-center gap-1">
-                      <Clock className="w-3 h-3 text-amber-700" />
+                  <div className="p-3 rounded-xl bg-amber-50/60 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-800/60 text-xs space-y-1">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-amber-900 dark:text-amber-400 flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-amber-700 dark:text-amber-400" />
                       Patient Preparation Required
                     </div>
-                    <p className="text-amber-950 font-semibold leading-relaxed">
+                    <p className="text-amber-950 dark:text-amber-200 font-semibold leading-relaxed">
                       {test.preparationInstructions}
                     </p>
                   </div>
 
                   {/* Sample & Context Details */}
-                  <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100 text-[11px] text-slate-500">
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400">
                     <div className="flex items-center gap-1">
-                      <span className="font-semibold text-slate-700">Sample:</span>
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">Sample:</span>
                       <span>{test.sampleRequired || 'Standard collection'}</span>
                     </div>
 
                     {test.commonNormalRangeContext && (
-                      <div className="text-[10px] text-slate-400 italic">
+                      <div className="text-[10px] text-slate-400 dark:text-slate-500 italic">
                         {test.commonNormalRangeContext}
                       </div>
                     )}
@@ -235,25 +235,25 @@ export const LabTestsSection: React.FC<LabTestsSectionProps> = ({
           </>
         ) : (
           /* Empty state when doctor did not prescribe lab tests */
-          <div className="p-6 md:p-8 rounded-2xl bg-slate-50 border border-slate-200 text-center space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto border border-indigo-100">
+          <div className="p-6 md:p-8 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 text-center space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto border border-indigo-100 dark:border-indigo-800/60">
               <TestTubes className="w-6 h-6" />
             </div>
             <div className="max-w-md mx-auto">
-              <h4 className="font-extrabold text-slate-900 text-sm md:text-base">
+              <h4 className="font-extrabold text-slate-900 dark:text-white text-sm md:text-base">
                 No Diagnostic Laboratory Tests Identified on This Prescription
               </h4>
-              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
                 The doctor did not write any specific laboratory blood work, radiology scans (X-Ray/CT), or diagnostic pathology on this prescription slip.
               </p>
             </div>
 
-            <div className="max-w-xl mx-auto p-4 rounded-xl bg-white border border-indigo-100 text-left text-xs text-slate-700 space-y-2">
-              <div className="font-bold text-indigo-900 flex items-center gap-1.5 text-xs">
-                <Info className="w-3.5 h-3.5 text-indigo-600" />
+            <div className="max-w-xl mx-auto p-4 rounded-xl bg-white dark:bg-slate-900 border border-indigo-100 dark:border-slate-800 text-left text-xs text-slate-700 dark:text-slate-300 space-y-2">
+              <div className="font-bold text-indigo-900 dark:text-indigo-400 flex items-center gap-1.5 text-xs">
+                <Info className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                 Medical Clinical Guidance:
               </div>
-              <p className="text-[11px] text-slate-600 leading-relaxed">
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
                 If your symptoms persist, worsen, or do not improve within 48-72 hours of starting your medicines, your doctor may recommend baseline diagnostic investigations (such as Complete Blood Count, Inflammatory markers, or Imaging) to assess the condition further.
               </p>
             </div>
@@ -261,47 +261,47 @@ export const LabTestsSection: React.FC<LabTestsSectionProps> = ({
         )}
 
         {/* Medical Knowledge Reference Drawer: Common Prescription Test Codes */}
-        <div className="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100">
+        <div className="p-4 rounded-2xl bg-indigo-50/50 dark:bg-slate-800/40 border border-indigo-100 dark:border-slate-800">
           <div className="flex items-center justify-between mb-2">
-            <h4 className="text-xs font-extrabold uppercase tracking-wider text-indigo-950 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+            <h4 className="text-xs font-extrabold uppercase tracking-wider text-indigo-950 dark:text-indigo-300 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
               Medical Abbreviation Knowledge Base for Lab Tests
             </h4>
-            <span className="text-[10px] text-indigo-600 font-bold">Standard Pathology Codes</span>
+            <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold">Standard Pathology Codes</span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 text-[11px]">
-            <div className="p-2 rounded-lg bg-white border border-indigo-100/80">
-              <span className="font-bold text-slate-900 block">CBC / FBC</span>
-              <span className="text-[10px] text-slate-500">Complete Blood Count (Infection/Anemia)</span>
+            <div className="p-2 rounded-lg bg-white dark:bg-slate-900 border border-indigo-100/80 dark:border-slate-800">
+              <span className="font-bold text-slate-900 dark:text-white block">CBC / FBC</span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400">Complete Blood Count (Infection/Anemia)</span>
             </div>
-            <div className="p-2 rounded-lg bg-white border border-indigo-100/80">
-              <span className="font-bold text-slate-900 block">LFT</span>
-              <span className="text-[10px] text-slate-500">Liver Function Test (Bilirubin, SGOT/SGPT)</span>
+            <div className="p-2 rounded-lg bg-white dark:bg-slate-900 border border-indigo-100/80 dark:border-slate-800">
+              <span className="font-bold text-slate-900 dark:text-white block">LFT</span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400">Liver Function Test (Bilirubin, SGOT/SGPT)</span>
             </div>
-            <div className="p-2 rounded-lg bg-white border border-indigo-100/80">
-              <span className="font-bold text-slate-900 block">KFT / RFT</span>
-              <span className="text-[10px] text-slate-500">Kidney Function Test (Creatinine, Urea)</span>
+            <div className="p-2 rounded-lg bg-white dark:bg-slate-900 border border-indigo-100/80 dark:border-slate-800">
+              <span className="font-bold text-slate-900 dark:text-white block">KFT / RFT</span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400">Kidney Function Test (Creatinine, Urea)</span>
             </div>
-            <div className="p-2 rounded-lg bg-white border border-indigo-100/80">
-              <span className="font-bold text-slate-900 block">FBS / PPBS</span>
-              <span className="text-[10px] text-slate-500">Fasting & Post-Meal Blood Sugar</span>
+            <div className="p-2 rounded-lg bg-white dark:bg-slate-900 border border-indigo-100/80 dark:border-slate-800">
+              <span className="font-bold text-slate-900 dark:text-white block">FBS / PPBS</span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400">Fasting & Post-Meal Blood Sugar</span>
             </div>
-            <div className="p-2 rounded-lg bg-white border border-indigo-100/80">
-              <span className="font-bold text-slate-900 block">HbA1c</span>
-              <span className="text-[10px] text-slate-500">3-Month Average Glycemic Control</span>
+            <div className="p-2 rounded-lg bg-white dark:bg-slate-900 border border-indigo-100/80 dark:border-slate-800">
+              <span className="font-bold text-slate-900 dark:text-white block">HbA1c</span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400">3-Month Average Glycemic Control</span>
             </div>
-            <div className="p-2 rounded-lg bg-white border border-indigo-100/80">
-              <span className="font-bold text-slate-900 block">Lipid Profile</span>
-              <span className="text-[10px] text-slate-500">Cholesterol & Triglycerides (Fasting)</span>
+            <div className="p-2 rounded-lg bg-white dark:bg-slate-900 border border-indigo-100/80 dark:border-slate-800">
+              <span className="font-bold text-slate-900 dark:text-white block">Lipid Profile</span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400">Cholesterol & Triglycerides (Fasting)</span>
             </div>
-            <div className="p-2 rounded-lg bg-white border border-indigo-100/80">
-              <span className="font-bold text-slate-900 block">CXR (PA View)</span>
-              <span className="text-[10px] text-slate-500">Chest X-Ray (Lungs & Heart)</span>
+            <div className="p-2 rounded-lg bg-white dark:bg-slate-900 border border-indigo-100/80 dark:border-slate-800">
+              <span className="font-bold text-slate-900 dark:text-white block">CXR (PA View)</span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400">Chest X-Ray (Lungs & Heart)</span>
             </div>
-            <div className="p-2 rounded-lg bg-white border border-indigo-100/80">
-              <span className="font-bold text-slate-900 block">Urine R/M</span>
-              <span className="text-[10px] text-slate-500">Urine Routine & Microscopic Exam</span>
+            <div className="p-2 rounded-lg bg-white dark:bg-slate-900 border border-indigo-100/80 dark:border-slate-800">
+              <span className="font-bold text-slate-900 dark:text-white block">Urine R/M</span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400">Urine Routine & Microscopic Exam</span>
             </div>
           </div>
         </div>

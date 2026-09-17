@@ -199,7 +199,7 @@ export const MultiEngineConsensusCard: React.FC<ClinicalAccuracyScoreCardProps> 
     <section
       id="clinical-accuracy-score-card"
       aria-label="Clinical Accuracy & Decryption Score"
-      className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden transition-all mb-6"
+      className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-sm overflow-hidden transition-all mb-6"
     >
       {/* Interactive Top Banner with Cyber Cyan & High-Tech Teal Theme */}
       <button
@@ -282,7 +282,7 @@ export const MultiEngineConsensusCard: React.FC<ClinicalAccuracyScoreCardProps> 
       {isExpanded && (
         <div id="accuracy-details-body" className="p-4 sm:p-6 space-y-6">
           {/* Hero Accuracy Showcase with Radial Gauge & Metric Dimensions */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center bg-gradient-to-br from-slate-50 via-white to-indigo-50/40 p-4 sm:p-5 rounded-2xl border border-slate-200">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center bg-gradient-to-br from-slate-50 via-white to-indigo-50/40 dark:from-slate-800/60 dark:via-slate-900 dark:to-slate-800/40 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800">
             {/* Left: Cool SVG Radial Progress Gauge */}
             <div className="lg:col-span-4 flex flex-col items-center justify-center text-center p-3">
               <div className="relative w-36 h-36 flex items-center justify-center">
@@ -295,7 +295,7 @@ export const MultiEngineConsensusCard: React.FC<ClinicalAccuracyScoreCardProps> 
                     stroke="currentColor"
                     strokeWidth="10"
                     fill="transparent"
-                    className="text-slate-200"
+                    className="text-slate-200 dark:text-slate-700"
                   />
                   {/* Gradient definition */}
                   <defs>
@@ -322,23 +322,23 @@ export const MultiEngineConsensusCard: React.FC<ClinicalAccuracyScoreCardProps> 
 
                 {/* Inner Center Label */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-2xl font-black text-slate-900 font-mono tracking-tight">
+                  <span className="text-2xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
                     {overallScore.toFixed(1)}%
                   </span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     Accuracy
                   </span>
-                  <span className="text-[9px] font-semibold text-emerald-700 bg-emerald-100/90 px-2 py-0.5 rounded-full mt-0.5">
+                  <span className="text-[9px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-100/90 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full mt-0.5">
                     Grade A+
                   </span>
                 </div>
               </div>
 
               <div className="mt-2.5">
-                <span className="text-xs font-bold text-slate-800 block">
+                <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
                   Overall Confidence Score
                 </span>
-                <span className="text-[11px] text-slate-500">
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">
                   {agreementScore.toFixed(1)}% multi-stage consensus agreement
                 </span>
               </div>
@@ -347,89 +347,89 @@ export const MultiEngineConsensusCard: React.FC<ClinicalAccuracyScoreCardProps> 
             {/* Right: 4 Sub-Accuracy Dimensions */}
             <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Dimension 1: Stroke Fidelity */}
-              <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs hover:border-emerald-300 transition-colors">
+              <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-emerald-300 dark:hover:border-slate-700 transition-colors">
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-1.5">
-                    <Fingerprint className="w-3.5 h-3.5 text-emerald-600" />
-                    <span className="text-xs font-bold text-slate-800">Stroke Fidelity</span>
+                    <Fingerprint className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Stroke Fidelity</span>
                   </div>
-                  <span className="text-xs font-extrabold text-emerald-700 font-mono">
+                  <span className="text-xs font-extrabold text-emerald-700 dark:text-emerald-400 font-mono">
                     {strokeFidelity.toFixed(1)}%
                   </span>
                 </div>
-                <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden mb-1">
+                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden mb-1">
                   <div
                     className="bg-emerald-500 h-2 rounded-full transition-all duration-700"
                     style={{ width: `${strokeFidelity}%` }}
                   />
                 </div>
-                <p className="text-[10px] text-slate-500">
+                <p className="text-[10px] text-slate-500 dark:text-slate-400">
                   Cursive loops, ligatures, pen slant & doctor scribble resolution.
                 </p>
               </div>
 
               {/* Dimension 2: Compound Match */}
-              <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs hover:border-teal-300 transition-colors">
+              <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-teal-300 dark:hover:border-slate-700 transition-colors">
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5 text-teal-600" />
-                    <span className="text-xs font-bold text-slate-800">Drug & Compound Match</span>
+                    <ShieldCheck className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Drug & Compound Match</span>
                   </div>
-                  <span className="text-xs font-extrabold text-teal-700 font-mono">
+                  <span className="text-xs font-extrabold text-teal-700 dark:text-teal-400 font-mono">
                     {compoundMatch.toFixed(1)}%
                   </span>
                 </div>
-                <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden mb-1">
+                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden mb-1">
                   <div
                     className="bg-teal-500 h-2 rounded-full transition-all duration-700"
                     style={{ width: `${compoundMatch}%` }}
                   />
                 </div>
-                <p className="text-[10px] text-slate-500">
+                <p className="text-[10px] text-slate-500 dark:text-slate-400">
                   Active pharmaceutical salt, brand formulas & chemical stem matching.
                 </p>
               </div>
 
               {/* Dimension 3: Dosage Accuracy */}
-              <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs hover:border-cyan-300 transition-colors">
+              <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-cyan-300 dark:hover:border-slate-700 transition-colors">
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-1.5">
-                    <Activity className="w-3.5 h-3.5 text-cyan-600" />
-                    <span className="text-xs font-bold text-slate-800">Dosage & Posology</span>
+                    <Activity className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Dosage & Posology</span>
                   </div>
-                  <span className="text-xs font-extrabold text-cyan-700 font-mono">
+                  <span className="text-xs font-extrabold text-cyan-700 dark:text-cyan-400 font-mono">
                     {dosageAccuracy.toFixed(1)}%
                   </span>
                 </div>
-                <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden mb-1">
+                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden mb-1">
                   <div
                     className="bg-cyan-500 h-2 rounded-full transition-all duration-700"
                     style={{ width: `${dosageAccuracy}%` }}
                   />
                 </div>
-                <p className="text-[10px] text-slate-500">
+                <p className="text-[10px] text-slate-500 dark:text-slate-400">
                   Milligram strengths (mg, ml), daily frequencies & treatment days.
                 </p>
               </div>
 
               {/* Dimension 4: Clinical Timing & Rules */}
-              <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs hover:border-indigo-300 transition-colors">
+              <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-indigo-300 dark:hover:border-slate-700 transition-colors">
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-1.5">
-                    <BrainCircuit className="w-3.5 h-3.5 text-indigo-600" />
-                    <span className="text-xs font-bold text-slate-800">Schedule & Meal Timing</span>
+                    <BrainCircuit className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Schedule & Meal Timing</span>
                   </div>
-                  <span className="text-xs font-extrabold text-indigo-700 font-mono">
+                  <span className="text-xs font-extrabold text-indigo-700 dark:text-indigo-400 font-mono">
                     {timingPrecision.toFixed(1)}%
                   </span>
                 </div>
-                <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden mb-1">
+                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden mb-1">
                   <div
                     className="bg-indigo-500 h-2 rounded-full transition-all duration-700"
                     style={{ width: `${timingPrecision}%` }}
                   />
                 </div>
-                <p className="text-[10px] text-slate-500">
+                <p className="text-[10px] text-slate-500 dark:text-slate-400">
                   1-0-1 shorthand, before/after meals (AC/PC), bedtime & spacing rules.
                 </p>
               </div>
@@ -437,50 +437,50 @@ export const MultiEngineConsensusCard: React.FC<ClinicalAccuracyScoreCardProps> 
           </div>
 
           {/* Interactive Navigation Pills (Switch Views) */}
-          <div className="flex items-center justify-between border-b border-slate-200 pb-3 flex-wrap gap-2">
-            <div className="flex items-center gap-1.5 bg-slate-100/90 p-1 rounded-xl">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 flex-wrap gap-2">
+            <div className="flex items-center gap-1.5 bg-slate-100/90 dark:bg-slate-800/90 p-1 rounded-xl">
               <button
                 type="button"
                 onClick={() => setActiveTab('metrics')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all min-h-[38px] flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all min-h-[38px] flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'metrics'
-                    ? 'bg-white text-slate-900 shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                <Sliders className="w-3.5 h-3.5 text-emerald-600" />
+                <Sliders className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                 <span>Verification Checkpoints</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveTab('stages')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all min-h-[38px] flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all min-h-[38px] flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'stages'
-                    ? 'bg-white text-slate-900 shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                <Activity className="w-3.5 h-3.5 text-teal-600" />
+                <Activity className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                 <span>5-Stage Neural Pipeline</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveTab('tokens')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all min-h-[38px] flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all min-h-[38px] flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'tokens'
-                    ? 'bg-white text-slate-900 shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                 <span>Confirmed Tokens & Ambiguities</span>
               </button>
             </div>
 
-            <div className="text-[11px] text-slate-500 font-medium flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+            <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
               <span>Pharmacopeia Reference Verified</span>
             </div>
           </div>
@@ -523,15 +523,15 @@ export const MultiEngineConsensusCard: React.FC<ClinicalAccuracyScoreCardProps> 
                 ].map((item, idx) => (
                   <div
                     key={idx}
-                    className="p-3 rounded-xl bg-slate-50/80 border border-slate-200/90 flex items-start gap-2.5"
+                    className="p-3 rounded-xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700 flex items-start gap-2.5"
                   >
-                    <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
+                    <div className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
                       <Check className="w-3 h-3 stroke-[3]" />
                     </div>
                     <div>
-                      <div className="text-xs font-bold text-slate-900">{item.title}</div>
-                      <div className="text-[11px] text-slate-500 mt-0.5 leading-snug">{item.desc}</div>
-                      <span className="inline-block text-[10px] font-bold text-emerald-700 font-mono mt-1">
+                      <div className="text-xs font-bold text-slate-900 dark:text-white">{item.title}</div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">{item.desc}</div>
+                      <span className="inline-block text-[10px] font-bold text-emerald-700 dark:text-emerald-400 font-mono mt-1">
                         {item.status}
                       </span>
                     </div>
@@ -540,9 +540,9 @@ export const MultiEngineConsensusCard: React.FC<ClinicalAccuracyScoreCardProps> 
               </div>
 
               {/* Arbitration Summary Note */}
-              <div className="p-3.5 sm:p-4 rounded-xl bg-emerald-50/70 border border-emerald-200/80 text-emerald-950 text-xs flex items-start gap-2.5">
-                <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
-                <p className="leading-relaxed text-[11px] sm:text-xs text-emerald-900">
+              <div className="p-3.5 sm:p-4 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 text-emerald-950 dark:text-emerald-200 text-xs flex items-start gap-2.5">
+                <ShieldCheck className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" />
+                <p className="leading-relaxed text-[11px] sm:text-xs text-emerald-900 dark:text-emerald-200">
                   {cleanOcrText(ensemble.arbitrationExplanation) ||
                     'Multi-stage clinical verification cross-referenced handwriting strokes with standard medical pharmacopeia references to achieve high transcription consistency.'}
                 </p>
@@ -561,21 +561,21 @@ export const MultiEngineConsensusCard: React.FC<ClinicalAccuracyScoreCardProps> 
                       key={idx}
                       type="button"
                       onClick={() => setSelectedStageIndex(idx)}
-                      className={`p-3 rounded-xl border text-left transition-all min-h-[64px] flex flex-col justify-between ${
+                      className={`p-3 rounded-xl border text-left transition-all min-h-[64px] flex flex-col justify-between cursor-pointer ${
                         isSelected
-                          ? 'bg-emerald-50/80 border-emerald-400 text-emerald-950 ring-2 ring-emerald-200'
-                          : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                          ? 'bg-emerald-50/80 dark:bg-emerald-950/60 border-emerald-400 dark:border-emerald-500 text-emerald-950 dark:text-emerald-200 ring-2 ring-emerald-200 dark:ring-emerald-800'
+                          : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
                       }`}
                     >
                       <div className="flex items-center justify-between gap-1 w-full mb-1">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                           Stage {idx + 1}
                         </span>
-                        <span className="text-[10px] font-bold text-emerald-700 font-mono">
+                        <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 font-mono">
                           {stage.confidence.toFixed(1)}%
                         </span>
                       </div>
-                      <div className="text-xs font-bold truncate text-slate-900">
+                      <div className="text-xs font-bold truncate text-slate-900 dark:text-white">
                         {stage.engineName.split(' ')[0]} {stage.engineName.split(' ')[1] || ''}
                       </div>
                     </button>
@@ -585,42 +585,42 @@ export const MultiEngineConsensusCard: React.FC<ClinicalAccuracyScoreCardProps> 
 
               {/* Selected Stage Detail Inspector Card */}
               {currentStage && (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 space-y-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 pb-3">
+                <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50 p-4 space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 dark:border-slate-700 pb-3">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold">
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold">
                           Stage {selectedStageIndex + 1} of {sanitizedStages.length}
                         </span>
-                        <h4 className="text-sm font-bold text-slate-900">{currentStage.engineName}</h4>
+                        <h4 className="text-sm font-bold text-slate-900 dark:text-white">{currentStage.engineName}</h4>
                       </div>
-                      <p className="text-xs text-slate-600 mt-1">{currentStage.engineRole}</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">{currentStage.engineRole}</p>
                     </div>
 
                     <div className="flex items-center gap-2 self-start sm:self-center">
-                      <span className="text-xs font-mono font-bold text-emerald-700 bg-white px-2.5 py-1 rounded-lg border border-slate-200">
+                      <span className="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-400 bg-white dark:bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700">
                         Confidence: {currentStage.confidence.toFixed(1)}%
                       </span>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                    <div className="bg-white rounded-xl p-3 border border-slate-200">
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center gap-1">
+                    <div className="bg-white dark:bg-slate-900 rounded-xl p-3 border border-slate-200 dark:border-slate-700">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1">
                         <FileText className="w-3 h-3 text-slate-400" />
                         <span>Decoded Clinical Tokens:</span>
                       </div>
-                      <p className="font-mono text-xs text-slate-800 break-words leading-relaxed">
+                      <p className="font-mono text-xs text-slate-800 dark:text-slate-200 break-words leading-relaxed">
                         {currentStage.extractedSnippet || 'Tokens aligned with multi-stage consensus.'}
                       </p>
                     </div>
 
-                    <div className="bg-white rounded-xl p-3 border border-slate-200">
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center gap-1">
+                    <div className="bg-white dark:bg-slate-900 rounded-xl p-3 border border-slate-200 dark:border-slate-700">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1">
                         <HelpCircle className="w-3 h-3 text-slate-400" />
                         <span>Clinical Focus:</span>
                       </div>
-                      <p className="text-xs text-slate-700 leading-relaxed">
+                      <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
                         {currentStage.specialtyFocus}
                       </p>
                     </div>
@@ -634,9 +634,9 @@ export const MultiEngineConsensusCard: React.FC<ClinicalAccuracyScoreCardProps> 
           {activeTab === 'tokens' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Confirmed Consensus Tokens */}
-              <div className="bg-slate-50/60 rounded-xl p-3.5 border border-slate-200">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-2.5 flex items-center gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              <div className="bg-slate-50/60 dark:bg-slate-800/40 rounded-xl p-3.5 border border-slate-200 dark:border-slate-800">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2.5 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                   <span>Confirmed Prescription Tokens ({ensemble.consensusTokens?.length || 0})</span>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
@@ -644,14 +644,14 @@ export const MultiEngineConsensusCard: React.FC<ClinicalAccuracyScoreCardProps> 
                     ensemble.consensusTokens.map((token, i) => (
                       <span
                         key={i}
-                        className="px-2.5 py-1 rounded-lg bg-white border border-emerald-200 text-emerald-900 text-xs font-semibold font-mono shadow-2xs flex items-center gap-1"
+                        className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-300 text-xs font-semibold font-mono shadow-2xs flex items-center gap-1"
                       >
-                        <Check className="w-3 h-3 text-emerald-600" />
+                        <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                         {cleanOcrText(token)}
                       </span>
                     ))
                   ) : (
-                    <span className="text-xs text-slate-500 italic">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 italic">
                       Standard pharmacopeia token consensus established.
                     </span>
                   )}
@@ -659,9 +659,9 @@ export const MultiEngineConsensusCard: React.FC<ClinicalAccuracyScoreCardProps> 
               </div>
 
               {/* Ambiguity Resolution Explanations */}
-              <div className="bg-slate-50/60 rounded-xl p-3.5 border border-slate-200">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-2.5 flex items-center gap-1.5">
-                  <BrainCircuit className="w-3.5 h-3.5 text-indigo-600" />
+              <div className="bg-slate-50/60 dark:bg-slate-800/40 rounded-xl p-3.5 border border-slate-200 dark:border-slate-800">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2.5 flex items-center gap-1.5">
+                  <BrainCircuit className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                   <span>Cursive Ambiguity Resolutions</span>
                 </div>
                 <ul className="space-y-2">
@@ -669,14 +669,14 @@ export const MultiEngineConsensusCard: React.FC<ClinicalAccuracyScoreCardProps> 
                     ensemble.resolvedAmbiguities.map((item, i) => (
                       <li
                         key={i}
-                        className="text-xs text-slate-800 flex items-start gap-2 bg-white p-2.5 rounded-lg border border-slate-200/90 shadow-2xs"
+                        className="text-xs text-slate-800 dark:text-slate-200 flex items-start gap-2 bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-slate-200/90 dark:border-slate-700 shadow-2xs"
                       >
-                        <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600 shrink-0 mt-0.5" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
                         <span className="leading-snug">{cleanOcrText(item)}</span>
                       </li>
                     ))
                   ) : (
-                    <li className="text-xs text-slate-500 italic">
+                    <li className="text-xs text-slate-500 dark:text-slate-400 italic">
                       All cursive ligatures deciphered with high confidence.
                     </li>
                   )}
@@ -686,14 +686,14 @@ export const MultiEngineConsensusCard: React.FC<ClinicalAccuracyScoreCardProps> 
           )}
 
           {/* Quick Collapse Footer */}
-          <div className="pt-3 border-t border-slate-200/80 flex items-center justify-between flex-wrap gap-2">
-            <span className="text-xs text-slate-500">
-              Composite Handwriting Accuracy Index: <strong className="text-slate-800 font-mono">{overallScore.toFixed(1)}%</strong>
+          <div className="pt-3 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-between flex-wrap gap-2">
+            <span className="text-xs text-slate-500 dark:text-slate-400">
+              Composite Handwriting Accuracy Index: <strong className="text-slate-800 dark:text-slate-200 font-mono">{overallScore.toFixed(1)}%</strong>
             </span>
             <button
               type="button"
               onClick={() => setIsExpanded(false)}
-              className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer min-h-[36px]"
+              className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer min-h-[36px]"
             >
               <ChevronUp className="w-3.5 h-3.5" />
               <span>Hide Accuracy Details</span>

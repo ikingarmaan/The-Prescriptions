@@ -47,8 +47,8 @@ export const DailyScheduleTimeline: React.FC<DailyScheduleTimelineProps> = ({
       timeRange: '7:00 AM – 9:00 AM',
       icon: Sun,
       color: 'amber',
-      bgHeader: 'bg-amber-500/10 text-amber-900 border-amber-200',
-      iconColor: 'text-amber-600',
+      bgHeader: 'bg-amber-500/10 dark:bg-amber-950/40 text-amber-900 dark:text-amber-300 border-amber-200 dark:border-amber-800/60',
+      iconColor: 'text-amber-600 dark:text-amber-400',
       items: safeSummary.morning,
       medicinesList: safeMedicines.filter((m) => m?.scheduleTimes?.morning),
     },
@@ -58,8 +58,8 @@ export const DailyScheduleTimeline: React.FC<DailyScheduleTimelineProps> = ({
       timeRange: '12:00 PM – 2:00 PM',
       icon: CloudSun,
       color: 'sky',
-      bgHeader: 'bg-sky-500/10 text-sky-900 border-sky-200',
-      iconColor: 'text-sky-600',
+      bgHeader: 'bg-sky-500/10 dark:bg-sky-950/40 text-sky-900 dark:text-sky-300 border-sky-200 dark:border-sky-800/60',
+      iconColor: 'text-sky-600 dark:text-sky-400',
       items: safeSummary.afternoon,
       medicinesList: safeMedicines.filter((m) => m?.scheduleTimes?.afternoon),
     },
@@ -69,8 +69,8 @@ export const DailyScheduleTimeline: React.FC<DailyScheduleTimelineProps> = ({
       timeRange: '6:00 PM – 8:00 PM',
       icon: Sunset,
       color: 'indigo',
-      bgHeader: 'bg-indigo-500/10 text-indigo-900 border-indigo-200',
-      iconColor: 'text-indigo-600',
+      bgHeader: 'bg-indigo-500/10 dark:bg-indigo-950/40 text-indigo-900 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800/60',
+      iconColor: 'text-indigo-600 dark:text-indigo-400',
       items: safeSummary.evening,
       medicinesList: safeMedicines.filter((m) => m?.scheduleTimes?.evening),
     },
@@ -80,8 +80,8 @@ export const DailyScheduleTimeline: React.FC<DailyScheduleTimelineProps> = ({
       timeRange: '9:30 PM – 11:00 PM',
       icon: Moon,
       color: 'purple',
-      bgHeader: 'bg-purple-500/10 text-purple-900 border-purple-200',
-      iconColor: 'text-purple-600',
+      bgHeader: 'bg-purple-500/10 dark:bg-purple-950/40 text-purple-900 dark:text-purple-300 border-purple-200 dark:border-purple-800/60',
+      iconColor: 'text-purple-600 dark:text-purple-400',
       items: safeSummary.bedtime,
       medicinesList: safeMedicines.filter((m) => m?.scheduleTimes?.bedtime),
     },
@@ -91,15 +91,15 @@ export const DailyScheduleTimeline: React.FC<DailyScheduleTimelineProps> = ({
       timeRange: 'Only when symptoms appear',
       icon: AlertCircle,
       color: 'rose',
-      bgHeader: 'bg-rose-500/10 text-rose-900 border-rose-200',
-      iconColor: 'text-rose-600',
+      bgHeader: 'bg-rose-500/10 dark:bg-rose-950/40 text-rose-900 dark:text-rose-300 border-rose-200 dark:border-rose-800/60',
+      iconColor: 'text-rose-600 dark:text-rose-400',
       items: safeSummary.asNeeded,
       medicinesList: safeMedicines.filter((m) => m?.scheduleTimes?.asNeeded),
     },
   ];
 
   return (
-    <div id="daily-schedule-timeline" className="bg-white rounded-3xl border-2 border-indigo-500/40 shadow-sm overflow-hidden">
+    <div id="daily-schedule-timeline" className="bg-white dark:bg-slate-900 rounded-3xl border-2 border-indigo-500/40 dark:border-indigo-500/30 shadow-sm overflow-hidden">
       {/* Box Header Banner with Violet & Sunset Clock Routine Theme */}
       <div className="bg-gradient-to-r from-slate-950 via-indigo-950 to-purple-950 text-white p-5 sm:p-7 md:p-8 relative overflow-hidden">
         {/* Subtle diurnal sun & moon orbit glow artwork */}
@@ -148,8 +148,8 @@ export const DailyScheduleTimeline: React.FC<DailyScheduleTimelineProps> = ({
               key={slot.id}
               className={`rounded-xl border p-4.5 flex flex-col justify-between transition-all ${
                 hasMeds
-                  ? 'bg-slate-50/50 border-slate-200 hover:border-slate-300'
-                  : 'bg-slate-50/20 border-slate-200/50 opacity-60'
+                  ? 'bg-slate-50/50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                  : 'bg-slate-50/20 dark:bg-slate-800/10 border-slate-200/50 dark:border-slate-800/50 opacity-60'
               }`}
             >
               <div>
@@ -162,13 +162,13 @@ export const DailyScheduleTimeline: React.FC<DailyScheduleTimelineProps> = ({
                       <Icon className={`w-4 h-4 ${slot.iconColor}`} />
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-slate-900">{slot.title}</h4>
-                      <span className="text-[10px] text-slate-400 block">{slot.timeRange}</span>
+                      <h4 className="text-sm font-bold text-slate-900 dark:text-white">{slot.title}</h4>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500 block">{slot.timeRange}</span>
                     </div>
                   </div>
                   <span
                     className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
-                      hasMeds ? 'bg-white border border-slate-200 text-slate-700' : 'text-slate-400'
+                      hasMeds ? 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'
                     }`}
                   >
                     {slot.medicinesList.length} med{slot.medicinesList.length !== 1 ? 's' : ''}
@@ -188,8 +188,8 @@ export const DailyScheduleTimeline: React.FC<DailyScheduleTimelineProps> = ({
                           onClick={() => toggleDose(doseKey)}
                           className={`p-2.5 rounded-lg border text-xs cursor-pointer select-none transition-all flex items-start gap-2.5 ${
                             isTaken
-                              ? 'bg-emerald-50/70 border-emerald-300 text-emerald-900'
-                              : 'bg-white border-slate-200/80 hover:border-emerald-300 text-slate-800'
+                              ? 'bg-emerald-50/70 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-300'
+                              : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-600 text-slate-800 dark:text-slate-200'
                           }`}
                         >
                           <button
@@ -197,7 +197,7 @@ export const DailyScheduleTimeline: React.FC<DailyScheduleTimelineProps> = ({
                             className={`w-4 h-4 rounded mt-0.5 flex items-center justify-center shrink-0 transition-colors ${
                               isTaken
                                 ? 'bg-emerald-600 text-white'
-                                : 'border border-slate-300 text-transparent hover:border-emerald-500'
+                                : 'border border-slate-300 dark:border-slate-600 text-transparent hover:border-emerald-500 dark:hover:border-emerald-400'
                             }`}
                           >
                             <CheckCircle2 className="w-3.5 h-3.5" />
@@ -206,16 +206,16 @@ export const DailyScheduleTimeline: React.FC<DailyScheduleTimelineProps> = ({
                             <div className="flex items-center justify-between gap-1">
                               <span
                                 className={`font-bold truncate ${
-                                  isTaken ? 'line-through text-emerald-800/70' : 'text-slate-900'
+                                  isTaken ? 'line-through text-emerald-800/70 dark:text-emerald-400/60' : 'text-slate-900 dark:text-white'
                                 }`}
                               >
                                 {med.name}
                               </span>
-                              <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 shrink-0 font-medium">
+                              <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 shrink-0 font-medium">
                                 {med.dosage}
                               </span>
                             </div>
-                            <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
                               {med.mealRelationText || med.genericName}
                             </p>
                           </div>
@@ -224,7 +224,7 @@ export const DailyScheduleTimeline: React.FC<DailyScheduleTimelineProps> = ({
                     })}
                   </div>
                 ) : (
-                  <div className="py-6 text-center text-xs text-slate-400">
+                  <div className="py-6 text-center text-xs text-slate-400 dark:text-slate-500">
                     No medications scheduled for this time slot.
                   </div>
                 )}

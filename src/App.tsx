@@ -28,14 +28,15 @@ const AbbreviationDictionary = React.lazy(() => import('./components/Abbreviatio
 const PrintableMedicationCard = React.lazy(() => import('./components/PrintableMedicationCard').then((m) => ({ default: m.PrintableMedicationCard })));
 const InfoPages = React.lazy(() => import('./components/InfoPages').then((m) => ({ default: m.InfoPages })));
 const BlogSection = React.lazy(() => import('./components/BlogSection').then((m) => ({ default: m.BlogSection })));
+import { ThemeProvider } from './context/ThemeContext';
 
 const TabLoadingFallback = () => (
   <div className="flex flex-col items-center justify-center min-h-[360px] py-16 px-4">
-    <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center animate-pulse">
-      <Sparkles className="w-6 h-6 text-emerald-600 animate-spin" style={{ animationDuration: '3s' }} />
+    <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 flex items-center justify-center animate-pulse">
+      <Sparkles className="w-6 h-6 text-emerald-600 dark:text-emerald-400 animate-spin" style={{ animationDuration: '3s' }} />
     </div>
-    <p className="mt-4 text-sm font-semibold text-slate-700">Loading section...</p>
-    <p className="text-xs text-slate-400 mt-1">Fetching resources safely</p>
+    <p className="mt-4 text-sm font-semibold text-slate-700 dark:text-slate-200">Loading section...</p>
+    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Fetching resources safely</p>
   </div>
 );
 import {
@@ -325,32 +326,33 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen relative bg-slate-50/80 flex flex-col font-sans text-slate-800 antialiased selection:bg-emerald-100 selection:text-emerald-900 overflow-x-hidden">
-      {/* Dynamic Mouse-Interactive Medical Background */}
-      <InteractiveMedicalBackground />
+    <ThemeProvider>
+      <div className="min-h-screen relative bg-slate-50/80 dark:bg-slate-950 flex flex-col font-sans text-slate-800 dark:text-slate-100 antialiased selection:bg-emerald-100 selection:text-emerald-900 dark:selection:bg-emerald-900/50 dark:selection:text-emerald-200 overflow-x-hidden transition-colors duration-150">
+        {/* Dynamic Mouse-Interactive Medical Background */}
+        <InteractiveMedicalBackground />
 
-      {/* Radiant Glowing Cursor Follower */}
-      <GlowingCursor />
+        {/* Radiant Glowing Cursor Follower */}
+        <GlowingCursor />
 
-      {/* Top Navigation */}
-      <div className="relative z-20">
-        <Navbar
-          activeTab={activeTab}
-          setActiveTab={(tab) => {
-            setActiveTab(tab);
-            setError(null);
-          }}
-          hasResult={Boolean(analysisResult && !isPrescriptionUnunderstood)}
-          onOpenPrintModal={() => {
-            setIsPrintModalOpen(true);
-            trackPrintCardOpened();
-          }}
-          hideOtherTabs={isPrescriptionUnunderstood}
-        />
-      </div>
+        {/* Top Navigation */}
+        <div className="relative z-20">
+          <Navbar
+            activeTab={activeTab}
+            setActiveTab={(tab) => {
+              setActiveTab(tab);
+              setError(null);
+            }}
+            hasResult={Boolean(analysisResult && !isPrescriptionUnunderstood)}
+            onOpenPrintModal={() => {
+              setIsPrintModalOpen(true);
+              trackPrintCardOpened();
+            }}
+            hideOtherTabs={isPrescriptionUnunderstood}
+          />
+        </div>
 
-      {/* Trust & Safety Banner */}
-      <div className="relative z-10 bg-emerald-900/95 backdrop-blur-xs text-emerald-100 py-2 px-3 sm:px-4 text-[11px] sm:text-xs font-medium border-b border-emerald-800/60 print:hidden shadow-2xs">
+        {/* Trust & Safety Banner */}
+        <div className="relative z-10 bg-emerald-900/95 dark:bg-emerald-950/90 backdrop-blur-xs text-emerald-100 py-2 px-3 sm:px-4 text-[11px] sm:text-xs font-medium border-b border-emerald-800/60 dark:border-emerald-800/40 print:hidden shadow-2xs transition-colors duration-150">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -588,5 +590,6 @@ export default function App() {
         onOpenPrintModal={() => setIsPrintModalOpen(true)}
       />
     </div>
+    </ThemeProvider>
   );
 }

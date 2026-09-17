@@ -59,14 +59,14 @@ export const PrintableMedicationCard: React.FC<PrintableMedicationCardProps> = (
   return (
     <div
       id="printable-med-modal"
-      className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/80 backdrop-blur-xs p-2 sm:p-6 flex items-center justify-center print:p-0 print:static print:bg-white"
+      className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/80 dark:bg-slate-950/85 backdrop-blur-xs p-2 sm:p-6 flex items-center justify-center print:p-0 print:static print:bg-white"
     >
-      <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full border border-slate-200 overflow-hidden print:border-none print:shadow-none print:max-w-none my-auto">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full border border-slate-200 dark:border-slate-800 overflow-hidden print:border-none print:shadow-none print:max-w-none my-auto">
         {/* Modal Controls (Hidden in Print) */}
-        <div className="flex flex-wrap items-center justify-between px-4 sm:px-6 py-3 border-b border-slate-100 bg-slate-50 print:hidden gap-3">
+        <div className="flex flex-wrap items-center justify-between px-4 sm:px-6 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 print:hidden gap-3">
           <div className="flex items-center gap-2 truncate">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 shrink-0" />
-            <span className="font-bold text-xs sm:text-sm text-slate-800 truncate">
+            <span className="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-200 truncate">
               Printable Medication Guide
             </span>
           </div>
@@ -77,7 +77,7 @@ export const PrintableMedicationCard: React.FC<PrintableMedicationCardProps> = (
               id="download-pdf-card-btn"
               type="button"
               onClick={handleDownloadPdf}
-              className="px-3 sm:px-3.5 py-2 bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-xs font-bold rounded-xl transition-colors flex items-center gap-1.5 shadow-2xs min-h-[40px] cursor-pointer"
+              className="px-3 sm:px-3.5 py-2 bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 active:bg-slate-950 text-white text-xs font-bold rounded-xl transition-colors flex items-center gap-1.5 shadow-2xs min-h-[40px] cursor-pointer"
               title="Download official medication card as PDF format"
             >
               {downloadedFormat === 'pdf' ? (
@@ -98,17 +98,17 @@ export const PrintableMedicationCard: React.FC<PrintableMedicationCardProps> = (
               id="download-txt-card-btn"
               type="button"
               onClick={handleDownloadTxt}
-              className="px-3 py-2 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl border border-slate-300 transition-colors flex items-center gap-1.5 min-h-[40px] cursor-pointer"
+              className="px-3 py-2 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-xl border border-slate-300 dark:border-slate-700 transition-colors flex items-center gap-1.5 min-h-[40px] cursor-pointer"
               title="Download plain text schedule for notes/messages"
             >
               {downloadedFormat === 'txt' ? (
                 <>
-                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                   <span>Text Saved!</span>
                 </>
               ) : (
                 <>
-                  <FileText className="w-3.5 h-3.5 text-slate-500" />
+                  <FileText className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                   <span>Download .TXT</span>
                 </>
               )}
@@ -129,7 +129,7 @@ export const PrintableMedicationCard: React.FC<PrintableMedicationCardProps> = (
             <button
               type="button"
               onClick={onClose}
-              className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-xl transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center cursor-pointer"
+              className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center cursor-pointer"
               aria-label="Close"
             >
               <X className="w-5 h-5" />

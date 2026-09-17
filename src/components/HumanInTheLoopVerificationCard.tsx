@@ -218,7 +218,7 @@ export const HumanInTheLoopVerificationCard: React.FC<HumanInTheLoopVerification
   return (
     <div
       id="human-in-the-loop-card"
-      className={`bg-white rounded-3xl border-2 border-amber-300 shadow-sm overflow-hidden ${className}`}
+      className={`bg-white dark:bg-slate-900 rounded-3xl border-2 border-amber-300 dark:border-amber-500/40 shadow-sm overflow-hidden ${className}`}
     >
       {/* Top Warning Accent Bar */}
       <div className="h-2 w-full bg-linear-to-r from-amber-500 via-orange-500 to-amber-600" />
@@ -259,37 +259,37 @@ export const HumanInTheLoopVerificationCard: React.FC<HumanInTheLoopVerification
 
       {/* Site Learning Drawer (Collapsible) */}
       {showLearningDrawer && (
-        <div className="bg-amber-50/70 border-b border-amber-200 p-4 sm:p-5 text-xs text-slate-800 space-y-3">
+        <div className="bg-amber-50/70 dark:bg-amber-950/40 border-b border-amber-200 dark:border-amber-800/60 p-4 sm:p-5 text-xs text-slate-800 dark:text-slate-200 space-y-3">
           <div className="flex items-center justify-between">
-            <h4 className="font-bold text-amber-950 flex items-center gap-1.5">
-              <BrainCircuit className="w-4 h-4 text-amber-700" />
+            <h4 className="font-bold text-amber-950 dark:text-amber-300 flex items-center gap-1.5">
+              <BrainCircuit className="w-4 h-4 text-amber-700 dark:text-amber-400" />
               Adaptive Site Memory: Learned Doctor Handwriting Patterns
             </h4>
-            <span className="text-[11px] text-amber-800 font-medium">
+            <span className="text-[11px] text-amber-800 dark:text-amber-400 font-medium">
               Trained from human confirmations
             </span>
           </div>
-          <p className="text-[11px] text-slate-600">
+          <p className="text-[11px] text-slate-600 dark:text-slate-400">
             Every time you confirm or manually type a medicine below, the system permanently learns that doctor’s handwriting ligature or abbreviation. Future scans will recognize it with 100% confidence.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 max-h-48 overflow-y-auto pr-1">
             {learnedMemory.map((item) => (
               <div
                 key={item.id}
-                className="p-2.5 rounded-xl bg-white border border-amber-200 shadow-2xs flex flex-col justify-between text-left"
+                className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-800/60 shadow-2xs flex flex-col justify-between text-left"
               >
                 <div className="flex items-center justify-between gap-1 mb-1">
-                  <span className="font-mono text-[11px] bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded font-bold">
+                  <span className="font-mono text-[11px] bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-1.5 py-0.5 rounded font-bold">
                     "{item.rawToken}"
                   </span>
-                  <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                  <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
                     +{item.count} Confirmed
                   </span>
                 </div>
-                <div className="font-bold text-slate-900 text-xs truncate">
+                <div className="font-bold text-slate-900 dark:text-white text-xs truncate">
                   → {item.confirmedMedicine}
                 </div>
-                <div className="text-[10px] text-slate-500 truncate">
+                <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
                   {item.confirmedGeneric}
                 </div>
               </div>
@@ -299,7 +299,7 @@ export const HumanInTheLoopVerificationCard: React.FC<HumanInTheLoopVerification
       )}
 
       {/* Low-Confidence / Ambiguous Items Review List */}
-      <div className="p-4 sm:p-6 divide-y divide-slate-200 space-y-5 sm:space-y-6">
+      <div className="p-4 sm:p-6 divide-y divide-slate-200 dark:divide-slate-800 space-y-5 sm:space-y-6">
         {itemsToReview.map((medIndex) => {
           const med = medicines[medIndex];
           if (!med) return null;
@@ -319,47 +319,47 @@ export const HumanInTheLoopVerificationCard: React.FC<HumanInTheLoopVerification
             <div
               key={medIndex}
               className={`pt-5 first:pt-0 space-y-3 transition-all ${
-                isJustExplained ? 'p-3 bg-emerald-50/50 rounded-2xl border border-emerald-200' : ''
+                isJustExplained ? 'p-3 bg-emerald-50/50 dark:bg-emerald-950/30 rounded-2xl border border-emerald-200 dark:border-emerald-800' : ''
               }`}
             >
               {/* Card Row Top: Raw OCR vs Best Guess */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300">
+                    <span className="text-xs font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
                       Line #{medIndex + 1}
                     </span>
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                       OCR Detected Text:
                     </span>
-                    <code className="font-mono text-xs font-bold bg-white px-2.5 py-1 rounded-md border border-slate-300 text-slate-900 shadow-2xs">
+                    <code className="font-mono text-xs font-bold bg-white dark:bg-slate-900 px-2.5 py-1 rounded-md border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white shadow-2xs">
                       "{rawOcrToken}"
                     </code>
-                    <span className="text-[11px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
+                    <span className="text-[11px] font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-800">
                       Confidence: {score}%
                     </span>
                   </div>
 
                   {isUnableToUnderstand ? (
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 pt-0.5">
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-100/90 text-amber-900 border border-amber-300 text-xs font-bold">
-                        <AlertTriangle className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-100/90 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-800 text-xs font-bold">
+                        <AlertTriangle className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
                         <span>Apologies, we didn't understand this medicine</span>
                       </div>
-                      <span className="text-xs text-slate-600">
+                      <span className="text-xs text-slate-600 dark:text-slate-400">
                         Doctor's handwriting is unclear on this line.
                       </span>
                     </div>
                   ) : (
-                    <div className="text-sm font-semibold text-slate-700 flex flex-wrap items-center gap-2">
+                    <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex flex-wrap items-center gap-2">
                       <span>AI Predicted Match:</span>
-                      <strong className="text-slate-900 text-base">{med.name}</strong>
+                      <strong className="text-slate-900 dark:text-white text-base">{med.name}</strong>
                       {med.strength && (
-                        <span className="text-xs bg-slate-200 text-slate-800 px-1.5 py-0.5 rounded">
+                        <span className="text-xs bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 px-1.5 py-0.5 rounded">
                           {med.strength}
                         </span>
                       )}
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-slate-500 dark:text-slate-400">
                         ({med.genericName})
                       </span>
                     </div>
@@ -368,7 +368,7 @@ export const HumanInTheLoopVerificationCard: React.FC<HumanInTheLoopVerification
 
                 {/* Direct Question Prompt */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
-                  <div className="text-xs font-bold text-slate-700 text-center sm:text-right">
+                  <div className="text-xs font-bold text-slate-700 dark:text-slate-300 text-center sm:text-right">
                     {isUnableToUnderstand ? "Do you know this medicine?" : "Is this correct?"}
                   </div>
 
@@ -421,11 +421,11 @@ export const HumanInTheLoopVerificationCard: React.FC<HumanInTheLoopVerification
                           }}
                           className={`flex-1 sm:flex-initial px-3.5 py-2 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                             isManualActive
-                              ? 'bg-amber-100 text-amber-900 border-amber-400'
-                              : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:text-slate-900'
+                              ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border-amber-400'
+                              : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white'
                           }`}
                         >
-                          <Edit3 className="w-3.5 h-3.5 text-amber-600" />
+                          <Edit3 className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                           <span>No, type manually</span>
                         </button>
                       </>
@@ -436,53 +436,53 @@ export const HumanInTheLoopVerificationCard: React.FC<HumanInTheLoopVerification
 
               {/* MANUAL TYPING ACCORDION */}
               {isManualActive && (
-                <div className="bg-amber-50/50 border border-amber-300 p-4 sm:p-5 rounded-2xl space-y-4">
+                <div className="bg-amber-50/50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-800/60 p-4 sm:p-5 rounded-2xl space-y-4">
                   <div className="flex items-center justify-between">
-                    <h5 className="text-xs sm:text-sm font-bold text-amber-950 flex items-center gap-1.5">
-                      <Edit3 className="w-4 h-4 text-amber-700" />
+                    <h5 className="text-xs sm:text-sm font-bold text-amber-950 dark:text-amber-300 flex items-center gap-1.5">
+                      <Edit3 className="w-4 h-4 text-amber-700 dark:text-amber-400" />
                       Type Correct Medicine Name for "{rawOcrToken}"
                     </h5>
-                    <span className="text-[11px] text-slate-500">
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400">
                       Search by brand name or generic active salt
                     </span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
                     <div className="sm:col-span-8 relative">
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                         Medicine Name (Live Autocomplete):
                       </label>
                       <div className="relative">
-                        <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                        <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-3" />
                         <input
                           type="text"
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
                           placeholder="e.g. Augmentin, Dolo, Pantocid, Azithral, Telma..."
-                          className="w-full pl-9 pr-3 py-2 bg-white rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-amber-500 text-xs text-slate-900 font-semibold"
+                          className="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-950 rounded-xl border border-slate-300 dark:border-slate-700 focus:outline-hidden focus:ring-2 focus:ring-amber-500 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 font-semibold"
                           autoFocus
                         />
                       </div>
 
                       {/* Autocomplete Dropdown */}
                       {filteredSuggestions.length > 0 && (
-                        <div className="absolute left-0 right-0 top-full mt-1 bg-white rounded-xl border border-slate-200 shadow-lg z-30 overflow-hidden divide-y divide-slate-100">
+                        <div className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-lg z-30 overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
                           {filteredSuggestions.map((entry) => (
                             <button
                               key={entry.brandName}
                               type="button"
                               onClick={() => handleSelectSuggestion(medIndex, entry)}
-                              className="w-full p-2.5 text-left hover:bg-amber-50 flex items-center justify-between gap-2 transition-colors cursor-pointer"
+                              className="w-full p-2.5 text-left hover:bg-amber-50 dark:hover:bg-slate-800 flex items-center justify-between gap-2 transition-colors cursor-pointer"
                             >
                               <div>
-                                <div className="font-bold text-slate-900 text-xs">
+                                <div className="font-bold text-slate-900 dark:text-white text-xs">
                                   {entry.brandName}
                                 </div>
-                                <div className="text-[11px] text-slate-500">
+                                <div className="text-[11px] text-slate-500 dark:text-slate-400">
                                   {entry.genericName}
                                 </div>
                               </div>
-                              <span className="text-[10px] bg-amber-100 text-amber-800 font-semibold px-2 py-0.5 rounded">
+                              <span className="text-[10px] bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-semibold px-2 py-0.5 rounded border border-amber-300/50 dark:border-amber-700/50">
                                 {entry.standardStrengths[0] || 'Standard'}
                               </span>
                             </button>
@@ -492,7 +492,7 @@ export const HumanInTheLoopVerificationCard: React.FC<HumanInTheLoopVerification
                     </div>
 
                     <div className="sm:col-span-4">
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                         Strength / Dosage:
                       </label>
                       <input
@@ -500,14 +500,14 @@ export const HumanInTheLoopVerificationCard: React.FC<HumanInTheLoopVerification
                         value={customStrength}
                         onChange={(e) => setCustomStrength(e.target.value)}
                         placeholder="e.g. 625mg, 40mg, 500mg"
-                        className="w-full px-3 py-2 bg-white rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-amber-500 text-xs text-slate-900"
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-950 rounded-xl border border-slate-300 dark:border-slate-700 focus:outline-hidden focus:ring-2 focus:ring-amber-500 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
                       />
                     </div>
                   </div>
 
                   {/* Popular Quick Suggestions Pills */}
                   <div className="space-y-1.5">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                       Quick Pharmacopeia Matches:
                     </span>
                     <div className="flex flex-wrap gap-1.5">
@@ -519,7 +519,7 @@ export const HumanInTheLoopVerificationCard: React.FC<HumanInTheLoopVerification
                             onClick={() => {
                               setSearchQuery(pill);
                             }}
-                            className="px-2.5 py-1 rounded-lg bg-white hover:bg-amber-100 text-slate-700 hover:text-amber-900 border border-slate-200 text-xs font-semibold transition-all cursor-pointer shadow-2xs"
+                            className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-amber-100 dark:hover:bg-amber-950/60 text-slate-700 dark:text-slate-200 hover:text-amber-900 dark:hover:text-amber-300 border border-slate-200 dark:border-slate-700 text-xs font-semibold transition-all cursor-pointer shadow-2xs"
                           >
                             + {pill}
                           </button>
@@ -529,11 +529,11 @@ export const HumanInTheLoopVerificationCard: React.FC<HumanInTheLoopVerification
                   </div>
 
                   {/* Submit Action */}
-                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-amber-200">
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-amber-200 dark:border-amber-800/60">
                     <button
                       type="button"
                       onClick={() => setActiveManualIndex(null)}
-                      className="px-3 py-1.5 text-xs text-slate-600 hover:text-slate-900 cursor-pointer"
+                      className="px-3 py-1.5 text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer"
                     >
                       Cancel
                     </button>
@@ -541,7 +541,7 @@ export const HumanInTheLoopVerificationCard: React.FC<HumanInTheLoopVerification
                       type="button"
                       disabled={!searchQuery.trim()}
                       onClick={() => handleCustomManualSubmit(medIndex)}
-                      className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 disabled:bg-slate-300 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                      className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 disabled:bg-slate-300 dark:disabled:bg-slate-800 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
                     >
                       <Sparkles className="w-3.5 h-3.5" />
                       <span>Save & Explain Medicine</span>
@@ -552,53 +552,53 @@ export const HumanInTheLoopVerificationCard: React.FC<HumanInTheLoopVerification
 
               {/* POST-VERIFICATION CLINICAL EXPLANATION BOX */}
               {isJustExplained && (
-                <div className="p-4 rounded-2xl bg-white border-2 border-emerald-400/80 shadow-xs space-y-2.5">
-                  <div className="flex items-center justify-between gap-2 border-b border-emerald-100 pb-2">
+                <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border-2 border-emerald-400/80 dark:border-emerald-500/60 shadow-xs space-y-2.5">
+                  <div className="flex items-center justify-between gap-2 border-b border-emerald-100 dark:border-emerald-900/60 pb-2">
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                      <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                       <div>
-                        <h4 className="text-xs sm:text-sm font-bold text-emerald-950">
+                        <h4 className="text-xs sm:text-sm font-bold text-emerald-950 dark:text-emerald-300">
                           Verified & Explained: {med.name}
                         </h4>
-                        <p className="text-[11px] text-emerald-700 font-medium">
+                        <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium">
                           Active Generic Salt: {med.genericName}
                         </p>
                       </div>
                     </div>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
                       Human Verified (Site Trained)
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-700 pt-1">
-                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
-                      <div className="font-bold text-slate-900 flex items-center gap-1">
-                        <BookOpen className="w-3.5 h-3.5 text-indigo-600" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-700 dark:text-slate-300 pt-1">
+                    <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1">
+                        <BookOpen className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                         What It Treats & Why Prescribed:
                       </div>
-                      <p className="text-[11px] text-slate-600 leading-relaxed">
+                      <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
                         {med.purposeAndUsage || 'Clinical therapeutic treatment prescribed for your condition.'}
                       </p>
                     </div>
 
-                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
-                      <div className="font-bold text-slate-900 flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5 text-teal-600" />
+                    <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                         How to Take Safely:
                       </div>
-                      <p className="text-[11px] text-slate-600 leading-relaxed">
+                      <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
                         {med.howToTake || med.mealRelationText || 'Take as scheduled with water.'}
                       </p>
                     </div>
                   </div>
 
                   {med.precautions && med.precautions.length > 0 && (
-                    <div className="bg-amber-50/70 p-3 rounded-xl border border-amber-200 text-xs text-amber-900 space-y-1">
-                      <div className="font-bold flex items-center gap-1 text-amber-950">
-                        <AlertTriangle className="w-3.5 h-3.5 text-amber-700" />
+                    <div className="bg-amber-50/70 dark:bg-amber-950/30 p-3 rounded-xl border border-amber-200 dark:border-amber-800/60 text-xs text-amber-900 dark:text-amber-300 space-y-1">
+                      <div className="font-bold flex items-center gap-1 text-amber-950 dark:text-amber-200">
+                        <AlertTriangle className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
                         Important Precautions:
                       </div>
-                      <ul className="list-disc list-inside text-[11px] text-amber-900 space-y-0.5">
+                      <ul className="list-disc list-inside text-[11px] text-amber-900 dark:text-amber-300 space-y-0.5">
                         {med.precautions.slice(0, 2).map((p, idx) => (
                           <li key={idx}>{p}</li>
                         ))}

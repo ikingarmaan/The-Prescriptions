@@ -113,20 +113,20 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
       id="faq-section"
       className={`w-full ${
         variant === 'homepage'
-          ? 'mt-12 pt-10 border-t border-slate-300'
+          ? 'mt-12 pt-10 border-t border-slate-300 dark:border-slate-800'
           : 'max-w-4xl mx-auto'
       }`}
     >
       {/* Header */}
       <div className="text-center max-w-3xl mx-auto space-y-3 mb-8">
-        <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-100/80 text-emerald-900 text-xs font-extrabold border border-emerald-300 shadow-2xs">
-          <HelpCircle className="w-4 h-4 text-emerald-700" />
+        <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-100/80 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 text-xs font-extrabold border border-emerald-300 dark:border-emerald-800 shadow-2xs">
+          <HelpCircle className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
           <span>Prescription FAQs & Safety Guidance</span>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
           Frequently Asked Questions
         </h2>
-        <p className="text-xs sm:text-sm text-slate-700 leading-relaxed max-w-2xl mx-auto font-medium">
+        <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed max-w-2xl mx-auto font-medium">
           {variant === 'homepage'
             ? 'Quick answers to top questions on deciphering doctor handwriting, understanding 1-0-1 dosage codes, and our encrypted privacy protections.'
             : `Explore our complete knowledge base of ${FAQ_DATABASE.length} verified answers covering prescription parsing, doctor Latin codes, pharmacology accuracy, medication safety protocols, and patient privacy.`}
@@ -138,20 +138,20 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
         <div className="w-full mx-auto space-y-4 mb-6">
           {/* Search Bar */}
           <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               id="faq-search-input"
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by symptom, medicine name, Latin code (e.g. 1-0-1, AC), or question..."
-              className="w-full pl-10 pr-10 py-3 bg-white border border-slate-300 rounded-2xl text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-emerald-500 focus:border-transparent shadow-xs transition-all"
+              className="w-full pl-10 pr-10 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 rounded-2xl text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-emerald-500 focus:border-transparent shadow-xs transition-all"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded-md cursor-pointer"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-md cursor-pointer"
                 title="Clear search"
               >
                 <X className="w-4 h-4" />
@@ -176,8 +176,8 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
                   onClick={() => setSelectedCategory(cat)}
                   className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
                     isActive
-                      ? 'bg-slate-900 text-white shadow-xs'
-                      : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-100 hover:text-slate-900'
+                      ? 'bg-slate-900 dark:bg-emerald-500 text-white dark:text-slate-950 shadow-xs'
+                      : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   {cat === 'Popular' && '🔥 '}
@@ -185,8 +185,8 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
                   <span
                     className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono ${
                       isActive
-                        ? 'bg-slate-700 text-emerald-300'
-                        : 'bg-slate-100 text-slate-600'
+                        ? 'bg-slate-700 dark:bg-emerald-600 text-emerald-300 dark:text-slate-950'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
                     }`}
                   >
                     {count}
@@ -196,9 +196,9 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
             })}
           </div>
 
-          <div className="flex items-center justify-between text-xs text-slate-600 px-1">
+          <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 px-1">
             <span>
-              Showing <strong className="text-slate-900 font-bold">{displayedFaqs.length}</strong> of{' '}
+              Showing <strong className="text-slate-900 dark:text-white font-bold">{displayedFaqs.length}</strong> of{' '}
               {FAQ_DATABASE.length} questions
             </span>
             {searchQuery && (
@@ -208,7 +208,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
                   setSearchQuery('');
                   setSelectedCategory('All');
                 }}
-                className="text-emerald-700 hover:underline font-bold cursor-pointer"
+                className="text-emerald-700 dark:text-emerald-400 hover:underline font-bold cursor-pointer"
               >
                 Reset Filters
               </button>
@@ -224,32 +224,32 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
           return (
             <div
               key={faq.id}
-              className={`bg-white border rounded-2xl transition-all duration-200 overflow-hidden ${
+              className={`bg-white dark:bg-slate-900 border rounded-2xl transition-all duration-200 overflow-hidden ${
                 isOpen
-                  ? 'border-emerald-500 shadow-md ring-1 ring-emerald-500/25'
-                  : 'border-slate-300 shadow-2xs hover:border-slate-400'
+                  ? 'border-emerald-500 dark:border-emerald-500 shadow-md ring-1 ring-emerald-500/25'
+                  : 'border-slate-300 dark:border-slate-800 shadow-2xs hover:border-slate-400 dark:hover:border-slate-700'
               }`}
             >
               <button
                 type="button"
                 onClick={() => toggleAccordion(faq.id)}
-                className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4 cursor-pointer focus:outline-hidden hover:bg-slate-50/70 transition-colors"
+                className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4 cursor-pointer focus:outline-hidden hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors"
               >
                 <div className="space-y-1.5 pr-2">
                   <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 border border-slate-200">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                       {getCategoryIcon(faq.category)}
                       <span>{faq.category}</span>
                     </span>
                     {faq.popular && (
-                      <span className="text-[10px] font-extrabold text-amber-800 bg-amber-50 border border-amber-300 px-1.5 py-0.2 rounded-md">
+                      <span className="text-[10px] font-extrabold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-800/60 px-1.5 py-0.2 rounded-md">
                         Key Question
                       </span>
                     )}
                   </div>
                   <h3
                     className={`font-bold text-sm sm:text-base leading-snug ${
-                      isOpen ? 'text-emerald-950 font-black' : 'text-slate-900'
+                      isOpen ? 'text-emerald-950 dark:text-emerald-300 font-black' : 'text-slate-900 dark:text-slate-100'
                     }`}
                   >
                     {faq.question}
@@ -260,7 +260,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
                   className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors ${
                     isOpen
                       ? 'bg-emerald-600 text-white'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                   }`}
                 >
                   {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -268,19 +268,19 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
               </button>
 
               {isOpen && (
-                <div className="px-4 sm:px-5 pb-5 pt-2 border-t border-slate-200 bg-emerald-50/30">
-                  <div className="text-xs sm:text-sm text-slate-800 leading-relaxed whitespace-pre-line space-y-2 font-medium">
+                <div className="px-4 sm:px-5 pb-5 pt-2 border-t border-slate-200 dark:border-slate-800 bg-emerald-50/30 dark:bg-emerald-950/20">
+                  <div className="text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-line space-y-2 font-medium">
                     {faq.answer}
                   </div>
 
                   {/* Contextual Quick Links based on category */}
                   {onNavigateToTab && (
-                    <div className="mt-4 pt-3 border-t border-slate-200 flex flex-wrap items-center gap-3 text-xs">
+                    <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-center gap-3 text-xs">
                       {faq.category === 'Dosage & Doctor Codes' && (
                         <button
                           type="button"
                           onClick={() => onNavigateToTab('abbreviations')}
-                          className="inline-flex items-center gap-1 text-emerald-800 hover:text-emerald-950 font-bold hover:underline cursor-pointer"
+                          className="inline-flex items-center gap-1 text-emerald-800 dark:text-emerald-400 hover:text-emerald-950 dark:hover:text-emerald-300 font-bold hover:underline cursor-pointer"
                         >
                           <span>Explore Doctor Codes Dictionary</span>
                           <ArrowRight className="w-3.5 h-3.5" />
@@ -290,7 +290,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
                         <button
                           type="button"
                           onClick={() => onNavigateToTab('lookup')}
-                          className="inline-flex items-center gap-1 text-blue-800 hover:text-blue-950 font-bold hover:underline cursor-pointer"
+                          className="inline-flex items-center gap-1 text-blue-800 dark:text-blue-400 hover:text-blue-950 dark:hover:text-blue-300 font-bold hover:underline cursor-pointer"
                         >
                           <span>Search Medicine & Generic Salts</span>
                           <ArrowRight className="w-3.5 h-3.5" />
@@ -300,7 +300,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
                         <button
                           type="button"
                           onClick={() => onNavigateToTab('disclaimer')}
-                          className="inline-flex items-center gap-1 text-rose-800 hover:text-rose-950 font-bold hover:underline cursor-pointer"
+                          className="inline-flex items-center gap-1 text-rose-800 dark:text-rose-400 hover:text-rose-950 dark:hover:text-rose-300 font-bold hover:underline cursor-pointer"
                         >
                           <span>Read Medical Safety Disclaimer</span>
                           <ArrowRight className="w-3.5 h-3.5" />
@@ -317,7 +317,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
 
       {/* Homepage specific: Clear Call-To-Action to View All Questions */}
       {variant === 'homepage' && (
-        <div className="w-full mx-auto mt-6 bg-slate-900 text-white p-5 rounded-2xl shadow-md flex flex-col sm:flex-row items-center justify-between gap-4 border border-slate-800">
+        <div className="w-full mx-auto mt-6 bg-slate-900 dark:bg-slate-900/90 text-white p-5 rounded-2xl shadow-md flex flex-col sm:flex-row items-center justify-between gap-4 border border-slate-800 dark:border-slate-700">
           <div className="text-center sm:text-left space-y-1">
             <div className="text-xs font-extrabold uppercase tracking-wider text-emerald-400 flex items-center justify-center sm:justify-start gap-1.5">
               <BookOpen className="w-3.5 h-3.5" />
@@ -354,7 +354,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
 
       {/* Full variant footer card */}
       {variant === 'full' && (
-        <div className="max-w-3xl mx-auto mt-8 p-5 bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 text-white rounded-2xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="max-w-3xl mx-auto mt-8 p-5 bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 dark:from-slate-900 dark:via-slate-900 dark:to-emerald-950/80 text-white rounded-2xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 border border-slate-800">
           <div className="space-y-1 text-center sm:text-left">
             <div className="text-xs font-bold text-emerald-400 flex items-center justify-center sm:justify-start gap-1.5">
               <Stethoscope className="w-3.5 h-3.5" />

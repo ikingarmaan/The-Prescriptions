@@ -16,6 +16,7 @@ import {
   Newspaper,
 } from 'lucide-react';
 import { ThePrescriptionLogo } from './ThePrescriptionLogo';
+import { ThemeToggle } from './ThemeToggle';
 
 export type AppNavTab =
   | 'prescription'
@@ -81,7 +82,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <>
       {/* Top Header Bar */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-2xs">
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/90 dark:border-slate-800 shadow-2xs transition-colors duration-150">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
           {/* Logo and Brand */}
           <div
@@ -96,7 +97,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Desktop Navigation Tabs */}
           {!hideOtherTabs && (
-            <nav className="hidden md:flex items-center bg-slate-100/90 p-1.5 rounded-2xl border border-slate-200/90 text-xs shadow-2xs gap-1">
+            <nav className="hidden md:flex items-center bg-slate-100/90 dark:bg-slate-800/90 p-1.5 rounded-2xl border border-slate-200/90 dark:border-slate-700/80 text-xs shadow-2xs gap-1">
               <button
                 id="nav-check-prescription"
                 type="button"
@@ -104,12 +105,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-bold transition-all min-h-[40px] cursor-pointer ${
                   activeTab === 'prescription'
                     ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm shadow-emerald-600/25 ring-1 ring-emerald-500/30'
-                    : 'text-slate-600 hover:text-emerald-700 hover:bg-emerald-50/70'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50/70 dark:hover:bg-slate-750'
                 }`}
               >
                 <div
                   className={`w-6 h-6 rounded-lg flex items-center justify-center transition-colors ${
-                    activeTab === 'prescription' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-700'
+                    activeTab === 'prescription' ? 'bg-white/20 text-white' : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400'
                   }`}
                 >
                   <FileText className="w-3.5 h-3.5" />
@@ -124,12 +125,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-bold transition-all min-h-[40px] cursor-pointer ${
                   activeTab === 'lookup'
                     ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-600/25 ring-1 ring-blue-500/30'
-                    : 'text-slate-600 hover:text-blue-700 hover:bg-blue-50/70'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-50/70 dark:hover:bg-slate-750'
                 }`}
               >
                 <div
                   className={`w-6 h-6 rounded-lg flex items-center justify-center transition-colors ${
-                    activeTab === 'lookup' ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-700'
+                    activeTab === 'lookup' ? 'bg-white/20 text-white' : 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400'
                   }`}
                 >
                   <Search className="w-3.5 h-3.5" />
@@ -144,12 +145,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-bold transition-all min-h-[40px] cursor-pointer ${
                   activeTab === 'abbreviations'
                     ? 'bg-gradient-to-r from-purple-600 to-violet-600 text-white shadow-sm shadow-purple-600/25 ring-1 ring-purple-500/30'
-                    : 'text-slate-600 hover:text-purple-700 hover:bg-purple-50/70'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-purple-700 dark:hover:text-purple-400 hover:bg-purple-50/70 dark:hover:bg-slate-750'
                 }`}
               >
                 <div
                   className={`w-6 h-6 rounded-lg flex items-center justify-center transition-colors ${
-                    activeTab === 'abbreviations' ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-700'
+                    activeTab === 'abbreviations' ? 'bg-white/20 text-white' : 'bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-400'
                   }`}
                 >
                   <BookOpen className="w-3.5 h-3.5" />
@@ -164,12 +165,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-bold transition-all min-h-[40px] cursor-pointer ${
                   activeTab === 'blog'
                     ? 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white shadow-sm shadow-teal-600/25 ring-1 ring-teal-500/30'
-                    : 'text-slate-600 hover:text-teal-700 hover:bg-teal-50/70'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-teal-700 dark:hover:text-teal-400 hover:bg-teal-50/70 dark:hover:bg-slate-750'
                 }`}
               >
                 <div
                   className={`w-6 h-6 rounded-lg flex items-center justify-center transition-colors ${
-                    activeTab === 'blog' ? 'bg-white/20 text-white' : 'bg-teal-100 text-teal-700'
+                    activeTab === 'blog' ? 'bg-white/20 text-white' : 'bg-teal-100 dark:bg-teal-950/60 text-teal-700 dark:text-teal-400'
                   }`}
                 >
                   <Newspaper className="w-3.5 h-3.5" />
@@ -185,8 +186,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)}
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-xl font-bold transition-all min-h-[40px] cursor-pointer ${
                     isInfoPageActive
-                      ? 'bg-white text-emerald-800 shadow-xs border border-slate-200'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                      ? 'bg-white dark:bg-slate-700 text-emerald-800 dark:text-emerald-300 shadow-xs border border-slate-200 dark:border-slate-600'
+                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-700/60'
                   }`}
                 >
                   <span>More Pages</span>
@@ -194,8 +195,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </button>
 
                 {isMoreMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl border border-slate-200 shadow-xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-                    <div className="px-3 py-1 text-[10px] uppercase font-extrabold tracking-wider text-slate-400">
+                  <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="px-3 py-1 text-[10px] uppercase font-extrabold tracking-wider text-slate-400 dark:text-slate-500">
                       Information & Legal
                     </div>
                     {infoPages.map((page) => {
@@ -209,31 +210,31 @@ export const Navbar: React.FC<NavbarProps> = ({
                             setActiveTab(page.id);
                             setIsMoreMenuOpen(false);
                           }}
-                          className={`w-full px-3 py-2.5 text-left flex items-start gap-3 hover:bg-slate-50 transition-colors cursor-pointer ${
-                            isCurrent ? 'bg-emerald-50/70 text-emerald-900 font-bold' : 'text-slate-700'
+                          className={`w-full px-3 py-2.5 text-left flex items-start gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors cursor-pointer ${
+                            isCurrent ? 'bg-emerald-50/70 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 font-bold' : 'text-slate-700 dark:text-slate-250'
                           }`}
                         >
                           <div
                             className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${
                               page.alert
-                                ? 'bg-rose-100 text-rose-700'
+                                ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300'
                                 : isCurrent
-                                ? 'bg-emerald-200 text-emerald-800'
-                                : 'bg-slate-100 text-slate-600'
+                                ? 'bg-emerald-200 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
                             }`}
                           >
                             <Icon className="w-3.5 h-3.5" />
                           </div>
                           <div>
                             <div className="text-xs font-bold leading-tight flex items-center gap-1.5">
-                              <span>{page.label}</span>
+                              <span className="text-slate-900 dark:text-slate-100">{page.label}</span>
                               {page.alert && (
-                                <span className="text-[9px] px-1.5 py-0.2 rounded bg-rose-100 text-rose-700 font-extrabold">
+                                <span className="text-[9px] px-1.5 py-0.2 rounded bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 font-extrabold">
                                   Notice
                                 </span>
                               )}
                             </div>
-                            <div className="text-[11px] text-slate-400 font-normal leading-tight mt-0.5">
+                            <div className="text-[11px] text-slate-400 dark:text-slate-500 font-normal leading-tight mt-0.5">
                               {page.desc}
                             </div>
                           </div>
@@ -248,15 +249,18 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Right Action Header Buttons */}
           <div className="flex items-center gap-2">
+            {/* Dark Mode Theme Toggle Button */}
+            <ThemeToggle />
+
             {!hideOtherTabs && hasResult && activeTab === 'prescription' && (
               <button
                 id="nav-print-card-btn"
                 type="button"
                 onClick={onOpenPrintModal}
-                className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 text-emerald-800 text-xs font-semibold rounded-xl border border-emerald-200 transition-colors flex items-center gap-1.5 min-h-[40px] cursor-pointer"
+                className="px-3 py-2 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 active:bg-emerald-200 text-emerald-800 dark:text-emerald-300 text-xs font-semibold rounded-xl border border-emerald-200 dark:border-emerald-800/60 transition-colors flex items-center gap-1.5 min-h-[40px] cursor-pointer"
                 title="Print Medication Card"
               >
-                <Printer className="w-4 h-4 text-emerald-700" />
+                <Printer className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                 <span className="hidden sm:inline">Print Medication Card</span>
                 <span className="sm:hidden text-xs font-bold">Print</span>
               </button>
@@ -267,7 +271,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors"
+                className="md:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                 aria-label="Toggle Navigation Menu"
               >
                 {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -278,7 +282,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Mobile Full Menu Dropdown */}
         {isMobileMenuOpen && (
-          <div className="md:hidden bg-white border-b border-slate-200 p-4 space-y-4 animate-in slide-in-from-top-2 duration-150">
+          <div className="md:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 space-y-4 animate-in slide-in-from-top-2 duration-150">
             <div className="grid grid-cols-4 gap-1.5">
               <button
                 type="button"
@@ -287,7 +291,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   setIsMobileMenuOpen(false);
                 }}
                 className={`p-2 rounded-xl text-center flex flex-col items-center gap-1 text-[11px] font-bold ${
-                  activeTab === 'prescription' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-700'
+                  activeTab === 'prescription' ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                 }`}
               >
                 <FileText className="w-4 h-4" />
@@ -301,7 +305,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   setIsMobileMenuOpen(false);
                 }}
                 className={`p-2 rounded-xl text-center flex flex-col items-center gap-1 text-[11px] font-bold ${
-                  activeTab === 'lookup' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700'
+                  activeTab === 'lookup' ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                 }`}
               >
                 <Search className="w-4 h-4" />
@@ -315,7 +319,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   setIsMobileMenuOpen(false);
                 }}
                 className={`p-2 rounded-xl text-center flex flex-col items-center gap-1 text-[11px] font-bold ${
-                  activeTab === 'abbreviations' ? 'bg-purple-600 text-white' : 'bg-slate-100 text-slate-700'
+                  activeTab === 'abbreviations' ? 'bg-purple-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                 }`}
               >
                 <BookOpen className="w-4 h-4" />
@@ -329,7 +333,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   setIsMobileMenuOpen(false);
                 }}
                 className={`p-2 rounded-xl text-center flex flex-col items-center gap-1 text-[11px] font-bold ${
-                  activeTab === 'blog' ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-700'
+                  activeTab === 'blog' ? 'bg-teal-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                 }`}
               >
                 <Newspaper className="w-4 h-4" />
@@ -337,8 +341,17 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             </div>
 
-            <div className="pt-2 border-t border-slate-100">
-              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+            {/* Theme Toggle row in Mobile Drawer */}
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <div className="flex flex-col">
+                <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Appearance Mode</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">Switch between light and dark theme</span>
+              </div>
+              <ThemeToggle showLabel={true} />
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+              <div className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">
                 Pages & Policies
               </div>
               <div className="grid grid-cols-2 gap-2 text-xs">
@@ -352,11 +365,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                     }}
                     className={`p-2.5 rounded-xl text-left flex items-center gap-2 font-medium ${
                       activeTab === page.id
-                        ? 'bg-emerald-100 text-emerald-900 font-bold'
-                        : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+                        ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 font-bold'
+                        : 'bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                     }`}
                   >
-                    <page.icon className="w-3.5 h-3.5 shrink-0 text-slate-500" />
+                    <page.icon className="w-3.5 h-3.5 shrink-0 text-slate-500 dark:text-slate-400" />
                     <span className="truncate">{page.label}</span>
                   </button>
                 ))}
@@ -370,7 +383,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       {!hideOtherTabs && (
         <nav
           id="mobile-bottom-nav"
-          className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-3 py-1.5 flex items-center justify-around shadow-lg"
+          className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-3 py-1.5 flex items-center justify-around shadow-lg transition-colors duration-150"
         >
           <button
             id="mobile-nav-prescription"
@@ -378,11 +391,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => setActiveTab('prescription')}
             className={`flex flex-col items-center justify-center min-w-[70px] min-h-[48px] py-1.5 px-2 rounded-xl transition-all ${
               activeTab === 'prescription'
-                ? 'text-emerald-700 font-bold bg-emerald-50 border border-emerald-200/80'
-                : 'text-slate-500 font-medium hover:text-slate-800'
+                ? 'text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200/80 dark:border-emerald-800/50'
+                : 'text-slate-500 dark:text-slate-400 font-medium hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
-            <FileText className={`w-5 h-5 mb-0.5 ${activeTab === 'prescription' ? 'text-emerald-600' : 'text-slate-400'}`} />
+            <FileText className={`w-5 h-5 mb-0.5 ${activeTab === 'prescription' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'}`} />
             <span className="text-[11px] leading-tight">Prescription</span>
           </button>
 
@@ -392,11 +405,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => setActiveTab('lookup')}
             className={`flex flex-col items-center justify-center min-w-[70px] min-h-[48px] py-1.5 px-2 rounded-xl transition-all ${
               activeTab === 'lookup'
-                ? 'text-blue-700 font-bold bg-blue-50 border border-blue-200/80'
-                : 'text-slate-500 font-medium hover:text-slate-800'
+                ? 'text-blue-700 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-950/50 border border-blue-200/80 dark:border-blue-800/50'
+                : 'text-slate-500 dark:text-slate-400 font-medium hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
-            <Search className={`w-5 h-5 mb-0.5 ${activeTab === 'lookup' ? 'text-blue-600' : 'text-slate-400'}`} />
+            <Search className={`w-5 h-5 mb-0.5 ${activeTab === 'lookup' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'}`} />
             <span className="text-[11px] leading-tight">Lookup</span>
           </button>
 
@@ -406,11 +419,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => setActiveTab('abbreviations')}
             className={`flex flex-col items-center justify-center min-w-[55px] min-h-[48px] py-1.5 px-1 rounded-xl transition-all ${
               activeTab === 'abbreviations'
-                ? 'text-purple-700 font-bold bg-purple-50 border border-purple-200/80'
-                : 'text-slate-500 font-medium hover:text-slate-800'
+                ? 'text-purple-700 dark:text-purple-400 font-bold bg-purple-50 dark:bg-purple-950/50 border border-purple-200/80 dark:border-purple-800/50'
+                : 'text-slate-500 dark:text-slate-400 font-medium hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
-            <BookOpen className={`w-5 h-5 mb-0.5 ${activeTab === 'abbreviations' ? 'text-purple-600' : 'text-slate-400'}`} />
+            <BookOpen className={`w-5 h-5 mb-0.5 ${activeTab === 'abbreviations' ? 'text-purple-600 dark:text-purple-400' : 'text-slate-400 dark:text-slate-500'}`} />
             <span className="text-[10px] leading-tight">Codes</span>
           </button>
 
@@ -420,11 +433,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => setActiveTab('blog')}
             className={`flex flex-col items-center justify-center min-w-[55px] min-h-[48px] py-1.5 px-1 rounded-xl transition-all ${
               activeTab === 'blog'
-                ? 'text-teal-700 font-bold bg-teal-50 border border-teal-200/80'
-                : 'text-slate-500 font-medium hover:text-slate-800'
+                ? 'text-teal-700 dark:text-teal-400 font-bold bg-teal-50 dark:bg-teal-950/50 border border-teal-200/80 dark:border-teal-800/50'
+                : 'text-slate-500 dark:text-slate-400 font-medium hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
-            <Newspaper className={`w-5 h-5 mb-0.5 ${activeTab === 'blog' ? 'text-teal-600' : 'text-slate-400'}`} />
+            <Newspaper className={`w-5 h-5 mb-0.5 ${activeTab === 'blog' ? 'text-teal-600 dark:text-teal-400' : 'text-slate-400 dark:text-slate-500'}`} />
             <span className="text-[10px] leading-tight">Articles</span>
           </button>
 
@@ -434,11 +447,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className={`flex flex-col items-center justify-center min-w-[70px] min-h-[48px] py-1.5 px-2 rounded-xl transition-all ${
               isInfoPageActive || isMobileMenuOpen
-                ? 'text-emerald-700 font-bold bg-emerald-50 border border-emerald-200/80'
-                : 'text-slate-500 font-medium hover:text-slate-800'
+                ? 'text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200/80 dark:border-emerald-800/50'
+                : 'text-slate-500 dark:text-slate-400 font-medium hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
-            <Menu className="w-5 h-5 mb-0.5 text-slate-400" />
+            <Menu className="w-5 h-5 mb-0.5 text-slate-400 dark:text-slate-500" />
             <span className="text-[11px] leading-tight">Pages</span>
           </button>
         </nav>

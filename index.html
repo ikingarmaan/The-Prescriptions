@@ -9,6 +9,29 @@
     <meta name="keywords" content="AI prescription reader, read doctor handwriting online, understand handwritten prescription, medicine schedule generator, doctor handwriting decoder, prescription checker, pharmacy notes deciphering, generic medicine lookup" />
     <meta name="author" content="Mohd Armaan" />
     <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#020617" media="(prefers-color-scheme: dark)" />
+
+    <!-- Zero-Latency Theme Initializer (Eliminates FOUC) -->
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('theprescription_theme');
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (saved === 'dark' || (!saved && prefersDark)) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <style>
+      html.dark body { background-color: #020617; }
+      html.dark #root > div { background-color: #020617 !important; color: #f8fafc !important; }
+      html.dark #root h1 { color: #f8fafc !important; }
+      html.dark #preloader-diagnostic { background: #0f172a !important; border-color: #1e293b !important; color: #f8fafc !important; }
+    </style>
     <link rel="canonical" href="https://www.theprescription.in/" />
 
     <!-- Open Graph / Social Sharing -->
