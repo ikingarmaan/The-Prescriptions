@@ -9,20 +9,14 @@
     <meta name="keywords" content="AI prescription reader, read doctor handwriting online, understand handwritten prescription, medicine schedule generator, doctor handwriting decoder, prescription checker, pharmacy notes deciphering, generic medicine lookup" />
     <meta name="author" content="Mohd Armaan" />
     <meta name="robots" content="index, follow" />
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#020617" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#ffffff" />
 
-    <!-- Zero-Latency Theme Initializer (Eliminates FOUC) -->
+    <!-- Initializer: The site loads on bright mode automatically -->
     <script>
       (function() {
         try {
-          var saved = localStorage.getItem('theprescription_theme');
-          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-          if (saved === 'dark' || (!saved && prefersDark)) {
-            document.documentElement.classList.add('dark');
-          } else {
-            document.documentElement.classList.remove('dark');
-          }
+          document.documentElement.classList.remove('dark');
+          localStorage.removeItem('theprescription_theme');
         } catch (e) {}
       })();
     </script>
