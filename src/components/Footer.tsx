@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { ThePrescriptionLogo } from './ThePrescriptionLogo';
 import { AppNavTab } from './Navbar';
+import { SocialLinks } from './SocialLinks';
 
 interface FooterProps {
   activeTab: AppNavTab;
@@ -154,6 +155,15 @@ export const Footer: React.FC<FooterProps> = ({ activeTab, setActiveTab, onOpenP
             <p className="text-xs text-slate-300 leading-relaxed max-w-md">
               AI-powered assistant that deciphers doctor prescriptions into clear medicine names, dosage timings, and structured schedules.
             </p>
+
+            {/* Social Media Channels */}
+            <div className="pt-1">
+              <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2 flex items-center gap-1.5">
+                <span>Connect With Us</span>
+                <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">7 Channels</span>
+              </span>
+              <SocialLinks variant="icons-only" size="md" />
+            </div>
 
             {/* Trust Badges - compact on mobile, full on desktop */}
             <div className="grid grid-cols-1 gap-1.5 pt-0.5">

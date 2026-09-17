@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { ThePrescriptionLogo } from './ThePrescriptionLogo';
 import { ThemeToggle } from './ThemeToggle';
+import { SocialLinks } from './SocialLinks';
 
 export type AppNavTab =
   | 'prescription'
@@ -374,6 +375,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* Social Media Links in Mobile Menu */}
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">
+                Connect With Us
+              </div>
+              <SocialLinks variant="icons-only" size="sm" />
             </div>
           </div>
         )}

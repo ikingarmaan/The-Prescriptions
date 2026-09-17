@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { ThePrescriptionLogo } from './ThePrescriptionLogo';
 import { FaqSection } from './FaqSection';
+import { SocialLinks } from './SocialLinks';
 import { trackContactFormSubmission } from '../utils/analytics';
 
 export type InfoPageType = 'about' | 'faq' | 'contact' | 'disclaimer' | 'privacy' | 'terms';
@@ -816,6 +817,23 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ currentPage, onNavigate })
                 </p>
               </div>
 
+              {/* Official Social Media Community Card */}
+              <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold text-sm">
+                    <Globe className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    <span>Official Social Channels</span>
+                  </div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                    7 Channels
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                  Follow our clinical updates, prescription analysis guides, and pharmacy safety tips across our verified channels:
+                </p>
+                <SocialLinks variant="icons-only" size="md" />
+              </div>
+
               <div className="p-4 bg-amber-50 dark:bg-amber-950/30 rounded-2xl border border-amber-200 dark:border-amber-800/60 space-y-2">
                 <div className="flex items-center gap-2 text-amber-900 dark:text-amber-200 font-bold text-xs">
                   <AlertTriangle className="w-4 h-4 text-amber-700 dark:text-amber-400 shrink-0" />
@@ -945,6 +963,24 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ currentPage, onNavigate })
               </div>
             </div>
           </div>
+
+          {/* Dedicated Community & Social Channels Grid */}
+          <section className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <span className="text-[11px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                  Verified Social Network
+                </span>
+                <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
+                  Connect Across Our Official Communities
+                </h3>
+              </div>
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                Click any handle to open official profile
+              </span>
+            </div>
+            <SocialLinks variant="cards-grid" size="md" />
+          </section>
 
           {/* Section: Submitting Prescription Feedback Safely */}
           <section className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
