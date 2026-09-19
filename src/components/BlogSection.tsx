@@ -302,9 +302,11 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
           {/* Author Badge */}
           <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-slate-100/90 border border-slate-200/90">
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-teal-600 to-emerald-500 flex items-center justify-center text-white font-black text-base shadow-sm ring-2 ring-white">
-                MA
-              </div>
+              <img
+                src={currentArticle.author.avatarUrl || '/theprescription-icon.svg'}
+                alt={currentArticle.author.name}
+                className="w-11 h-11 rounded-full object-cover shadow-sm ring-2 ring-emerald-500/30 bg-slate-900 shrink-0"
+              />
               <div>
                 <div className="flex items-center gap-2">
                   <a
@@ -526,9 +528,11 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
 
             {/* Author Bio Card */}
             <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-5 items-start sm:items-center">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-teal-600 to-emerald-500 flex items-center justify-center text-white font-black text-2xl shrink-0 shadow-md">
-                MA
-              </div>
+              <img
+                src={currentArticle.author.avatarUrl || '/theprescription-icon.svg'}
+                alt={currentArticle.author.name}
+                className="w-16 h-16 rounded-2xl object-cover shrink-0 shadow-md ring-2 ring-emerald-500/20 bg-slate-900"
+              />
               <div className="space-y-1.5 flex-1">
                 <div className="flex items-center gap-2">
                   <h4 className="font-bold text-base text-slate-900">
@@ -741,9 +745,11 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
 
               <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs text-slate-500">
-                  <div className="w-7 h-7 rounded-full bg-teal-600 text-white font-bold flex items-center justify-center text-[10px]">
-                    MA
-                  </div>
+                  <img
+                    src={ALL_ARTICLES[0].author.avatarUrl || '/theprescription-icon.svg'}
+                    alt={ALL_ARTICLES[0].author.name}
+                    className="w-7 h-7 rounded-full object-cover shadow-xs bg-slate-900 shrink-0"
+                  />
                   <span className="font-semibold">{ALL_ARTICLES[0].author.name}</span>
                 </div>
                 <span className="text-teal-600 font-bold text-xs group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
@@ -836,9 +842,11 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
                   {/* Footer */}
                   <div className="px-5 sm:px-6 pb-5 pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2 text-slate-500">
-                      <div className="w-6 h-6 rounded-full bg-slate-100 text-slate-700 font-bold flex items-center justify-center text-[10px]">
-                        MA
-                      </div>
+                      <img
+                        src={article.author.avatarUrl || '/theprescription-icon.svg'}
+                        alt={article.author.name}
+                        className="w-6 h-6 rounded-full object-cover shadow-xs bg-slate-900 shrink-0"
+                      />
                       <span className="font-medium text-[11px]">{article.author.name}</span>
                     </div>
 
