@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ShieldAlert,
   PhoneCall,
@@ -42,6 +42,24 @@ const EMERGENCY_NUMBERS = [
 
 export const Footer: React.FC<FooterProps> = ({ activeTab, setActiveTab, onOpenPrintModal }) => {
   const [activeCountryIndex, setActiveCountryIndex] = useState<number>(0);
+  const [rpmRate, setRpmRate] = useState<number>(45);
+
+  useEffect(() => {
+    let isMounted = true;
+    fetch('/api/health')
+      .then((res) => res.json())
+      .then((data) => {
+        if (isMounted && data && typeof data.activeKeysCount === 'number') {
+          // Each active Gemini API key provides 15 Requests Per Minute (RPM)
+          const computed = Math.max(15, data.activeKeysCount * 15);
+          setRpmRate(computed);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -457,7 +475,7 @@ export const Footer: React.FC<FooterProps> = ({ activeTab, setActiveTab, onOpenP
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
               </span>
-              <span>All Systems Operational (30 RPM Engine)</span>
+              <span>All Systems Operational ({rpmRate} RPM Engine)</span>
             </span>
             <span className="text-slate-600">•</span>
             <span className="text-slate-300">
