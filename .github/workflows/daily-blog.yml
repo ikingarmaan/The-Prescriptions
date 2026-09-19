@@ -1,0 +1,48 @@
+name: Daily Clinical Blog Publisher
+
+on:
+  schedule:
+    # 04:30 UTC = 10:00 AM IST every day
+    - cron: '30 4 * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions anytime
+
+permissions:
+  contents: write
+
+jobs:
+  publish-article:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Daily Clinical Article
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: node scripts/daily_blog_generator.mjs
+
+      - name: Verify Build
+        run: npm run build
+
+      - name: Commit and Push to Main
+        run: |
+          git config --global user.name "ThePrescription Bot"
+          git config --global user.email "bot@theprescription.in"
+          git add src/data/blog/ public/sitemap.xml public/blog/
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "feat(blog): automated 10 AM daily clinical article publication"
+            git push origin main
+          fi
