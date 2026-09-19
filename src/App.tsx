@@ -60,27 +60,33 @@ export default function App() {
     // Initialize Google Analytics 4
     initGA();
 
-    const handleHash = () => {
+    const handleHashAndRoute = () => {
       const h = window.location.hash.toLowerCase();
-      if (h.startsWith('#blog')) {
+      const p = window.location.pathname.toLowerCase();
+
+      if (h.startsWith('#blog') || p.startsWith('/article') || p.startsWith('/blog')) {
         setActiveTab('blog');
-      } else if (h.includes('lookup')) {
+      } else if (h.includes('lookup') || p.includes('lookup')) {
         setActiveTab('lookup');
-      } else if (h.includes('abbreviation') || h.includes('codes')) {
+      } else if (h.includes('abbreviation') || h.includes('codes') || p.includes('abbreviation')) {
         setActiveTab('abbreviations');
-      } else if (['about', 'faq', 'contact', 'disclaimer', 'privacy', 'terms'].some((p) => h.includes(p))) {
-        for (const p of ['about', 'faq', 'contact', 'disclaimer', 'privacy', 'terms'] as const) {
-          if (h.includes(p)) {
-            setActiveTab(p);
+      } else if (['about', 'faq', 'contact', 'disclaimer', 'privacy', 'terms'].some((page) => h.includes(page) || p.includes(page))) {
+        for (const page of ['about', 'faq', 'contact', 'disclaimer', 'privacy', 'terms'] as const) {
+          if (h.includes(page) || p.includes(page)) {
+            setActiveTab(page);
             break;
           }
         }
       }
     };
 
-    handleHash();
-    window.addEventListener('hashchange', handleHash);
-    return () => window.removeEventListener('hashchange', handleHash);
+    handleHashAndRoute();
+    window.addEventListener('hashchange', handleHashAndRoute);
+    window.addEventListener('popstate', handleHashAndRoute);
+    return () => {
+      window.removeEventListener('hashchange', handleHashAndRoute);
+      window.removeEventListener('popstate', handleHashAndRoute);
+    };
   }, []);
 
   // Helper to determine if prescription analysis resulted in completely ununderstood prescription

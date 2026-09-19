@@ -178,14 +178,14 @@ export const PrescriptionUploader: React.FC<PrescriptionUploaderProps> = ({
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 relative z-10">
             <div>
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-900/60 text-emerald-200 text-xs font-semibold mb-2.5 border border-emerald-500/50 backdrop-blur-xs">
-                <Stethoscope className="w-3.5 h-3.5 text-emerald-300" />
-                <span>AI Clinical Handwriting & Prescription Decryption</span>
+                <Sparkles className="w-3.5 h-3.5 text-emerald-300" />
+                <span>#1 Free AI Prescription Reader & Handwriting Scanner</span>
               </div>
               <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight">
-                Decode Your Doctor's Prescription
+                AI Doctor Prescription Reader
               </h1>
               <p className="text-xs sm:text-sm text-emerald-100 mt-1.5 max-w-2xl leading-relaxed font-normal">
-                Upload a photo of your doctor's handwritten slip or paste notes. Our 5-stage clinical handwriting engine deciphers cursive doctor shorthand, confirms active medicine salts, and verifies safe dosage timings.
+                Free online prescription reader and scanner. Upload a photo of your doctor's handwritten slip or paste notes to decipher cursive handwriting, identify generic medicine salts, and generate safe 1-0-1 dosage schedules.
               </p>
             </div>
 
@@ -218,6 +218,29 @@ export const PrescriptionUploader: React.FC<PrescriptionUploaderProps> = ({
                 <span>Type Notes</span>
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* Key Feature Trust Badges for SEO & Patient Guidance */}
+        <div className="px-4 sm:px-6 md:px-8 py-2.5 bg-slate-50/90 dark:bg-slate-800/70 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-3 overflow-x-auto text-[11px] font-semibold text-slate-600 dark:text-slate-300">
+          <div className="flex items-center gap-1.5 shrink-0">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span>Doctor Handwriting OCR</span>
+          </div>
+          <span className="text-slate-300 dark:text-slate-700 hidden sm:inline">•</span>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span>Generic Salt Equivalents</span>
+          </div>
+          <span className="text-slate-300 dark:text-slate-700 hidden sm:inline">•</span>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span>1-0-1 Dosage Decoder</span>
+          </div>
+          <span className="text-slate-300 dark:text-slate-700 hidden sm:inline">•</span>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span>Zero-Storage Privacy</span>
           </div>
         </div>
 

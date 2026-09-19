@@ -1,14 +1,14 @@
 # Theprescription
 
-> AI-Powered Clinical Prescription & Doctor Handwriting Deciphering Assistant
+> Free AI Doctor Prescription Reader, Online Prescription Scanner & Medical Handwriting Decipherer
 
-Theprescription is an educational healthcare intelligence platform that assists patients, caregivers, and pharmacists in deciphering handwritten doctor prescriptions, identifying generic chemical equivalents, clarifying Latin dosing shorthand, and understanding circadian medication intervals.
+Theprescription is an AI-powered healthcare literacy platform that assists patients, caregivers, and pharmacists in deciphering handwritten doctor prescriptions, identifying generic chemical equivalents, clarifying Latin dosing shorthand (1-0-1, BD, TDS), and generating safe, printable daily medication schedules.
 
 ## Core Resources
-- [Prescription Decipherer](https://www.theprescription.in/): Core OCR vision engine for interpreting cursive physician handwriting and prescription notes.
-- [Medicine & Generic Salt Directory](https://www.theprescription.in/#lookup): Comprehensive clinical index of 5,000+ brand medications, active generic pharmaceutical salts, dosage forms, and indications.
-- [Medical Abbreviations Dictionary](https://www.theprescription.in/#abbreviations): Decoded Latin prescription notation including 1-0-1, OD, BD, TDS, AC, PC, SOS, HS, and STAT.
-- [Clinical Health Blog](https://www.theprescription.in/#blog): 17 evidence-based clinical articles on medication literacy, pediatric dosing, drug-food interactions, and chronotherapy.
-- [Medical FAQs](https://www.theprescription.in/#faq): 62 physician-verified answers covering storage protocols, missed doses, and polypharmacy safety.
+- [AI Doctor Prescription Reader](https://www.theprescription.in/): Free online prescription reader and multi-engine OCR vision system for interpreting cursive doctor handwriting, handwritten clinic slips, and medical abbreviations.
+- [Medicine & Generic Salt Directory](https://www.theprescription.in/#lookup): Comprehensive clinical index of 5,000+ brand medications, active generic pharmaceutical salts, dosage forms, and affordable equivalents.
+- [Doctor Abbreviation Dictionary](https://www.theprescription.in/#abbreviations): Decoded Latin prescription notation including 1-0-1, OD, BD, TDS, AC, PC, SOS, HS, and STAT.
+- [Clinical Health Blog](https://www.theprescription.in/#blog): 17 evidence-based clinical guides on medication literacy, deciphering unreadable prescriptions, pediatric dosing, drug-food interactions, and chronotherapy.
+- [Medical FAQs](https://www.theprescription.in/#faq): 62 physician-verified answers covering prescription handwriting recognition, storage protocols, missed doses, and polypharmacy safety.
 - [Clinical Mission & Principles](https://www.theprescription.in/#about): Mission statement, privacy architecture, and zero-retention health data philosophy.
 - [Medical Disclaimer](https://www.theprescription.in/#disclaimer): Critical safety notice and guidance on consulting licensed healthcare professionals.

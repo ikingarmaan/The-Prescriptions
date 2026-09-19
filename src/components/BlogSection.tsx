@@ -51,9 +51,24 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
   const [activeTocId, setActiveTocId] = useState<string>('');
 
-  // Synchronize with URL hash (e.g. #blog/doctor-handwriting-mystery)
+  // Synchronize with URL hash (e.g. #blog/doctor-handwriting-mystery) or pathname (/article/slug)
   useEffect(() => {
-    const checkHash = () => {
+    const checkHashAndPath = () => {
+      const pathname = window.location.pathname;
+      if (pathname.startsWith('/article/')) {
+        const pathSlug = pathname.replace('/article/', '').split('/')[0].split('?')[0];
+        if (pathSlug) {
+          setSelectedArticleSlug(pathSlug);
+          return;
+        }
+      } else if (pathname.startsWith('/blog/')) {
+        const pathSlug = pathname.replace('/blog/', '').split('/')[0].split('?')[0];
+        if (pathSlug) {
+          setSelectedArticleSlug(pathSlug);
+          return;
+        }
+      }
+
       const hash = window.location.hash;
       if (hash.startsWith('#blog/')) {
         const slug = hash.replace('#blog/', '').split('?')[0];
@@ -69,9 +84,13 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
       }
     };
 
-    checkHash();
-    window.addEventListener('hashchange', checkHash);
-    return () => window.removeEventListener('hashchange', checkHash);
+    checkHashAndPath();
+    window.addEventListener('hashchange', checkHashAndPath);
+    window.addEventListener('popstate', checkHashAndPath);
+    return () => {
+      window.removeEventListener('hashchange', checkHashAndPath);
+      window.removeEventListener('popstate', checkHashAndPath);
+    };
   }, []);
 
   // Update hash when selecting an article

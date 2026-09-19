@@ -170,10 +170,10 @@ export const HowItWorksGuide: React.FC<HowItWorksGuideProps> = ({
             <span>User Walkthrough</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            How to Use This Website
+            How to Use the AI Doctor Prescription Reader
           </h2>
           <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
-            A simple step-by-step guide on how to upload your prescription, review your deciphered medicines, and generate a printable routine.
+            A simple step-by-step walkthrough on how to scan your prescription, decode messy doctor handwriting, verify generic medicine salts, and generate a printable daily schedule.
           </p>
         </div>
 

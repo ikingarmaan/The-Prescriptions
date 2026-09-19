@@ -11,11 +11,11 @@ interface PageSeoMetadata {
 
 export const SEO_METADATA_BY_TAB: Record<AppNavTab, PageSeoMetadata> = {
   prescription: {
-    title: 'Theprescription - AI Prescription & Doctor Handwriting Deciphering Assistant',
+    title: 'AI Doctor Prescription Reader Online - Read Doctor Handwriting | Theprescription',
     description:
-      'Read doctor handwriting and prescriptions online with AI. Find generic medicines, decode dosage timings (1-0-1, BD), and get a printable schedule.',
+      'Free AI doctor prescription reader & scanner. Decipher messy doctor handwriting, decode 1-0-1 dosage schedules, and identify generic medicines online.',
     keywords:
-      'AI prescription reader, read doctor handwriting online, understand handwritten prescription, medicine schedule generator, doctor handwriting decoder, prescription checker, pharmacy notes deciphering',
+      'AI doctor prescription reader, prescription reader, AI prescription reader, doctor prescription reader, read doctor handwriting online, doctor handwriting scanner, handwritten prescription decoder, online prescription reader free, decipher doctor handwriting, medical prescription reader, Rx reader online',
     canonicalUrl: 'https://www.theprescription.in/',
   },
   lookup: {
