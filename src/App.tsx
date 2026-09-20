@@ -17,17 +17,50 @@ import { HomeSeoArticle } from './components/HomeSeoArticle';
 import { LazyOnVisible } from './components/LazyOnVisible';
 import { useSeoMetadata } from './utils/seo';
 
+// Robust dynamic import with automatic chunk retry and fallback resolution
+function lazyWithRetry<T extends React.ComponentType<any>>(
+  componentImport: () => Promise<{ default: T } | { [key: string]: any }>,
+  namedExport?: string
+) {
+  return React.lazy(async () => {
+    try {
+      const module = await componentImport();
+      if (module && 'default' in module && module.default) {
+        return { default: module.default };
+      }
+      if (namedExport && module && module[namedExport]) {
+        return { default: module[namedExport] };
+      }
+      if (module) {
+        const found = Object.values(module).find((v) => typeof v === 'function');
+        if (found) {
+          return { default: found as T };
+        }
+      }
+      return { default: (() => null) as unknown as T };
+    } catch (error) {
+      console.error('[LazyLoad] Module import failed, attempting reload:', error);
+      const retryKey = `chunk_retry_${namedExport || 'component'}`;
+      if (!sessionStorage.getItem(retryKey)) {
+        sessionStorage.setItem(retryKey, 'true');
+        window.location.reload();
+      }
+      throw error;
+    }
+  });
+}
+
 // Lazy-load non-critical tabs, result views, and below-the-fold sections to achieve ultra-low initial JS payload
-const PrescriptionResultView = React.lazy(() => import('./components/PrescriptionResultView').then((m) => ({ default: m.PrescriptionResultView })));
-const HowItWorksGuide = React.lazy(() => import('./components/HowItWorksGuide').then((m) => ({ default: m.HowItWorksGuide })));
-const FaqSection = React.lazy(() => import('./components/FaqSection').then((m) => ({ default: m.FaqSection })));
-const PrescriptionAnalyzingInteractiveModal = React.lazy(() => import('./components/PrescriptionAnalyzingInteractiveModal').then((m) => ({ default: m.PrescriptionAnalyzingInteractiveModal })));
-const UnunderstoodMedicinePopup = React.lazy(() => import('./components/UnunderstoodMedicinePopup').then((m) => ({ default: m.UnunderstoodMedicinePopup })));
-const MedicineLookup = React.lazy(() => import('./components/MedicineLookup').then((m) => ({ default: m.MedicineLookup })));
-const AbbreviationDictionary = React.lazy(() => import('./components/AbbreviationDictionary').then((m) => ({ default: m.AbbreviationDictionary })));
-const PrintableMedicationCard = React.lazy(() => import('./components/PrintableMedicationCard').then((m) => ({ default: m.PrintableMedicationCard })));
-const InfoPages = React.lazy(() => import('./components/InfoPages').then((m) => ({ default: m.InfoPages })));
-const BlogSection = React.lazy(() => import('./components/BlogSection').then((m) => ({ default: m.BlogSection })));
+const PrescriptionResultView = lazyWithRetry(() => import('./components/PrescriptionResultView'), 'PrescriptionResultView');
+const HowItWorksGuide = lazyWithRetry(() => import('./components/HowItWorksGuide'), 'HowItWorksGuide');
+const FaqSection = lazyWithRetry(() => import('./components/FaqSection'), 'FaqSection');
+const PrescriptionAnalyzingInteractiveModal = lazyWithRetry(() => import('./components/PrescriptionAnalyzingInteractiveModal'), 'PrescriptionAnalyzingInteractiveModal');
+const UnunderstoodMedicinePopup = lazyWithRetry(() => import('./components/UnunderstoodMedicinePopup'), 'UnunderstoodMedicinePopup');
+const MedicineLookup = lazyWithRetry(() => import('./components/MedicineLookup'), 'MedicineLookup');
+const AbbreviationDictionary = lazyWithRetry(() => import('./components/AbbreviationDictionary'), 'AbbreviationDictionary');
+const PrintableMedicationCard = lazyWithRetry(() => import('./components/PrintableMedicationCard'), 'PrintableMedicationCard');
+const InfoPages = lazyWithRetry(() => import('./components/InfoPages'), 'InfoPages');
+const BlogSection = lazyWithRetry(() => import('./components/BlogSection'), 'BlogSection');
 import { ThemeProvider } from './context/ThemeContext';
 
 const TabLoadingFallback = () => (
@@ -551,20 +584,44 @@ export default function App() {
         )}
 
         <React.Suspense fallback={<TabLoadingFallback />}>
-          {activeTab === 'lookup' && <MedicineLookup />}
+          {activeTab === 'lookup' && (
+            <ErrorBoundary
+              fallbackTitle="Medicine Lookup Unavailable"
+              fallbackMessage="We encountered an issue loading the medicine database. Please refresh or try again."
+            >
+              <MedicineLookup />
+            </ErrorBoundary>
+          )}
 
-          {activeTab === 'abbreviations' && <AbbreviationDictionary />}
+          {activeTab === 'abbreviations' && (
+            <ErrorBoundary
+              fallbackTitle="Medical Abbreviations Dictionary Unavailable"
+              fallbackMessage="We encountered an issue loading the abbreviation dictionary. Please refresh or try again."
+            >
+              <AbbreviationDictionary />
+            </ErrorBoundary>
+          )}
 
           {activeTab === 'blog' && (
-            <BlogSection onNavigateToScanner={() => setActiveTab('prescription')} />
+            <ErrorBoundary
+              fallbackTitle="Articles & Guides Unavailable"
+              fallbackMessage="We encountered an issue loading the articles section. Please refresh or try again in a moment."
+            >
+              <BlogSection onNavigateToScanner={() => setActiveTab('prescription')} />
+            </ErrorBoundary>
           )}
 
           {/* Informational, Legal, and Contact Pages */}
           {['about', 'faq', 'contact', 'disclaimer', 'privacy', 'terms'].includes(activeTab) && (
-            <InfoPages
-              currentPage={activeTab as InfoPageType}
-              onNavigate={(page) => setActiveTab(page as AppNavTab)}
-            />
+            <ErrorBoundary
+              fallbackTitle="Page Temporarily Unavailable"
+              fallbackMessage="We encountered an issue loading this page. Please refresh or return home."
+            >
+              <InfoPages
+                currentPage={activeTab as InfoPageType}
+                onNavigate={(page) => setActiveTab(page as AppNavTab)}
+              />
+            </ErrorBoundary>
           )}
         </React.Suspense>
       </main>

@@ -50,14 +50,15 @@ export interface CategoryFilterItem {
 }
 
 export const BLOG_CATEGORIES: CategoryFilterItem[] = [
-  { id: 'all', label: 'All Articles', description: 'Browse all 17 clinical and prescription guides', color: 'slate' },
+  { id: 'all', label: 'All Articles', description: 'Browse all clinical and prescription guides', color: 'slate' },
   { id: 'handwriting', label: 'Doctor Handwriting', description: 'Decoding cursive, penmanship, and unreadable scripts', color: 'emerald' },
   { id: 'abbreviations', label: 'Prescription Codes', description: 'Latin shorthand, OD/BD/TDS, and anatomy of a script', color: 'amber' },
   { id: 'interactions', label: 'Drug & Food Interactions', description: 'CYP enzymes, grapefruit, meal timing, and chronotherapy', color: 'rose' },
   { id: 'generics', label: 'Generic Pharmacology', description: 'Bioequivalence, active salts, excipients, and cost savings', color: 'blue' },
   { id: 'safety', label: 'Patient Safety & Protocols', description: 'LASA drugs, antibiotics, steroids, pediatrics, and polypharmacy', color: 'red' },
   { id: 'diagnostics', label: 'Diagnostic Lab Tests', description: 'Understanding CBC, liver enzymes, kidney markers, and lipids', color: 'purple' },
-  { id: 'ai-health', label: 'AI & Digital Health', description: 'Computer vision, OCR, and the future of healthcare literacy', color: 'teal' }
+  { id: 'ai-health', label: 'AI & Digital Health', description: 'Computer vision, OCR, and the future of healthcare literacy', color: 'teal' },
+  { id: 'pharmacology', label: 'Pharmacology & Therapeutics', description: 'Deep dives into medication classes, mechanisms, and modern treatments', color: 'indigo' },
 ];
 
 export function getAllArticles(): BlogArticle[] {

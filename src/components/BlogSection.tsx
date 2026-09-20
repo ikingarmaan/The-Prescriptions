@@ -649,7 +649,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
           </h1>
 
           <p className="text-base sm:text-lg text-slate-600 leading-relaxed font-normal">
-            Explore 17 comprehensive, human-written clinical guides to decoding doctor handwriting, understanding generic bioequivalence, preventing fatal drug interactions, and protecting your family’s medication safety.
+            Explore {ALL_ARTICLES.length} comprehensive, human-written clinical guides to decoding doctor handwriting, understanding generic bioequivalence, preventing fatal drug interactions, and protecting your family’s medication safety.
           </p>
         </div>
 
@@ -765,7 +765,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-extrabold text-slate-900">
               {selectedCategory === 'all' && !searchQuery
-                ? 'All Clinical & Patient Guides (17)'
+                ? `All Clinical & Patient Guides (${ALL_ARTICLES.length})`
                 : `Matching Articles (${filteredArticles.length})`}
             </h2>
             <span className="text-xs text-slate-500">
@@ -886,3 +886,5 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
     </div>
   );
 };
+
+export default BlogSection;

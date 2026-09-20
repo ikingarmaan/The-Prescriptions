@@ -8,7 +8,10 @@ const rootEl = document.getElementById('root');
 if (rootEl) {
   createRoot(rootEl).render(
     <StrictMode>
-      <ErrorBoundary fallbackTitle="Clinical Interface Initialization">
+      <ErrorBoundary
+        fallbackTitle="Application Initialization Error"
+        fallbackMessage="The application encountered an unexpected issue during initialization. Please reload the page."
+      >
         <App />
       </ErrorBoundary>
     </StrictMode>,

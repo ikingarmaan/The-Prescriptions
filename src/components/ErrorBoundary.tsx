@@ -4,6 +4,7 @@ import { AlertTriangle, RotateCcw, Home } from 'lucide-react';
 interface Props {
   children: ReactNode;
   fallbackTitle?: string;
+  fallbackMessage?: string;
   onReset?: () => void;
 }
 
@@ -44,6 +45,13 @@ export class ErrorBoundary extends Component<Props, State> {
 
   public render() {
     if (this.state.hasError) {
+      const isPrescription = this.props.fallbackTitle?.toLowerCase().includes('prescription');
+      const defaultMessage = isPrescription
+        ? 'We processed your prescription, but encountered a temporary display issue when formatting the full interactive results.'
+        : 'An unexpected issue occurred while loading this section. Please click below to refresh or try again.';
+      const message = this.props.fallbackMessage || defaultMessage;
+      const retryLabel = isPrescription ? 'Retry / New Scan' : 'Retry / Reload';
+
       return (
         <div className="w-full max-w-2xl mx-auto my-8 p-6 sm:p-8 bg-white rounded-3xl border-2 border-amber-300 shadow-sm text-center">
           <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-amber-100 border border-amber-200 flex items-center justify-center text-amber-700">
@@ -53,7 +61,7 @@ export class ErrorBoundary extends Component<Props, State> {
             {this.props.fallbackTitle || 'Display Refresh Required'}
           </h3>
           <p className="text-sm text-slate-600 mb-6 max-w-md mx-auto leading-relaxed">
-            We processed your prescription, but encountered a temporary display issue when formatting the full interactive results.
+            {message}
           </p>
           <div className="flex items-center justify-center gap-3">
             <button
@@ -62,7 +70,7 @@ export class ErrorBoundary extends Component<Props, State> {
               className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl shadow-sm transition-all flex items-center gap-2 cursor-pointer"
             >
               <RotateCcw className="w-4 h-4" />
-              <span>Retry / New Scan</span>
+              <span>{retryLabel}</span>
             </button>
             <button
               type="button"

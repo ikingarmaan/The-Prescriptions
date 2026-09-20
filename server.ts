@@ -2233,7 +2233,13 @@ Include its generic name, primary uses, mechanism of action, typical dosage form
           `  try { if (window.sessionStorage) window.sessionStorage.clear(); } catch(e){}\n` +
           `  var freshUrl = window.location.pathname + '?fresh=' + Date.now();\n` +
           `  if (window.location.search.indexOf('fresh=') === -1) { window.location.replace(freshUrl); }\n` +
-          `}`
+          `}\n` +
+          `export default function FallbackComponent() { return null; }\n` +
+          `export const BlogSection = FallbackComponent;\n` +
+          `export const MedicineLookup = FallbackComponent;\n` +
+          `export const AbbreviationDictionary = FallbackComponent;\n` +
+          `export const InfoPages = FallbackComponent;\n` +
+          `export const PrescriptionResultView = FallbackComponent;\n`
         );
       }
 
