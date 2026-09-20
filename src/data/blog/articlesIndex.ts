@@ -39,6 +39,7 @@ export const ALL_ARTICLES: BlogArticle[] = [
   article17,
   article18,
   article19,
+  article20,
 ];
 
 export interface CategoryFilterItem {
