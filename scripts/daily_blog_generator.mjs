@@ -351,6 +351,12 @@ CRITICAL INSTRUCTIONS:
     indexContent = indexContent.replace(/(article\d+,\n)(\];)/, `$1  article${padIdx},\n$2`);
     fs.writeFileSync(indexFilePath, indexContent, 'utf-8');
     console.log(`[Daily Blog Generator] Registered article${padIdx} in ${indexFilePath}`);
+
+    // Self-verification safeguard: ensure import exists
+    const verifiedIndex = fs.readFileSync(indexFilePath, 'utf-8');
+    if (!verifiedIndex.includes(`import { article${padIdx} } from './articles/article${padIdx}';`)) {
+      throw new Error(`[Daily Blog Generator FATAL]: Safety check failed! Missing import statement for article${padIdx} in ${indexFilePath}`);
+    }
   }
 
   // 3. Patch sitemap.xml
