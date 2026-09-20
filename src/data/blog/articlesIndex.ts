@@ -18,6 +18,7 @@ import { article16 } from './articles/article16';
 import { article17 } from './articles/article17';
 import { article18 } from './articles/article18';
 import { article19 } from './articles/article19';
+import { article20 } from './articles/article20';
 
 export const ALL_ARTICLES: BlogArticle[] = [
   article01,

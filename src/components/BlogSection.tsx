@@ -54,6 +54,26 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
   // Synchronize with URL hash (e.g. #blog/doctor-handwriting-mystery) or pathname (/article/slug)
   useEffect(() => {
     const checkHashAndPath = () => {
+      const hash = window.location.hash;
+      if (hash === '#blog' || hash === '#articles') {
+        setSelectedArticleSlug(null);
+        return;
+      }
+      if (hash.startsWith('#blog/')) {
+        const slug = hash.replace('#blog/', '').split('?')[0];
+        if (slug) {
+          setSelectedArticleSlug(slug);
+          return;
+        }
+      } else if (hash.includes('article=')) {
+        const params = new URLSearchParams(hash.split('?')[1] || '');
+        const slug = params.get('article');
+        if (slug) {
+          setSelectedArticleSlug(slug);
+          return;
+        }
+      }
+
       const pathname = window.location.pathname;
       if (pathname.startsWith('/article/')) {
         const pathSlug = pathname.replace('/article/', '').split('/')[0].split('?')[0];
@@ -66,20 +86,6 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
         if (pathSlug) {
           setSelectedArticleSlug(pathSlug);
           return;
-        }
-      }
-
-      const hash = window.location.hash;
-      if (hash.startsWith('#blog/')) {
-        const slug = hash.replace('#blog/', '').split('?')[0];
-        if (slug) {
-          setSelectedArticleSlug(slug);
-        }
-      } else if (hash.includes('article=')) {
-        const params = new URLSearchParams(hash.split('?')[1] || '');
-        const slug = params.get('article');
-        if (slug) {
-          setSelectedArticleSlug(slug);
         }
       }
     };
@@ -102,7 +108,11 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
 
   const handleBackToList = () => {
     setSelectedArticleSlug(null);
-    window.location.hash = 'blog';
+    if (window.location.pathname.startsWith('/article/') || window.location.pathname.startsWith('/blog/')) {
+      window.history.pushState(null, '', '/#blog');
+    } else {
+      window.location.hash = 'blog';
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

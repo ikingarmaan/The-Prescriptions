@@ -338,7 +338,16 @@ CRITICAL INSTRUCTIONS:
   let indexContent = fs.readFileSync(indexFilePath, 'utf-8');
   const importStatement = `import { article${padIdx} } from './articles/article${padIdx}';\n`;
   if (!indexContent.includes(`article${padIdx}`)) {
-    indexContent = indexContent.replace(/(import { article\d+ } from '\.\/articles\/article\d+';\n)(export const ALL_ARTICLES)/, `$1${importStatement}\n$2`);
+    const lastImportRegex = /import { article\d+ } from '\.\/articles\/article\d+';/g;
+    let match;
+    let lastMatch;
+    while ((match = lastImportRegex.exec(indexContent)) !== null) {
+      lastMatch = match;
+    }
+    if (lastMatch) {
+      const insertPos = lastMatch.index + lastMatch[0].length;
+      indexContent = indexContent.slice(0, insertPos) + `\n${importStatement.trimEnd()}` + indexContent.slice(insertPos);
+    }
     indexContent = indexContent.replace(/(article\d+,\n)(\];)/, `$1  article${padIdx},\n$2`);
     fs.writeFileSync(indexFilePath, indexContent, 'utf-8');
     console.log(`[Daily Blog Generator] Registered article${padIdx} in ${indexFilePath}`);

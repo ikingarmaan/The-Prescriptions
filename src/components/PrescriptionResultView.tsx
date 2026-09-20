@@ -14,6 +14,7 @@ import {
   Apple,
   Ban,
   Droplets,
+  GlassWater,
   Download,
 } from 'lucide-react';
 import { PrescriptionAnalysisResult } from '../types';
