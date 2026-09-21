@@ -5,7 +5,7 @@
 **Author:** Mohd Armaan (Lead Developer & Clinical Informatics Contributor)  
 **Category:** Dosage Timing & Chronotherapy | **Read Time:** 11 min read | **Word Count:** 1820 words
 
-![Bedside table in soft morning sunlight with a prescription bottle of Levothyroxine 100 mcg, blister packs, a clear glass of water, an analog alarm clock showing 6:30 AM fasting timing, and a stethoscope](https://www.theprescription.in/blog/thyroid-medication-timing-levothyroxine-safety-rules.png)
+![Bedside table in soft morning sunlight with a prescription bottle of Levothyroxine 100 mcg, blister packs, a clear glass of water, an analog alarm clock showing 6:30 AM fasting timing, and a stethoscope](https://www.theprescription.in/blog/thyroid_levothyroxine_timing_guide.png)
 
 ## 1. Clinical Overview & Patient Context
 

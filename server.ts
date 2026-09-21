@@ -2172,8 +2172,6 @@ Include its generic name, primary uses, mechanism of action, typical dosage form
     // 1. Static asset serving with strict cache control
     app.use(
       express.static(distPath, {
-        maxAge: "1y",
-        immutable: true,
         setHeaders: (res, filePath) => {
           if (filePath.endsWith(".html")) {
             // Strictly forbid HTML caching so clients and corporate proxies always fetch the active version
@@ -2181,8 +2179,13 @@ Include its generic name, primary uses, mechanism of action, typical dosage form
             res.setHeader("Pragma", "no-cache");
             res.setHeader("Expires", "0");
             res.setHeader("Surrogate-Control", "no-store");
-          } else if (filePath.match(/\.(js|css|webp|png|jpg|jpeg|svg|woff2?|ico)$/i)) {
+          } else if (filePath.includes("/assets/") || filePath.includes("\\assets\\")) {
+            // Hashed bundles under /assets/ are truly immutable
             res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+            res.setHeader("Access-Control-Allow-Origin", "*");
+          } else {
+            // Static images (e.g. /blog/, logos) should revalidate so image updates reflect promptly
+            res.setHeader("Cache-Control", "public, max-age=3600, must-revalidate");
             res.setHeader("Access-Control-Allow-Origin", "*");
           }
         },
