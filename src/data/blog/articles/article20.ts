@@ -18,7 +18,7 @@ export const article20: BlogArticle = {
     "profileUrl": "https://mohdarmaan.up.railway.app/#home"
   },
   "heroImage": "/blog/thyroid-medication-timing-levothyroxine-safety-rules.png",
-  "heroImageAlt": "Clinical healthcare illustration for Thyroid Medication Timing Guide: Why Levothyroxine Absorption Depends on Morning Routines and 4-Hour Mineral Gaps",
+  "heroImageAlt": "Bedside table in soft morning sunlight with a prescription bottle of Levothyroxine 100 mcg, blister packs, a clear glass of water, an analog alarm clock showing 6:30 AM fasting timing, and a stethoscope",
   "tags": [
     "Levothyroxine",
     "Thyroid Health",

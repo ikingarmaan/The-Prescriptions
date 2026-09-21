@@ -18,7 +18,7 @@ export const article21: BlogArticle = {
     "profileUrl": "https://mohdarmaan.up.railway.app/#home"
   },
   "heroImage": "/blog/blood-pressure-prescriptions-ace-arb-beta-blockers.png",
-  "heroImageAlt": "Clinical healthcare illustration for Demystifying Blood Pressure Prescriptions: ACE Inhibitors, ARBs, Beta-Blockers, and Calcium Channel Blockers Explained",
+  "heroImageAlt": "Doctor consultation desk with a digital blood pressure monitor showing 120/80 mmHg, arm cuff, stethoscope, clinical chart, and prescription blister packs of Lisinopril, Amlodipine, and Losartan",
   "tags": [
     "Hypertension",
     "Blood Pressure",

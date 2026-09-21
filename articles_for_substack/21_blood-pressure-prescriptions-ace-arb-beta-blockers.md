@@ -5,7 +5,7 @@
 **Author:** Mohd Armaan (Lead Developer & Clinical Informatics Contributor)  
 **Category:** Pharmacology & Medication Safety | **Read Time:** 11 min read | **Word Count:** 1820 words
 
-![Clinical healthcare illustration for Demystifying Blood Pressure Prescriptions: ACE Inhibitors, ARBs, Beta-Blockers, and Calcium Channel Blockers Explained](https://www.theprescription.in/blog/blood-pressure-prescriptions-ace-arb-beta-blockers.png)
+![Doctor consultation desk with a digital blood pressure monitor showing 120/80 mmHg, arm cuff, stethoscope, clinical chart, and prescription blister packs of Lisinopril, Amlodipine, and Losartan](https://www.theprescription.in/blog/blood-pressure-prescriptions-ace-arb-beta-blockers.png)
 
 ## 1. Clinical Overview & Patient Context
 
