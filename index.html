@@ -21,19 +21,6 @@
       })();
     </script>
     <style>
-      /* Ensure normal cursor and prevent typing icon across the entire page */
-      *, *::before, *::after {
-        cursor: default !important;
-      }
-      input, textarea, [contenteditable], [contenteditable="true"] {
-        cursor: default !important;
-      }
-      a, a *, button, button *, [role="button"], [role="button"] *, .cursor-pointer, .cursor-pointer *, select, summary {
-        cursor: pointer !important;
-      }
-      :disabled, [disabled], .cursor-not-allowed {
-        cursor: not-allowed !important;
-      }
       html.dark body { background-color: #020617; }
       html.dark #root > div { background-color: #020617 !important; color: #f8fafc !important; }
       html.dark #root h1 { color: #f8fafc !important; }

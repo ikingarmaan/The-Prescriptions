@@ -10,67 +10,6 @@ html.dark {
   color-scheme: dark;
 }
 
-/* ==========================================================================
-   Global Cursor Control:
-   - Moves like a normal cursor across the entire application
-   - Absolutely NO typing icon (I-beam / text cursor) anywhere on this app
-   ========================================================================== */
-
-/* Universal normal cursor: prevents the I-beam typing icon on text, paragraphs, headings */
-*,
-*::before,
-*::after {
-  cursor: default !important;
-}
-
-/* Enforce normal cursor on all text inputs, textareas, and editable fields */
-input,
-textarea,
-[contenteditable],
-[contenteditable="true"],
-input[type="text"],
-input[type="search"],
-input[type="email"],
-input[type="password"],
-input[type="number"],
-input[type="tel"],
-input[type="url"],
-input[type="date"],
-::placeholder {
-  cursor: default !important;
-}
-
-/* Maintain pointer cursor for buttons, links, and clickable controls */
-a,
-a *,
-button,
-button *,
-[role="button"],
-[role="button"] *,
-.cursor-pointer,
-.cursor-pointer *,
-select,
-summary,
-input[type="button"],
-input[type="submit"],
-input[type="reset"],
-input[type="checkbox"],
-input[type="radio"],
-input[type="file"],
-label[for],
-label:has(input[type="checkbox"]),
-label:has(input[type="radio"]) {
-  cursor: pointer !important;
-}
-
-/* Maintain not-allowed cursor for disabled elements */
-:disabled,
-[disabled],
-.cursor-not-allowed,
-.cursor-not-allowed * {
-  cursor: not-allowed !important;
-}
-
 @keyframes gpuSlide {
   0% {
     transform: translate3d(-30%, 0, 0);

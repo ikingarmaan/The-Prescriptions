@@ -31,8 +31,6 @@ export function GlowingCursor() {
     const onMouseMove = (e: MouseEvent) => {
       try {
         targetPos.current = { x: e.clientX, y: e.clientY };
-        currentPos.current = { x: e.clientX, y: e.clientY };
-        setPosition({ x: e.clientX, y: e.clientY });
         if (!isVisible) setIsVisible(true);
 
         // Moving the mouse restores normal cursor characteristics
@@ -90,10 +88,11 @@ export function GlowingCursor() {
     const onMouseLeave = () => setIsVisible(false);
     const onMouseEnter = () => setIsVisible(true);
 
-    // Synchronous animation loop: tracks 1:1 like a normal cursor with zero trailing delay
+    // Smooth animation loop for the trailing glow
     const animate = () => {
-      currentPos.current.x = targetPos.current.x;
-      currentPos.current.y = targetPos.current.y;
+      const ease = 0.22;
+      currentPos.current.x += (targetPos.current.x - currentPos.current.x) * ease;
+      currentPos.current.y += (targetPos.current.y - currentPos.current.y) * ease;
 
       setPosition({
         x: currentPos.current.x,
