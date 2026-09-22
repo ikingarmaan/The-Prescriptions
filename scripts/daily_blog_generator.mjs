@@ -155,21 +155,16 @@ export async function runDailyPublication() {
     return;
   }
 
-  // Ensure public/blog image exists (or copy fallback clinical image)
+  // Verify public/blog image exists for this specific topic
   const heroImageName = `${topic.topicId}.png`;
   const heroWebpName = `${topic.topicId}.webp`;
   const heroImagePath = path.join(rootDir, 'public', 'blog', heroImageName);
   const heroWebpPath = path.join(rootDir, 'public', 'blog', heroWebpName);
 
   if (!fs.existsSync(heroImagePath)) {
-    // Copy existing clinical image as fallback
-    const fallbackImage = path.join(rootDir, 'public', 'blog', 'painkillers_nsaids_guide.png');
-    const fallbackWebp = path.join(rootDir, 'public', 'blog', 'painkillers_nsaids_guide.webp');
-    if (fs.existsSync(fallbackImage)) {
-      fs.copyFileSync(fallbackImage, heroImagePath);
-      fs.copyFileSync(fallbackWebp, heroWebpPath);
-      console.log(`[Daily Blog Generator] Provisioned hero image at ${heroImagePath}`);
-    }
+    console.warn(`[Daily Blog Generator] WARNING: Dedicated hero image not found at ${heroImagePath}. Never reuse an existing image for different articles.`);
+  } else {
+    console.log(`[Daily Blog Generator] Verified unique dedicated hero image at ${heroImagePath}`);
   }
 
   // Check if Gemini API Key is available

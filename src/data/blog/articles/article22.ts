@@ -18,7 +18,7 @@ export const article22: BlogArticle = {
     "profileUrl": "https://mohdarmaan.up.railway.app/#home"
   },
   "heroImage": "/blog/antidepressant-prescriptions-ssri-snri-tapering-guide.png",
-  "heroImageAlt": "Clinical healthcare illustration for The Patient Guide to Antidepressant Prescriptions: SSRIs, SNRIs, How They Work, and the Science of Safe Tapering",
+  "heroImageAlt": "Clinical doctor consultation desk with prescription blister packs of Sertraline and Escitalopram, an amber medicine vial, a clear glass of water, a medical stethoscope, and a clinical serotonin synapse neurotransmitter diagram illustrating SSRI mechanism of action",
   "tags": [
     "Mental Health",
     "Antidepressants",
