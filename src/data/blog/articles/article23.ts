@@ -18,7 +18,7 @@ export const article23: BlogArticle = {
     "profileUrl": "https://mohdarmaan.up.railway.app/#home"
   },
   "heroImage": "/blog/sleep-medication-prescriptions-z-drugs-circadian-rhythm.png",
-  "heroImageAlt": "Clinical healthcare illustration for Sleep Aid Prescriptions vs. Natural Sleep Architecture: Zolpidem, Eszopiclone, Benzodiazepines, and Melatonin Compared",
+  "heroImageAlt": "Bedside nightstand in evening dim lighting with an amber prescription bottle of Zolpidem, blister packs of sleep medications, an analog alarm clock showing 10:30 PM, a clear glass of water, and an educational sleep architecture chart showing REM and deep sleep cycles",
   "tags": [
     "Sleep Medicine",
     "Insomnia",
