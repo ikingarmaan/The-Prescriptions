@@ -18,7 +18,7 @@ export const article26: BlogArticle = {
     "profileUrl": "https://mohdarmaan.up.railway.app/#home"
   },
   "heroImage": "/blog/otc-vs-prescription-painkillers-nsaids-acetaminophen.png",
-  "heroImageAlt": "Clinical healthcare illustration for The Complete Guide to Painkiller Prescriptions: Acetaminophen vs. NSAIDs, Safe Dosing, and Organ Protection",
+  "heroImageAlt": "Clinical consultation between physician and patient reviewing prescription blister packs of Meloxicam and Celecoxib, Acetaminophen bottle with safe daily limits, liver and kidney pathway chart, and stethoscope",
   "tags": [
     "Painkillers",
     "NSAIDs",

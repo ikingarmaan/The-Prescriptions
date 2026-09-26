@@ -41,6 +41,14 @@ interface BlogSectionProps {
 
 const getWebpUrl = (url: string) => (url ? url.replace(/\.(png|jpg|jpeg)$/i, '.webp') : url);
 
+const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+  const target = e.currentTarget;
+  if (!target.dataset.fallbackApplied) {
+    target.dataset.fallbackApplied = 'true';
+    target.src = '/blog/anatomy_of_prescription.png';
+  }
+};
+
 export const BlogSection: React.FC<BlogSectionProps> = ({
   onNavigateToScanner,
   initialArticleSlug,
@@ -359,6 +367,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
                 loading="eager"
                 fetchPriority="high"
                 decoding="async"
+                onError={handleImageError}
               />
             </picture>
             <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-slate-950/80 via-slate-950/40 to-transparent p-4 text-xs text-slate-200">
@@ -612,6 +621,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           loading="lazy"
                           decoding="async"
+                          onError={handleImageError}
                         />
                       </picture>
                     </div>
@@ -732,6 +742,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
                   loading="eager"
                   fetchPriority="high"
                   decoding="async"
+                  onError={handleImageError}
                 />
               </picture>
               <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-teal-600 text-white text-[11px] font-bold uppercase tracking-wider shadow-md">
@@ -821,6 +832,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           loading="lazy"
                           decoding="async"
+                          onError={handleImageError}
                         />
                       </picture>
                       <div className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-white/90 backdrop-blur-xs text-slate-800 text-[10px] font-extrabold uppercase tracking-wider shadow-xs">
