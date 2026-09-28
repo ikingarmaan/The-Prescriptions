@@ -1741,3 +1741,5 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ currentPage, onNavigate })
     </div>
   );
 };
+
+export default InfoPages;

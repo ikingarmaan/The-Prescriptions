@@ -779,3 +779,5 @@ export const MedicineLookup: React.FC = () => {
     </div>
   );
 };
+
+export default MedicineLookup;

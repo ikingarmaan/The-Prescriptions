@@ -563,3 +563,5 @@ export const PrintableMedicationCard: React.FC<PrintableMedicationCardProps> = (
   );
 };
 
+export default PrintableMedicationCard;
+

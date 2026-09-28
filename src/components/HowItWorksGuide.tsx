@@ -657,3 +657,5 @@ export const HowItWorksGuide: React.FC<HowItWorksGuideProps> = ({
     </section>
   );
 };
+
+export default HowItWorksGuide;

@@ -563,3 +563,5 @@ export const AbbreviationDictionary: React.FC = () => {
     </div>
   );
 };
+
+export default AbbreviationDictionary;

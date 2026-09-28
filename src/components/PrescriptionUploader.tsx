@@ -55,6 +55,7 @@ export const PrescriptionUploader: React.FC<PrescriptionUploaderProps> = ({
   const [multiEngineProgress, setMultiEngineProgress] = useState<MultiEngineProcessProgress | null>(null);
   const [preprocessingReport, setPreprocessingReport] = useState<ImagePreprocessingReport | null>(null);
   const [hasConsent, setHasConsent] = useState<boolean>(false);
+  const [consentError, setConsentError] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const nativeCameraInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -133,7 +134,12 @@ export const PrescriptionUploader: React.FC<PrescriptionUploaderProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!hasConsent) {
-      alert('Please check the safety agreement box giving your consent before analyzing your prescription.');
+      setConsentError(true);
+      const consentBox = document.getElementById('prescription-ai-consent-checkbox');
+      if (consentBox) {
+        consentBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        consentBox.focus();
+      }
       return;
     }
     if (activeInputTab === 'photo' && !selectedImage) {
@@ -498,6 +504,8 @@ Adv / Inv:
               className={`flex items-start gap-3 p-3.5 sm:p-4 rounded-2xl border transition-all cursor-pointer select-none ${
                 hasConsent
                   ? 'bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800/70 ring-1 ring-emerald-400/20 shadow-xs'
+                  : consentError
+                  ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-400 dark:border-rose-700 ring-2 ring-rose-400 shadow-md animate-pulse'
                   : 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-200/90 dark:border-amber-900/50 hover:bg-amber-50/80 dark:hover:bg-amber-950/30'
               }`}
             >
@@ -505,7 +513,10 @@ Adv / Inv:
                 id="prescription-ai-consent-checkbox"
                 type="checkbox"
                 checked={hasConsent}
-                onChange={(e) => setHasConsent(e.target.checked)}
+                onChange={(e) => {
+                  setHasConsent(e.target.checked);
+                  if (e.target.checked) setConsentError(false);
+                }}
                 className="mt-0.5 w-4 h-4 rounded text-emerald-600 border-slate-300 dark:border-slate-600 focus:ring-emerald-500 cursor-pointer shrink-0 accent-emerald-600"
               />
               <div className="text-xs space-y-0.5 flex-1">
@@ -515,10 +526,12 @@ Adv / Inv:
                     className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                       hasConsent
                         ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+                        : consentError
+                        ? 'bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-200 border border-rose-300 dark:border-rose-800'
                         : 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
                     }`}
                   >
-                    {hasConsent ? 'Consent Confirmed' : 'Required to Analyze'}
+                    {hasConsent ? 'Consent Confirmed' : consentError ? 'Action Required Below' : 'Required to Analyze'}
                   </span>
                 </div>
                 <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
@@ -526,11 +539,15 @@ Adv / Inv:
                 </p>
               </div>
             </label>
-            {!hasConsent && (
-              <p className="text-[11px] text-amber-700 dark:text-amber-400 font-medium mt-1.5 pl-1 flex items-center gap-1">
-                <span>⚠️ Please check the consent box above to enable the "Analyze &amp; Explain Medicines" button.</span>
+            {consentError ? (
+              <p className="text-[11px] text-rose-600 dark:text-rose-400 font-bold mt-1.5 pl-1 flex items-center gap-1">
+                <span>⚠️ Please check the safety agreement box above to proceed with prescription analysis.</span>
               </p>
-            )}
+            ) : !hasConsent ? (
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-1.5 pl-1 flex items-center gap-1">
+                <span>Please check the safety agreement box above before analyzing your prescription.</span>
+              </p>
+            ) : null}
           </div>
 
           {/* Submit Action */}
@@ -545,7 +562,6 @@ Adv / Inv:
               type="submit"
               disabled={
                 isLoading ||
-                !hasConsent ||
                 (activeInputTab === 'photo' && !selectedImage) ||
                 (activeInputTab === 'text' && !textNotes.trim())
               }

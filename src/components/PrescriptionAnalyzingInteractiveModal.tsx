@@ -277,3 +277,5 @@ export const PrescriptionAnalyzingInteractiveModal: React.FC<PrescriptionAnalyzi
     </div>
   );
 };
+
+export default PrescriptionAnalyzingInteractiveModal;

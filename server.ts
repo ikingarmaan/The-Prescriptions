@@ -923,6 +923,7 @@ async function callGeminiWithRetry(params: {
     "gemini-3.6-flash",
     "gemini-3.1-flash-lite",
     "gemini-3.7-flash",
+    "gemini-2.5-flash",
   ];
   let lastError: any = null;
   const invalidKeys = new Set<string>();
@@ -940,11 +941,11 @@ async function callGeminiWithRetry(params: {
       for (let attempt = 1; attempt <= 2; attempt++) {
         try {
           const config = { ...params.config };
-          // If model is gemini-3.7-flash, cap thinking to low so it doesn't spend minutes on internal reasoning tokens
-          if (model.includes("3.7") && !config.thinkingConfig) {
+          // For all Gemini 3 models, cap thinking level to "low" so it responds in seconds instead of burning 20+ seconds on deep internal reasoning tokens
+          if ((model.includes("3.") || model.startsWith("gemini-3")) && !config.thinkingConfig) {
             config.thinkingConfig = { thinkingLevel: "low" };
           }
-          if (!model.startsWith("gemini-3") && config.thinkingConfig) {
+          if (!model.startsWith("gemini-3") && !model.includes("3.") && config.thinkingConfig) {
             delete config.thinkingConfig;
           }
 

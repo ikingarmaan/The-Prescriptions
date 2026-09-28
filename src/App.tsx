@@ -123,36 +123,33 @@ export default function App() {
   }, []);
 
   // Helper to determine if prescription analysis resulted in completely ununderstood prescription
-  // ONLY show when completely unable to identify ANY medicine name on the prescription
+  // ONLY show when completely unable to identify ANY medicine name or lab test on the prescription
+  const hasRecognizedMedicines = Boolean(
+    analysisResult?.medicines &&
+      analysisResult.medicines.length > 0 &&
+      analysisResult.medicines.some((m) => {
+        const n = (m.name || '').toLowerCase();
+        return (
+          m.name &&
+          m.name.trim().length > 1 &&
+          !n.includes('apologies') &&
+          !n.includes("didn't understand") &&
+          !n.includes('unclear') &&
+          !n.includes('illegible') &&
+          !n.includes('unidentified')
+        );
+      })
+  );
+
+  const hasRecognizedLabTests = Boolean(
+    analysisResult?.labTests && analysisResult.labTests.length > 0
+  );
+
   const isPrescriptionUnunderstood = Boolean(
     analysisResult &&
-      (!analysisResult.medicines ||
-        analysisResult.medicines.length === 0 ||
-        (analysisResult.unableToDecipher &&
-          analysisResult.medicines.every((m) => {
-            const n = (m.name || '').toLowerCase();
-            return (
-              !m.name ||
-              m.name.trim().length <= 1 ||
-              n.includes('apologies') ||
-              n.includes("didn't understand") ||
-              n.includes('unclear') ||
-              n.includes('illegible') ||
-              n.includes('unidentified')
-            );
-          })) ||
-        analysisResult.medicines.every((m) => {
-          const n = (m.name || '').toLowerCase();
-          return (
-            !m.name ||
-            m.name.trim().length <= 1 ||
-            n.includes('apologies') ||
-            n.includes("didn't understand") ||
-            n.includes('unclear') ||
-            n.includes('illegible') ||
-            n.includes('unidentified')
-          );
-        }))
+      !hasRecognizedMedicines &&
+      !hasRecognizedLabTests &&
+      (analysisResult.unableToDecipher || (!analysisResult.generalExplanation && (!analysisResult.medicines || analysisResult.medicines.length === 0)))
   );
 
   const handleAnalyze = async (payload: {
@@ -168,11 +165,33 @@ export default function App() {
 
     try {
       const learnedCorrections = getLearnedCorrections();
+
+      // Strip redundant base64 duplicate image copies from preprocessing report before sending to API
+      // (Reduces JSON payload from 25MB+ down to ~300KB, preventing HTTP 413 and connection drops)
+      let leanPreprocessingReport: ImagePreprocessingReport | undefined = undefined;
+      if (payload.preprocessingReport) {
+        leanPreprocessingReport = {
+          ...payload.preprocessingReport,
+          originalImage: undefined,
+          enhancedImage: undefined,
+          deskewedImage: undefined,
+          adaptiveBinarizedImage: undefined,
+          lines: payload.preprocessingReport.lines?.map((l) => ({
+            ...l,
+            lineImageBase64: undefined,
+          })),
+        };
+      }
+
       const response = await fetch('/api/analyze-prescription', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...payload,
+          imageBase64: payload.imageBase64,
+          textNotes: payload.textNotes,
+          patientContext: payload.patientContext,
+          ocrPretext: payload.ocrPretext,
+          preprocessingReport: leanPreprocessingReport,
           learnedCorrections,
         }),
       });

@@ -382,3 +382,5 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
     </section>
   );
 };
+
+export default FaqSection;

@@ -157,3 +157,5 @@ export const UnunderstoodMedicinePopup: React.FC<UnunderstoodMedicinePopupProps>
     </div>
   );
 };
+
+export default UnunderstoodMedicinePopup;

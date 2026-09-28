@@ -452,3 +452,5 @@ ${
     </div>
   );
 };
+
+export default PrescriptionResultView;
