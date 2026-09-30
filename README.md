@@ -1,12 +1,19 @@
 <div align="center">
 
+# 🌐 Visit Official Website: [www.theprescription.in](https://www.theprescription.in)
+
+> ### 🚀 **[👉 Click Here to Launch Live Web App: https://www.theprescription.in 👈](https://www.theprescription.in)**
+> **Instantly scan handwritten prescriptions, check medicine interactions, and generate 24-hour patient schedules online.**
+
+<br />
+
 <img src="./public/theprescription-logo.svg" alt="The Prescription Logo" width="380" />
 
 <p align="center">
   <strong>Intelligent Clinical Prescription Decoder, Drug Safety Analyzer & 24-Hour Patient Dosage Scheduler</strong>
 </p>
 
-[![Live Platform](https://img.shields.io/badge/Live%20Platform-theprescription.in-0d9488?style=for-the-badge&logo=googlechrome&logoColor=white)](https://www.theprescription.in)
+[![Live Website](https://img.shields.io/badge/Website-www.theprescription.in-2563EB?style=for-the-badge&logo=googlechrome&logoColor=white)](https://www.theprescription.in)
 [![Deploy to Render](https://img.shields.io/badge/Deploy%20to-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://render.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 [![Node Version](https://img.shields.io/badge/Node-%3E%3D20.0.0-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
