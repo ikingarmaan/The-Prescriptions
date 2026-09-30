@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: the-prescription
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY_2
+        sync: false
+      - key: GEMINI_API_KEY_3
+        sync: false
+      - key: APP_URL
+        sync: false
+      - key: VITE_GA_MEASUREMENT_ID
+        value: G-2ESSBNEX33
