@@ -2,7 +2,30 @@
   "name": "the-prescription",
   "private": true,
   "version": "1.0.0",
+  "description": "AI-powered clinical prescription decoder, medicine interaction analyzer, and personalized patient dosage scheduler.",
   "type": "module",
+  "homepage": "https://www.theprescription.in",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ikingarmaan/The-Prescriptions.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ikingarmaan/The-Prescriptions/issues"
+  },
+  "author": "Armaan <https://github.com/ikingarmaan>",
+  "license": "MIT",
+  "keywords": [
+    "prescription-analyzer",
+    "medical-ai",
+    "gemini-vision",
+    "clinical-ocr",
+    "drug-interactions",
+    "dosage-scheduler",
+    "healthcare",
+    "react-19",
+    "typescript",
+    "tailwind-css"
+  ],
   "engines": {
     "node": ">=20.0.0"
   },
