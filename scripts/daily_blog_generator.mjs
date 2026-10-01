@@ -209,7 +209,7 @@ CRITICAL INSTRUCTIONS:
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
     "avatarUrl": "/theprescription-icon.svg",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/${heroImageName}",
   "heroImageAlt": "Clinical medical setting for ${topic.title}",
@@ -272,7 +272,7 @@ CRITICAL INSTRUCTIONS:
         name: 'Mohd Armaan',
         role: 'Lead Developer & Clinical Informatics Contributor',
         avatarUrl: '/theprescription-icon.svg',
-        profileUrl: 'https://mohdarmaan.up.railway.app/#home'
+        profileUrl: 'https://armaanali.onrender.com/#home'
       },
       heroImage: `/blog/${heroImageName}`,
       heroImageAlt: `Clinical healthcare illustration for ${topic.title}`,

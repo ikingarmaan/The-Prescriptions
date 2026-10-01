@@ -15,7 +15,7 @@ export const article25: BlogArticle = {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
     "avatarUrl": "/theprescription-icon.svg",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/statin-prescriptions-cholesterol-muscle-pain-coq10.png",
   "heroImageAlt": "Clinical healthcare illustration for Statin Prescriptions and Cardiovascular Health: Atorvastatin vs. Rosuvastatin, Muscle Pain Myths, and the Truth About CoQ10",

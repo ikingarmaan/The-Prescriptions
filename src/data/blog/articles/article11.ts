@@ -14,7 +14,7 @@ export const article11: BlogArticle = {
   "author": {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/anatomy_of_prescription.png",
   "heroImageAlt": "Vintage medical prescription document overlaid with clinical anatomical callouts highlighting Superscription Rx, Inscription, and Signa",

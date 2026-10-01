@@ -15,7 +15,7 @@ export const article21: BlogArticle = {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
     "avatarUrl": "/theprescription-icon.svg",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/blood_pressure_prescriptions_guide.png",
   "heroImageAlt": "Doctor consultation desk with a digital blood pressure monitor showing 120/80 mmHg, arm cuff, stethoscope, clinical chart, and prescription blister packs of Lisinopril, Amlodipine, and Losartan",

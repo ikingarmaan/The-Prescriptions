@@ -358,5 +358,5 @@ This project is open-source and distributed under the **[MIT License](LICENSE)**
 ---
 
 <div align="center">
-  <sub>Developed with ❤️ for patient safety and clinical transparency by <a href="https://github.com/ikingarmaan">Armaan</a>.</sub>
+  <sub>Developed with ❤️ for patient safety and clinical transparency by <a href="https://armaanali.onrender.com/#home">Mohd Armaan</a>.</sub>
 </div>

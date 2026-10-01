@@ -15,7 +15,7 @@ export const article24: BlogArticle = {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
     "avatarUrl": "/theprescription-icon.svg",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/asthma-copd-inhaler-prescriptions-spacer-technique.png",
   "heroImageAlt": "Clinical healthcare illustration for The Master Guide to Inhaler Prescriptions: Relievers vs. Preventers, Spacers, and Why Mouth Rinsing Prevents Oral Thrush",

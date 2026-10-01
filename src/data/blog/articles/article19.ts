@@ -15,7 +15,7 @@ export const article19: BlogArticle = {
     name: 'Mohd Armaan',
     role: 'Lead Developer & Clinical Informatics Contributor',
     avatarUrl: '/theprescription-icon.svg',
-    profileUrl: 'https://mohdarmaan.up.railway.app/#home'
+    profileUrl: 'https://armaanali.onrender.com/#home'
   },
   heroImage: '/blog/painkillers_nsaids_guide.png',
   heroImageAlt: 'Modern clinical consultation desk with prescription pain relief medications, blister packs of acetaminophen and NSAIDs, a medical stethoscope, a glass of water, and an educational clinical chart',

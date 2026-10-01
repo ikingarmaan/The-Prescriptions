@@ -15,7 +15,7 @@ export const article28: BlogArticle = {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
     "avatarUrl": "/theprescription-icon.svg",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/blood-pressure-prescriptions-ace-arb-beta-blockers.png",
   "heroImageAlt": "Clinical healthcare illustration for Demystifying Blood Pressure Prescriptions: ACE Inhibitors, ARBs, Beta-Blockers, and Calcium Channel Blockers Explained",

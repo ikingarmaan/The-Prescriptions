@@ -14,7 +14,7 @@ export const article17: BlogArticle = {
   "author": {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/ai_prescription_vision.png",
   "heroImageAlt": "Futuristic digital tablet displaying an AI neural network scanning a handwritten medical prescription into clean structured digital schedules",

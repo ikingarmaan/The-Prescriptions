@@ -15,7 +15,7 @@ export const article29: BlogArticle = {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
     "avatarUrl": "/theprescription-icon.svg",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/antidepressant-prescriptions-ssri-snri-tapering-guide.png",
   "heroImageAlt": "Clinical healthcare illustration for The Patient Guide to Antidepressant Prescriptions: SSRIs, SNRIs, How They Work, and the Science of Safe Tapering",

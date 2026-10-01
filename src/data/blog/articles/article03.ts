@@ -14,7 +14,7 @@ export const article03: BlogArticle = {
   "author": {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/prescription_abbreviations.png",
   "heroImageAlt": "Macro photograph of a clinical prescription slip displaying handwritten medical abbreviations like OD, BD, and PC next to a pair of reading glasses",

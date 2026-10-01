@@ -15,7 +15,7 @@ export const article27: BlogArticle = {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
     "avatarUrl": "/theprescription-icon.svg",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/thyroid-medication-timing-levothyroxine-safety-rules.png",
   "heroImageAlt": "Clinical healthcare illustration for Thyroid Medication Timing Guide: Why Levothyroxine Absorption Depends on Morning Routines and 4-Hour Mineral Gaps",

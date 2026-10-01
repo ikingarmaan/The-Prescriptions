@@ -14,7 +14,7 @@ export const article12: BlogArticle = {
   "author": {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/ppi_gastroprotection.png",
   "heroImageAlt": "Proton pump inhibitor capsule sitting beside a blister pack of NSAID painkiller tablets on a clinical medical surface",

@@ -14,7 +14,7 @@ export const article13: BlogArticle = {
   "author": {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/steroid_tapering.png",
   "heroImageAlt": "Clinical blister dose pack of methylprednisolone tablets showing a daily stepping down schedule next to an endocrine diagnostic chart",

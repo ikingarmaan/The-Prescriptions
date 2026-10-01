@@ -15,7 +15,7 @@ export const article23: BlogArticle = {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
     "avatarUrl": "/theprescription-icon.svg",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/sleep-medication-prescriptions-z-drugs-circadian-rhythm.png",
   "heroImageAlt": "Bedside nightstand in evening dim lighting with an amber prescription bottle of Zolpidem, blister packs of sleep medications, an analog alarm clock showing 10:30 PM, a clear glass of water, and an educational sleep architecture chart showing REM and deep sleep cycles",

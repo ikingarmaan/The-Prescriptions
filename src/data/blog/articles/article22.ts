@@ -15,7 +15,7 @@ export const article22: BlogArticle = {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
     "avatarUrl": "/theprescription-icon.svg",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/antidepressant-prescriptions-ssri-snri-tapering-guide.png",
   "heroImageAlt": "Clinical doctor consultation desk with prescription blister packs of Sertraline and Escitalopram, an amber medicine vial, a clear glass of water, a medical stethoscope, and a clinical serotonin synapse neurotransmitter diagram illustrating SSRI mechanism of action",

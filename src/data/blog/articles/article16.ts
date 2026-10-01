@@ -14,7 +14,7 @@ export const article16: BlogArticle = {
   "author": {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/polypharmacy_safety.png",
   "heroImageAlt": "Elderly hands holding an overflowing handful of assorted pharmaceutical prescription pills beside a multi-day weekly pill organizer",

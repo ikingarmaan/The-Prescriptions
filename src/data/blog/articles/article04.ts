@@ -14,7 +14,7 @@ export const article04: BlogArticle = {
   "author": {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/drug_food_interactions.png",
   "heroImageAlt": "Fresh sliced pink grapefruit resting beside pharmaceutical prescription blister packs and a glass of water on a kitchen counter",

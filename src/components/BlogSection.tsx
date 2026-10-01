@@ -328,7 +328,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
               <div>
                 <div className="flex items-center gap-2">
                   <a
-                    href={currentArticle.author.profileUrl || 'https://mohdarmaan.up.railway.app/#home'}
+                    href={currentArticle.author.profileUrl || 'https://armaanali.onrender.com/#home'}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="font-bold text-sm text-slate-900 hover:text-teal-600 inline-flex items-center gap-1 transition-colors"
@@ -558,7 +558,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
                     Written by {currentArticle.author.name}
                   </h4>
                   <a
-                    href={currentArticle.author.profileUrl || 'https://mohdarmaan.up.railway.app/#home'}
+                    href={currentArticle.author.profileUrl || 'https://armaanali.onrender.com/#home'}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-xs font-bold text-teal-600 hover:text-teal-700 hover:underline inline-flex items-center gap-1"

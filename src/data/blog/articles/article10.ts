@@ -14,7 +14,7 @@ export const article10: BlogArticle = {
   "author": {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/blood_test_guide.png",
   "heroImageAlt": "Clinical laboratory phlebotomy test tubes with colorful rubber stoppers beside a printed laboratory requisition report sheet",

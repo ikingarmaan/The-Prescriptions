@@ -481,7 +481,7 @@ export const Footer: React.FC<FooterProps> = ({ activeTab, setActiveTab, onOpenP
             <span className="text-slate-300">
               Developed by{' '}
               <a
-                href="https://mohdarmaan.up.railway.app/#home"
+                href="https://armaanali.onrender.com/#home"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-bold text-emerald-400 hover:text-emerald-300 underline decoration-emerald-500/40 hover:decoration-emerald-300 transition-colors inline-flex items-center gap-1 cursor-pointer"

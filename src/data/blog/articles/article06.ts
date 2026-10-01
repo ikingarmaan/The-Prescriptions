@@ -14,7 +14,7 @@ export const article06: BlogArticle = {
   "author": {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/lasa_drugs.png",
   "heroImageAlt": "Two prescription pill bottles with nearly identical labels and shapes side-by-side on a pharmacy dispensing tray illustrating LASA risk",

@@ -14,7 +14,7 @@ export const article15: BlogArticle = {
   "author": {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/pediatric_liquid_dosing.png",
   "heroImageAlt": "Calibrated plastic oral dosing syringe resting beside a colorful pediatric liquid acetaminophen medicine bottle on a nursery table",

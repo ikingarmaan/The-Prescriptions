@@ -14,7 +14,7 @@ export const article07: BlogArticle = {
   "author": {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/antibiotic_resistance.png",
   "heroImageAlt": "Microbiology Petri dish displaying bacterial colonies with clear zones of antibiotic inhibition beside an amber pharmaceutical prescription vial",

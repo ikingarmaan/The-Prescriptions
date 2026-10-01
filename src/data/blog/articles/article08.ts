@@ -14,7 +14,7 @@ export const article08: BlogArticle = {
   "author": {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/chronotherapy_timing.png",
   "heroImageAlt": "Modern minimalist clinical clock face overlaid with pharmaceutical capsules highlighting morning and evening chronotherapy windows",

@@ -14,7 +14,7 @@ export const article14: BlogArticle = {
   "author": {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/unreadable_prescription.png",
   "heroImageAlt": "Frustrated patient holding a magnifying glass over an illegible handwritten clinical prescription slip on a desk",

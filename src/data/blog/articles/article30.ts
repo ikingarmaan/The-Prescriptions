@@ -15,7 +15,7 @@ export const article30: BlogArticle = {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
     "avatarUrl": "/theprescription-icon.svg",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/sleep-medication-prescriptions-z-drugs-circadian-rhythm.png",
   "heroImageAlt": "Clinical healthcare illustration for Sleep Aid Prescriptions vs. Natural Sleep Architecture: Zolpidem, Eszopiclone, Benzodiazepines, and Melatonin Compared",

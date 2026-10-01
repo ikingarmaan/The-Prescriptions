@@ -14,7 +14,7 @@ export const article18: BlogArticle = {
   "author": {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/glp1_semaglutide_guide.png",
   "heroImageAlt": "Clinical consultation desk featuring a modern pharmaceutical GLP-1 injection pen resting next to an official prescription clipboard and a glass of fresh water in gentle morning light",

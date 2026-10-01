@@ -2,6 +2,7 @@
 
 ## 1. Official Live Production Website
 - **Live Website**: [https://www.theprescription.in](https://www.theprescription.in) (and `www.theprescription.in`)
+- **Developer / Creator**: Mohd Armaan ([Portfolio: https://armaanali.onrender.com/#home](https://armaanali.onrender.com/#home) | [GitHub](https://github.com/ikingarmaan))
 - **Repository**: [https://github.com/ikingarmaan/The-Prescriptions](https://github.com/ikingarmaan/The-Prescriptions)
 - **Top of README**: Always prominently feature `www.theprescription.in` at the very top of `README.md`.
 

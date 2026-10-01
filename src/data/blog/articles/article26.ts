@@ -15,7 +15,7 @@ export const article26: BlogArticle = {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
     "avatarUrl": "/theprescription-icon.svg",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/otc-vs-prescription-painkillers-nsaids-acetaminophen.png",
   "heroImageAlt": "Clinical consultation between physician and patient reviewing prescription blister packs of Meloxicam and Celecoxib, Acetaminophen bottle with safe daily limits, liver and kidney pathway chart, and stethoscope",

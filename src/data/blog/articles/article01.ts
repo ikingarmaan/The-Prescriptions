@@ -14,7 +14,7 @@ export const article01: BlogArticle = {
   "author": {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/doctor_handwriting.png",
   "heroImageAlt": "Vintage fountain pen resting on a handwritten clinical doctor prescription sheet with stethoscope in soft focus",

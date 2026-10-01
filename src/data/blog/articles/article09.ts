@@ -14,7 +14,7 @@ export const article09: BlogArticle = {
   "author": {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/empty_stomach_vs_food.png",
   "heroImageAlt": "A plate of light breakfast food beside a glass of water and two distinct pharmaceutical prescription tablets illustrating meal timing",

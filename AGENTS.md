@@ -3,6 +3,7 @@
 ## 1. Project Identity & Live Production Website
 - **Platform Name**: The Prescription
 - **Official Live Website**: [https://www.theprescription.in](https://www.theprescription.in) (also accessible at `www.theprescription.in`)
+- **Developer / Creator**: Mohd Armaan ([Portfolio: https://armaanali.onrender.com/#home](https://armaanali.onrender.com/#home) | [GitHub](https://github.com/ikingarmaan))
 - **Repository**: [https://github.com/ikingarmaan/The-Prescriptions](https://github.com/ikingarmaan/The-Prescriptions)
 - **Primary Goal**: Clinical prescription decoding, drug safety analysis, 24-hour visual schedule generation, and patient education.
 

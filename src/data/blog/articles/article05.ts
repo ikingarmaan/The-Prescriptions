@@ -14,7 +14,7 @@ export const article05: BlogArticle = {
   "author": {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/dosage_timing_matrix.png",
   "heroImageAlt": "Handwritten medicine box with 1-0-1 clearly marked in blue ballpoint pen next to a morning and evening blister strip on a bedside table",

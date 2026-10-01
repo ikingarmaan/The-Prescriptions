@@ -460,7 +460,7 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ currentPage, onNavigate })
 
             <div className="pt-2">
               <a
-                href="https://mohdarmaan.up.railway.app/#home"
+                href="https://armaanali.onrender.com/#home"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-xs font-bold text-emerald-400 hover:text-emerald-300 transition-colors"

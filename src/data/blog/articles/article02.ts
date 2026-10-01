@@ -14,7 +14,7 @@ export const article02: BlogArticle = {
   "author": {
     "name": "Mohd Armaan",
     "role": "Lead Developer & Clinical Informatics Contributor",
-    "profileUrl": "https://mohdarmaan.up.railway.app/#home"
+    "profileUrl": "https://armaanali.onrender.com/#home"
   },
   "heroImage": "/blog/generic_vs_brand.png",
   "heroImageAlt": "Two identical white pharmaceutical capsules side by side on a clinical laboratory slate representing generic and brand bioequivalence",
