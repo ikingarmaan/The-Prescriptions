@@ -30,6 +30,7 @@ import { article28 } from './articles/article28';
 import { article29 } from './articles/article29';
 import { article30 } from './articles/article30';
 import { article31 } from './articles/article31';
+import { article32 } from './articles/article32';
 
 export const ALL_ARTICLES: BlogArticle[] = [
   article01,
@@ -63,6 +64,7 @@ export const ALL_ARTICLES: BlogArticle[] = [
   article29,
   article30,
   article31,
+  article32,
 ];
 
 export interface CategoryFilterItem {
