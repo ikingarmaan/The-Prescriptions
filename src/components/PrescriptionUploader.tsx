@@ -196,31 +196,35 @@ export const PrescriptionUploader: React.FC<PrescriptionUploaderProps> = ({
             </div>
 
             {/* Input Mode Switcher: Photo vs Text */}
-            <div className="grid grid-cols-2 w-full md:w-auto bg-slate-900/80 p-1.5 rounded-2xl shrink-0 self-stretch md:self-center border border-white/15 backdrop-blur-sm shadow-inner gap-1">
+            <div className="grid grid-cols-2 w-full md:w-auto bg-slate-900/90 p-1 rounded-xl shrink-0 self-stretch md:self-center border border-white/20 backdrop-blur-sm shadow-inner gap-1" role="tablist" aria-label="Prescription Input Mode">
               <button
                 id="tab-photo-upload"
                 type="button"
+                role="tab"
+                aria-selected={activeInputTab === 'photo'}
                 onClick={() => setActiveInputTab('photo')}
-                className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all min-h-[44px] cursor-pointer ${
+                className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all min-h-[40px] cursor-pointer ${
                   activeInputTab === 'photo'
-                    ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/30 ring-2 ring-emerald-400/40'
+                    ? 'bg-emerald-800/90 text-white shadow-xs border border-emerald-400/50'
                     : 'text-slate-300 hover:text-white hover:bg-white/10'
                 }`}
               >
-                <Camera className="w-4 h-4" />
+                <Camera className="w-4 h-4 text-emerald-400" />
                 <span>Prescription Photo</span>
               </button>
               <button
                 id="tab-text-notes"
                 type="button"
+                role="tab"
+                aria-selected={activeInputTab === 'text'}
                 onClick={() => setActiveInputTab('text')}
-                className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all min-h-[44px] cursor-pointer ${
+                className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all min-h-[40px] cursor-pointer ${
                   activeInputTab === 'text'
-                    ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/30 ring-2 ring-emerald-400/40'
+                    ? 'bg-emerald-800/90 text-white shadow-xs border border-emerald-400/50'
                     : 'text-slate-300 hover:text-white hover:bg-white/10'
                 }`}
               >
-                <FileText className="w-4 h-4" />
+                <FileText className="w-4 h-4 text-emerald-400" />
                 <span>Type Notes</span>
               </button>
             </div>
@@ -305,9 +309,9 @@ export const PrescriptionUploader: React.FC<PrescriptionUploaderProps> = ({
                   <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto rounded-2xl bg-emerald-100/70 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center mb-3 sm:mb-4">
                     <Upload className="w-6 h-6 sm:w-7 sm:h-7" />
                   </div>
-                  <h3 className="text-sm sm:text-base font-semibold text-slate-800 dark:text-slate-100 mb-1">
+                  <h2 className="text-sm sm:text-base font-semibold text-slate-800 dark:text-slate-100 mb-1">
                     Upload or Photograph Prescription
-                  </h3>
+                  </h2>
                   <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-4 sm:mb-5">
                     Supports high-resolution camera photos, doctor slips, or gallery images (JPG, PNG, WEBP).
                   </p>
@@ -517,9 +521,9 @@ Adv / Inv:
                   setHasConsent(e.target.checked);
                   if (e.target.checked) setConsentError(false);
                 }}
-                className="mt-0.5 w-4 h-4 rounded text-emerald-600 border-slate-300 dark:border-slate-600 focus:ring-emerald-500 cursor-pointer shrink-0 accent-emerald-600"
+                className="mt-0.5 w-5 h-5 rounded-md text-emerald-600 border-2 border-slate-400 dark:border-slate-500 focus:ring-2 focus:ring-emerald-500 cursor-pointer shrink-0 accent-emerald-600"
               />
-              <div className="text-xs space-y-0.5 flex-1">
+              <div className="text-xs sm:text-sm space-y-0.5 flex-1">
                 <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-slate-100">
                   <span>Mandatory Consent &amp; Safety Agreement</span>
                   <span
@@ -534,29 +538,24 @@ Adv / Inv:
                     {hasConsent ? 'Consent Confirmed' : consentError ? 'Action Required Below' : 'Required to Analyze'}
                   </span>
                 </div>
-                <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+                <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-xs">
                   I consent to AI analysis of this prescription for informational understanding, and I agree to consult a doctor or pharmacist before taking, stopping, or changing any medicine.
                 </p>
               </div>
             </label>
             {consentError ? (
-              <p className="text-[11px] text-rose-600 dark:text-rose-400 font-bold mt-1.5 pl-1 flex items-center gap-1">
+              <p className="text-xs text-rose-600 dark:text-rose-400 font-bold mt-1.5 pl-1 flex items-center gap-1">
                 <span>⚠️ Please check the safety agreement box above to proceed with prescription analysis.</span>
               </p>
             ) : !hasConsent ? (
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-1.5 pl-1 flex items-center gap-1">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1.5 pl-1 flex items-center gap-1">
                 <span>Please check the safety agreement box above before analyzing your prescription.</span>
               </p>
             ) : null}
           </div>
 
           {/* Submit Action */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
-            <div className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-              <Info className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <span>Decodes doctor handwriting, organizes lab tests, and maps daily medicine routines.</span>
-            </div>
-
+          <div className="flex flex-col items-center justify-center gap-3 pt-4 border-t border-slate-100 dark:border-slate-800 text-center">
             <button
               id="submit-prescription-btn"
               type="submit"
@@ -565,7 +564,7 @@ Adv / Inv:
                 (activeInputTab === 'photo' && !selectedImage) ||
                 (activeInputTab === 'text' && !textNotes.trim())
               }
-              className="w-full sm:w-auto px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
+              className="w-full sm:w-auto min-w-[280px] px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm sm:text-base font-bold rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
             >
               {isLoading ? (
                 <>
@@ -580,6 +579,10 @@ Adv / Inv:
                 </>
               )}
             </button>
+            <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center justify-center gap-1.5">
+              <Info className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <span>Decodes doctor handwriting, organizes lab tests, and maps daily medicine routines.</span>
+            </div>
           </div>
         </form>
 
@@ -588,11 +591,11 @@ Adv / Inv:
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-purple-600 animate-pulse" />
-              <span className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-purple-950 dark:text-purple-200">
+              <span className="text-xs sm:text-sm font-bold text-purple-950 dark:text-purple-200">
                 Try Instant Sample Prescriptions (1-Click Demo)
               </span>
             </div>
-            <span className="text-[11px] font-bold text-purple-700 dark:text-purple-300 bg-purple-100/90 dark:bg-purple-950/60 px-2.5 py-0.5 rounded-full border border-purple-200 dark:border-purple-800/60">
+            <span className="text-xs font-semibold text-purple-700 dark:text-purple-300 bg-purple-100/90 dark:bg-purple-950/60 px-2.5 py-0.5 rounded-full border border-purple-200 dark:border-purple-800/60">
               Zero Upload Required
             </span>
           </div>
@@ -614,7 +617,7 @@ Adv / Inv:
                     {sample.sampleResult.medicines.length} Meds
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 mb-2.5 font-medium">
+                <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-1 mb-2.5 font-medium">
                   {sample.subtitle}
                 </p>
                 <div className="text-[10px] font-mono text-purple-950 dark:text-purple-200 bg-purple-50/60 dark:bg-purple-950/40 p-2 rounded-xl border border-purple-100 dark:border-purple-900/40 line-clamp-2 leading-relaxed">

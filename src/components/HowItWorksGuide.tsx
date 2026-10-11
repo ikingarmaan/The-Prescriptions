@@ -17,6 +17,8 @@ import {
   Lightbulb,
   ExternalLink,
   Check,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { SamplePrescription, SAMPLE_PRESCRIPTIONS } from '../data/medicalData';
 
@@ -122,6 +124,7 @@ export const HowItWorksGuide: React.FC<HowItWorksGuideProps> = ({
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [progress, setProgress] = useState(0);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [simulatedSearchText, setSimulatedSearchText] = useState('Augmentin 625');
   const [simulatedUploaded, setSimulatedUploaded] = useState(false);
 
@@ -177,30 +180,58 @@ export const HowItWorksGuide: React.FC<HowItWorksGuideProps> = ({
           </p>
         </div>
 
-        {/* Auto-Play Toggle & Step Status */}
-        <div className="flex items-center gap-3 self-end md:self-center">
+        {/* Controls: Auto-Play Toggle & Collapse Toggle */}
+        <div className="flex items-center gap-2.5 self-end md:self-center">
           <button
             type="button"
+            aria-pressed={isPlaying}
             onClick={() => setIsPlaying(!isPlaying)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 text-xs font-bold text-slate-200 border border-slate-700 transition-colors cursor-pointer"
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
+              isPlaying
+                ? 'bg-emerald-950/80 border-emerald-500/60 text-emerald-300 shadow-xs'
+                : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'
+            }`}
           >
+            <span className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}`} aria-hidden="true" />
             {isPlaying ? (
               <>
                 <Pause className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Auto-Cycling Guide</span>
+                <span>Auto-Cycling Active</span>
               </>
             ) : (
               <>
                 <Play className="w-3.5 h-3.5 text-slate-400" />
-                <span>Paused (Click to Resume)</span>
+                <span>Auto-Cycling Paused</span>
+              </>
+            )}
+          </button>
+
+          <button
+            type="button"
+            aria-expanded={isExpanded}
+            aria-controls="how-to-use-content"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 border border-slate-700 transition-colors cursor-pointer"
+          >
+            {isExpanded ? (
+              <>
+                <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
+                <span>Collapse</span>
+              </>
+            ) : (
+              <>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                <span>Expand</span>
               </>
             )}
           </button>
         </div>
       </div>
 
-      {/* Step Selector Pills */}
-      <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 my-6">
+      {isExpanded && (
+        <div id="how-to-use-content">
+          {/* Step Selector Pills */}
+      <div role="tablist" aria-label="Prescription Analysis Steps" className="relative z-10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 my-6">
         {USER_STEPS.map((step, idx) => {
           const isActive = idx === activeStepIndex;
           const StepIcon = step.icon;
@@ -209,6 +240,10 @@ export const HowItWorksGuide: React.FC<HowItWorksGuideProps> = ({
             <button
               key={step.id}
               type="button"
+              role="tab"
+              id={`step-tab-${step.id}`}
+              aria-selected={isActive}
+              aria-controls={`step-panel-${step.id}`}
               onClick={() => handleSelectStep(idx)}
               className={`p-3 sm:p-4 rounded-2xl text-left transition-all relative overflow-hidden cursor-pointer border ${
                 isActive
@@ -261,10 +296,10 @@ export const HowItWorksGuide: React.FC<HowItWorksGuideProps> = ({
         <div className="lg:col-span-5 flex flex-col justify-between space-y-4 bg-slate-900/80 p-6 rounded-2xl border border-slate-800">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              <span className="inline-flex items-center leading-none text-[10px] font-black uppercase tracking-wider px-2.5 py-1.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                 {activeStep.highlightTag}
               </span>
-              <span className="text-xs text-slate-400 font-semibold">
+              <span className="inline-flex items-center leading-none text-xs text-slate-400 font-semibold">
                 {activeStep.stepNumber} of 5
               </span>
             </div>
@@ -278,13 +313,15 @@ export const HowItWorksGuide: React.FC<HowItWorksGuideProps> = ({
             </p>
 
             {/* Instruction Checklist */}
-            <div className="space-y-2.5 pt-3 border-t border-slate-800">
+            <div className="space-y-2.5 pt-3 border-t border-slate-800" role="list">
               <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                 What to do:
               </div>
               {activeStep.instructions.map((item, i) => (
-                <div key={i} className="flex items-start gap-2.5 text-xs text-slate-200">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                <div key={i} className="flex items-start gap-2.5 text-xs text-slate-200" role="listitem">
+                  <span className="w-4 h-4 rounded-full bg-slate-800 text-slate-300 border border-slate-700 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5" aria-hidden="true">
+                    {i + 1}
+                  </span>
                   <span className="leading-relaxed">{item}</span>
                 </div>
               ))}
@@ -309,10 +346,10 @@ export const HowItWorksGuide: React.FC<HowItWorksGuideProps> = ({
             <button
               type="button"
               onClick={() => handleSelectStep((activeStepIndex + 1) % USER_STEPS.length)}
-              className="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
+              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold transition-colors cursor-pointer flex items-center gap-1.5"
             >
               <span>Next Step</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
             </button>
           </div>
         </div>
@@ -408,26 +445,25 @@ export const HowItWorksGuide: React.FC<HowItWorksGuideProps> = ({
                 </div>
 
                 {/* Consent Checkbox Simulation */}
-                <div className="p-3 rounded-xl bg-slate-950/90 border border-emerald-500/50 flex items-start gap-2.5">
-                  <div className="w-4 h-4 rounded bg-emerald-500 text-slate-950 flex items-center justify-center mt-0.5 shrink-0">
-                    <Check className="w-3 h-3 stroke-[3]" />
+                <div className="p-3 rounded-xl bg-slate-950/90 border border-slate-700 flex items-start gap-2.5">
+                  <div className="w-4 h-4 rounded border-2 border-emerald-500 bg-slate-900 flex items-center justify-center mt-0.5 shrink-0" aria-hidden="true">
+                    <span className="w-1.5 h-1.5 rounded-xs bg-emerald-400/50" />
                   </div>
-                  <div className="text-[11px] text-emerald-200 leading-snug">
-                    <span className="font-bold block text-white">Mandatory Safety Consent:</span>
-                    <span>I consent to AI analysis &amp; agree to consult a doctor/pharmacist before taking medicines.</span>
+                  <div className="text-[11px] text-slate-300 leading-snug">
+                    <span className="font-bold block text-white">Action Required: Tick Safety Agreement</span>
+                    <span>Checking this consent on the form unlocks the Analyze button below.</span>
                   </div>
                 </div>
 
-                {/* Analyze Button with pulse animation */}
-                <div className="relative">
+                {/* Analyze Button with non-colliding assistive prompt */}
+                <div className="space-y-1.5">
                   <div className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-black rounded-xl text-center text-sm shadow-lg flex items-center justify-center gap-2">
-                    <Sparkles className="w-4 h-4 animate-spin" />
+                    <Sparkles className="w-4 h-4" />
                     <span>Analyze &amp; Explain Medicines</span>
                   </div>
-                  {/* Cursor click simulation */}
-                  <div className="absolute -bottom-2 right-8 flex items-center gap-1 text-[11px] font-black text-amber-300 bg-slate-900 px-2 py-0.5 rounded-md border border-amber-500/40">
-                    <MousePointer className="w-3 h-3 text-amber-400" />
-                    <span>Click to Analyze</span>
+                  <div className="flex items-center justify-center gap-1 text-[11px] font-bold text-amber-300 pt-0.5">
+                    <MousePointer className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Click button to begin handwriting decryption</span>
                   </div>
                 </div>
 
@@ -654,6 +690,8 @@ export const HowItWorksGuide: React.FC<HowItWorksGuideProps> = ({
           </button>
         </div>
       </div>
+        </div>
+      )}
     </section>
   );
 };

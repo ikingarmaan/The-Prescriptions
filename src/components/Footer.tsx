@@ -132,27 +132,33 @@ export const Footer: React.FC<FooterProps> = ({ activeTab, setActiveTab, onOpenP
           </div>
 
           {/* Region Switcher & Direct Call Action */}
-          <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto no-scrollbar py-0.5">
-            <span className="text-[10px] sm:text-[11px] font-medium text-slate-400 mr-0.5 shrink-0">Region:</span>
-            {EMERGENCY_NUMBERS.map((country, idx) => (
-              <button
-                key={country.country}
-                type="button"
-                onClick={() => setActiveCountryIndex(idx)}
-                className={`px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-md text-[11px] sm:text-xs font-semibold transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
-                  activeCountryIndex === idx
-                    ? 'bg-rose-500/30 text-rose-100 border border-rose-400/60 shadow-xs scale-102'
-                    : 'bg-slate-800/70 text-slate-300 hover:text-white border border-slate-700/60'
-                }`}
-              >
-                <span>{country.flag}</span>
-                <span className="hidden md:inline">{country.country}</span>
-              </button>
-            ))}
+          <div className="flex items-center flex-wrap sm:flex-nowrap gap-2 sm:gap-2.5 w-full sm:w-auto py-1">
+            <span className="text-xs font-semibold text-slate-400 shrink-0 inline-flex items-center leading-none">
+              Region:
+            </span>
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar" role="radiogroup" aria-label="Select Emergency Region">
+              {EMERGENCY_NUMBERS.map((country, idx) => (
+                <button
+                  key={country.country}
+                  type="button"
+                  role="radio"
+                  aria-checked={activeCountryIndex === idx}
+                  onClick={() => setActiveCountryIndex(idx)}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all inline-flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                    activeCountryIndex === idx
+                      ? 'bg-rose-500/30 text-rose-100 border border-rose-400/60 shadow-xs'
+                      : 'bg-slate-800/80 text-slate-300 hover:text-white border border-slate-700/80'
+                  }`}
+                >
+                  <span aria-hidden="true">{country.flag}</span>
+                  <span className="hidden md:inline">{country.country}</span>
+                </button>
+              ))}
+            </div>
 
             <a
               href={`tel:${currentCountry.emergency.split('/')[0].trim()}`}
-              className="ml-auto sm:ml-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-[11px] sm:text-xs shadow-xs transition-all shrink-0 cursor-pointer active:scale-95"
+              className="ml-auto sm:ml-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-xs transition-all shrink-0 cursor-pointer active:scale-95"
             >
               <span>Call {currentCountry.emergency}</span>
             </a>

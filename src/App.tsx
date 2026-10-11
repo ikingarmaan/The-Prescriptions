@@ -418,7 +418,7 @@ export default function App() {
               Medical Handwriting Decryption: Identify medicines, dosage times & lab tests safely.
             </span>
           </div>
-          <span className="text-[11px] text-emerald-300/80 hidden md:inline shrink-0">
+          <span className="text-xs text-emerald-200 font-semibold hidden md:inline shrink-0">
             Clinical Reference & Safety Guidance
           </span>
         </div>
@@ -472,15 +472,15 @@ export default function App() {
                 </LazyOnVisible>
 
                 {/* High-Visibility Clinical Tools & Quick Actions directly below FAQ */}
-                <div className="pt-6 pb-2">
-                  <div className="text-center max-w-2xl mx-auto mb-6">
-                    <span className="text-[11px] font-black uppercase tracking-widest text-emerald-800 bg-emerald-100/90 border border-emerald-300 px-3 py-1 rounded-full">
+                <section className="mt-12 sm:mt-16 pt-8 sm:pt-12 pb-2 border-t border-slate-200 dark:border-slate-800" aria-labelledby="tools-section-heading">
+                  <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
+                    <span className="text-xs font-bold uppercase tracking-widest text-emerald-800 dark:text-emerald-300 bg-emerald-100/90 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 px-3.5 py-1 rounded-full shadow-2xs">
                       Clinical Exploration
                     </span>
-                    <h3 className="text-xl sm:text-2xl font-black text-slate-900 mt-2">
+                    <h2 id="tools-section-heading" className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 dark:text-white mt-3">
                       Fast Medical Tools & Databases
-                    </h3>
-                    <p className="text-xs sm:text-sm text-slate-600 mt-1">
+                    </h2>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1.5 max-w-xl mx-auto">
                       Access our drug catalog, decode Latin abbreviations, or review medical safety policies.
                     </p>
                   </div>
@@ -580,7 +580,7 @@ export default function App() {
                       </div>
                     </button>
                   </div>
-                </div>
+                </section>
 
                 {/* Comprehensive SEO & Patient Health Literacy Guide (1,800+ Words) - Viewport-deferred */}
                 <LazyOnVisible minHeight="200px">

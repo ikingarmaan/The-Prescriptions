@@ -126,7 +126,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
         <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
           Frequently Asked Questions
         </h2>
-        <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed max-w-2xl mx-auto font-medium">
+        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed max-w-xl mx-auto font-normal">
           {variant === 'homepage'
             ? 'Quick answers to top questions on deciphering doctor handwriting, understanding 1-0-1 dosage codes, and our encrypted privacy protections.'
             : `Explore our complete knowledge base of ${FAQ_DATABASE.length} verified answers covering prescription parsing, doctor Latin codes, pharmacology accuracy, medication safety protocols, and patient privacy.`}
@@ -242,8 +242,9 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
                       <span>{faq.category}</span>
                     </span>
                     {faq.popular && (
-                      <span className="text-[10px] font-extrabold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-800/60 px-1.5 py-0.2 rounded-md">
-                        Key Question
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/60 px-2 py-0.5 rounded-md">
+                        <Sparkles className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                        <span>Key Question</span>
                       </span>
                     )}
                   </div>
@@ -268,7 +269,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
               </button>
 
               {isOpen && (
-                <div className="px-4 sm:px-5 pb-5 pt-2 border-t border-slate-200 dark:border-slate-800 bg-emerald-50/30 dark:bg-emerald-950/20">
+                <div className="px-4 sm:px-5 pt-3 pb-6 sm:pb-7 border-t border-slate-200 dark:border-slate-800 bg-emerald-50/30 dark:bg-emerald-950/20">
                   <div className="text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-line space-y-2 font-medium">
                     {faq.answer}
                   </div>
