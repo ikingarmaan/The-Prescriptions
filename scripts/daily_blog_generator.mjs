@@ -120,6 +120,76 @@ export const TRENDING_TOPICS_QUEUE = [
       { name: 'National Lipid Association (NLA)', title: 'Assessment and Management of Statin-Associated Muscle Symptoms (SAMS)', url: 'https://www.lipid.org/scientific-statements' },
       { name: 'Mayo Clinic Cardiovascular Review', title: 'Statin Side Effects: Weigh the Benefits and Risks', url: 'https://www.mayoclinic.org/diseases-conditions/high-blood-cholesterol/in-depth/statin-side-effects/art-20046013' }
     ]
+  },
+  {
+    topicId: 'metformin-prescriptions-extended-release-b12-lactic-acidosis',
+    title: 'The Definitive Patient Guide to Metformin Prescriptions: Immediate vs. Extended Release (ER), B12 Deficiency, and GI Tolerance',
+    subtitle: 'From Glucophage and Glumetza to Generic Metformin HCl: How Biguanides Inhibit Hepatic Gluconeogenesis, Why Taking It Mid-Meal Eliminates Digestive Distress, Annual Vitamin B12 Monitoring, and Preventing Lactic Acidosis',
+    category: 'pharmacology',
+    categoryLabel: 'Pharmacology & Medication Safety',
+    categoryColor: 'emerald',
+    tags: ['Metformin', 'Type 2 Diabetes', 'Extended Release', 'Glucophage', 'Vitamin B12', 'Lactic Acidosis', 'Medication Safety'],
+    references: [
+      { name: 'American Diabetes Association (ADA)', title: 'Standards of Care in Diabetes', url: 'https://diabetesjournals.org/care/issue' },
+      { name: 'National Library of Medicine (PubMed)', title: 'Long-term Metformin Use and Vitamin B12 Deficiency', url: 'https://pubmed.ncbi.nlm.nih.gov/26916393/' },
+      { name: 'U.S. Food and Drug Administration (FDA)', title: 'FDA Revises Warnings Regarding Metformin in Certain Patients with Reduced Kidney Function', url: 'https://www.fda.gov/drugs/drug-safety-and-availability/' }
+    ]
+  },
+  {
+    topicId: 'blood-thinner-prescriptions-eliquis-xarelto-warfarin-safety-guide',
+    title: 'Demystifying Blood Thinner Prescriptions: Eliquis, Xarelto, Warfarin, and the Crucial Rules of Anticoagulant Safety',
+    subtitle: 'Direct Oral Anticoagulants (DOACs) vs. Vitamin K Antagonists: Understanding Factor Xa Inhibition, When to Hold Doses for Dental Procedures, Vitamin K Food Consistency, and Recognizing Internal Bleeding Red Flags',
+    category: 'drug-safety',
+    categoryLabel: 'Anticoagulation & Patient Safety',
+    categoryColor: 'rose',
+    tags: ['Blood Thinners', 'Anticoagulants', 'Eliquis', 'Xarelto', 'Warfarin', 'Atrial Fibrillation', 'Drug Safety'],
+    references: [
+      { name: 'American Heart Association (AHA)', title: 'Guideline for the Management of Patients With Atrial Fibrillation', url: 'https://www.ahajournals.org/' },
+      { name: 'New England Journal of Medicine (NEJM)', title: 'Apixaban versus Warfarin in Patients with Atrial Fibrillation', url: 'https://pubmed.ncbi.nlm.nih.gov/21875371/' },
+      { name: 'CHEST Journal', title: 'Antithrombotic Therapy for VTE Disease', url: 'https://journal.chestnet.org/guidelines' }
+    ]
+  },
+  {
+    topicId: 'antibiotic-prescriptions-course-completion-resistance-superbugs',
+    title: 'The Science of Antibiotic Prescriptions: Why Stopping Early Breeds Superbugs and How to Protect Your Gut Microbiome',
+    subtitle: 'From Amoxicillin-Clavulanate to Ciprofloxacin: How Bactericidal vs. Bacteriostatic Antibiotics Eliminate Pathogens, Why Feeling Better on Day 3 Is Deceptive, Probiotic Spacing Rules, and Fighting Antimicrobial Resistance',
+    category: 'safety',
+    categoryLabel: 'Infectious Disease & Patient Safety',
+    categoryColor: 'teal',
+    tags: ['Antibiotics', 'Superbugs', 'Antimicrobial Resistance', 'Amoxicillin', 'Gut Microbiome', 'Probiotics'],
+    references: [
+      { name: 'World Health Organization (WHO)', title: 'Antimicrobial Resistance Surveillance & Guidance', url: 'https://www.who.int/news-room/fact-sheets/detail/antimicrobial-resistance' },
+      { name: 'Centers for Disease Control and Prevention (CDC)', title: 'Be Antibiotics Aware: Smart Use, Best Care', url: 'https://www.cdc.gov/antibiotic-use/index.html' },
+      { name: 'Infectious Diseases Society of America (IDSA)', title: 'Practice Guidelines for Antimicrobial Selection & Stewardship', url: 'https://www.idsociety.org/practice-guidelines' }
+    ]
+  },
+  {
+    topicId: 'pediatric-liquid-medication-dosing-weight-based-syringe-safety',
+    title: 'The Parent Guide to Pediatric Liquid Prescriptions: Weight-Based Dosing, Oral Syringe Accuracy, and Avoiding Overdoses',
+    subtitle: 'Why Kitchen Spoons Cause 70% of Medication Errors: Calculating Milligrams per Kilogram (mg/kg), Safe Infant vs. Children\'s Acetaminophen & Ibuprofen Alternation, and Storage Safety to Protect Curious Toddlers',
+    category: 'patient-care',
+    categoryLabel: 'Pediatric Pharmacology & Family Care',
+    categoryColor: 'purple',
+    tags: ['Pediatric Prescriptions', 'Liquid Medication', 'Oral Syringe', 'Weight-Based Dosing', 'Acetaminophen', 'Ibuprofen'],
+    references: [
+      { name: 'American Academy of Pediatrics (AAP)', title: 'Preventing Home Medication Administration Errors', url: 'https://publications.aap.org/pediatrics/' },
+      { name: 'U.S. Food and Drug Administration (FDA)', title: 'Giving Acetaminophen to Children Safely', url: 'https://www.fda.gov/drugs/safe-daily-use-acetaminophen/' },
+      { name: 'National Capital Poison Center', title: 'Children and Liquid Medication Overdose Prevention', url: 'https://www.poison.org/' }
+    ]
+  },
+  {
+    topicId: 'adhd-prescriptions-stimulants-vyvanse-adderall-safety-guide',
+    title: 'The Comprehensive Guide to ADHD Prescriptions: Stimulants vs. Non-Stimulants, Duration Kinetics, and Cardiovascular Care',
+    subtitle: 'Comparing Methylphenidate (Ritalin/Concerta) and Amphetamines (Adderall/Vyvanse) with Non-Stimulants (Strattera/Intuniv): Dopamine Reuptake, Managing the Afternoon Crash, Appetite Suppression, and Blood Pressure Monitoring',
+    category: 'pharmacology',
+    categoryLabel: 'Neuropharmacology & Mental Health',
+    categoryColor: 'amber',
+    tags: ['ADHD Prescriptions', 'Stimulants', 'Adderall', 'Vyvanse', 'Ritalin', 'Concerta', 'Dopamine', 'Cardiovascular Safety'],
+    references: [
+      { name: 'American Academy of Child and Adolescent Psychiatry (AACAP)', title: 'ADHD Clinical Practice Guidelines', url: 'https://www.aacap.org/' },
+      { name: 'The Lancet Psychiatry', title: 'Comparative Efficacy and Tolerability of Medications for ADHD', url: 'https://pubmed.ncbi.nlm.nih.gov/30097390/' },
+      { name: 'Children and Adults with Attention-Deficit/Hyperactivity Disorder (CHADD)', title: 'Understanding ADHD Medications and Managing Side Effects', url: 'https://chadd.org/' }
+    ]
   }
 ];
 
