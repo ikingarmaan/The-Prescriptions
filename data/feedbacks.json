@@ -1,0 +1,62 @@
+[
+  {
+    "id": "fb-01",
+    "name": "Anita S.",
+    "role": "Daughter & Caregiver",
+    "rating": 5,
+    "comment": "My 72-year-old father came home with 4 medications in unreadable doctor handwriting. This tool identified his diabetes and blood pressure pills within seconds and gave us a clean morning/night schedule.",
+    "tags": ["Decoded Cursive", "Elderly Care", "Clear Schedule"],
+    "date": "Yesterday",
+    "verifiedScan": true
+  },
+  {
+    "id": "fb-02",
+    "name": "Dr. Arvinder M.",
+    "role": "Community Pharmacist",
+    "rating": 5,
+    "comment": "As a pharmacist, I am deeply impressed by how well this flags drug interactions and translates Latin codes like TDS and PC into simple patient instructions. Excellent patient education tool.",
+    "tags": ["Drug Interactions", "Latin Codes", "Accurate"],
+    "date": "3 days ago",
+    "verifiedScan": true
+  },
+  {
+    "id": "fb-03",
+    "name": "David L.",
+    "role": "Asthma Patient",
+    "rating": 5,
+    "comment": "The printable medication card is incredible! I downloaded the PDF and stuck it right on our refrigerator so my wife and I never double-dose my inhalers.",
+    "tags": ["Printable PDF Card", "Saved Time", "Easy to Read"],
+    "date": "5 days ago",
+    "verifiedScan": true
+  },
+  {
+    "id": "fb-04",
+    "name": "Pooja V.",
+    "role": "Mom of Two",
+    "rating": 5,
+    "comment": "Was terrified I would misread the pediatrician's scribble for my son's antibiotic. The app decoded the exact dosage and reminded me to separate his probiotic by 2 hours.",
+    "tags": ["Pediatric Safety", "Antibiotic Timing", "Life Saver"],
+    "date": "1 week ago",
+    "verifiedScan": true
+  },
+  {
+    "id": "fb-05",
+    "name": "Marcus T.",
+    "role": "Chronic Migraine Patient",
+    "rating": 5,
+    "comment": "Simple, fast, and didn't force me to create an account or give up private health data. The instant analysis was spot-on with the pharmacist's label.",
+    "tags": ["Privacy First", "Fast & Free", "Spot-On Accuracy"],
+    "date": "1 week ago",
+    "verifiedScan": true
+  },
+  {
+    "id": "fb-06",
+    "name": "Elena R.",
+    "role": "Post-Op Knee Patient",
+    "rating": 5,
+    "comment": "Taking blood thinners and painkillers after knee surgery was confusing. The 24-hour visual schedule made timing each dose completely stress-free.",
+    "tags": ["Blood Thinner Safety", "Stress-Free", "24h Schedule"],
+    "date": "2 weeks ago",
+    "verifiedScan": true
+  }
+]

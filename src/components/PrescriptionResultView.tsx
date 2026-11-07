@@ -24,13 +24,15 @@ import { MedicineCard } from './MedicineCard';
 import { DailyScheduleTimeline } from './DailyScheduleTimeline';
 import { MultiEngineConsensusCard } from './MultiEngineConsensusCard';
 import { HumanInTheLoopVerificationCard } from './HumanInTheLoopVerificationCard';
-import { MedicineDetail } from '../types';
+import { MedicineDetail, UserFeedback } from '../types';
 import { generateAndDownloadMedicationCardPdf } from '../utils/cardDownload';
+import { PrescriptionFeedbackCard } from './PrescriptionFeedbackCard';
 
 interface PrescriptionResultViewProps {
   result: PrescriptionAnalysisResult;
   onReset: () => void;
   onOpenPrintModal: () => void;
+  onFeedbackSubmitted?: (newFeedback: UserFeedback) => void;
   onConfirmOrEditMedicine?: (
     index: number,
     newName: string,
@@ -43,6 +45,7 @@ export const PrescriptionResultView: React.FC<PrescriptionResultViewProps> = ({
   result,
   onReset,
   onOpenPrintModal,
+  onFeedbackSubmitted,
   onConfirmOrEditMedicine,
 }) => {
   const [copied, setCopied] = useState<boolean>(false);
@@ -437,6 +440,9 @@ ${
           </div>
         </div>
       )}
+
+      {/* Patient & Caregiver Feedback & Rating Prompt */}
+      <PrescriptionFeedbackCard onFeedbackSubmitted={onFeedbackSubmitted} />
 
       {/* Official Medical Disclaimer */}
       <div className="p-5 rounded-2xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 flex items-start gap-3 transition-colors">

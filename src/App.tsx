@@ -5,7 +5,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { InteractiveMedicalBackground } from './components/InteractiveMedicalBackground';
 import { GlowingCursor } from './components/GlowingCursor';
 import { SamplePrescription, SAMPLE_PRESCRIPTIONS } from './data/medicalData';
-import { PrescriptionAnalysisResult, ImagePreprocessingReport, MedicineDetail } from './types';
+import { PrescriptionAnalysisResult, ImagePreprocessingReport, MedicineDetail, UserFeedback } from './types';
 import { ShieldCheck, Stethoscope, Heart, AlertCircle, Sparkles, AlertTriangle, ArrowRight, Lock, BookOpen, Search, FileText, PhoneCall, Newspaper } from 'lucide-react';
 import { postProcessPrescriptionResultWithNLP } from './utils/smartNlpEngine';
 import { createSamplePreprocessingReport } from './utils/imagePreprocessing';
@@ -61,6 +61,7 @@ const AbbreviationDictionary = lazyWithRetry(() => import('./components/Abbrevia
 const PrintableMedicationCard = lazyWithRetry(() => import('./components/PrintableMedicationCard'), 'PrintableMedicationCard');
 const InfoPages = lazyWithRetry(() => import('./components/InfoPages'), 'InfoPages');
 const BlogSection = lazyWithRetry(() => import('./components/BlogSection'), 'BlogSection');
+const CommunityFeedbackSection = lazyWithRetry(() => import('./components/CommunityFeedbackSection'), 'CommunityFeedbackSection');
 import { ThemeProvider } from './context/ThemeContext';
 
 const TabLoadingFallback = () => (
@@ -87,6 +88,7 @@ export default function App() {
   const [analyzingImage, setAnalyzingImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState<boolean>(false);
+  const [liveFeedback, setLiveFeedback] = useState<UserFeedback | null>(null);
 
   // Synchronize activeTab with URL hash (#blog, #lookup, #abbreviations, etc.)
   useEffect(() => {
@@ -461,6 +463,16 @@ export default function App() {
                   </React.Suspense>
                 </LazyOnVisible>
 
+                {/* Community Ratings & Reviews Showcase - Viewport-deferred */}
+                <LazyOnVisible minHeight="200px">
+                  <React.Suspense fallback={<div className="min-h-[100px]" />}>
+                    <CommunityFeedbackSection
+                      onStartScan={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                      newLiveFeedback={liveFeedback}
+                    />
+                  </React.Suspense>
+                </LazyOnVisible>
+
                 {/* Homepage Embedded FAQ Section - Viewport-deferred */}
                 <LazyOnVisible minHeight="200px">
                   <React.Suspense fallback={<div className="min-h-[100px]" />}>
@@ -594,6 +606,7 @@ export default function App() {
                     result={analysisResult}
                     onReset={handleReset}
                     onOpenPrintModal={() => setIsPrintModalOpen(true)}
+                    onFeedbackSubmitted={(fb) => setLiveFeedback(fb)}
                     onConfirmOrEditMedicine={handleConfirmOrEditMedicine}
                   />
                 </React.Suspense>

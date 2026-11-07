@@ -173,3 +173,14 @@ export interface PrescriptionAnalysisResult {
   medicalDisclaimer: string;
   imagePreprocessingReport?: ImagePreprocessingReport;
 }
+
+export interface UserFeedback {
+  id: string;
+  name: string;
+  role: string;
+  rating: number; // 1 to 5
+  comment: string;
+  tags?: string[];
+  date: string;
+  verifiedScan?: boolean;
+}
