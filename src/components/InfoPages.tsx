@@ -32,7 +32,7 @@ import {
 } from 'lucide-react';
 import { ThePrescriptionLogo } from './ThePrescriptionLogo';
 import { FaqSection } from './FaqSection';
-import { SocialLinks } from './SocialLinks';
+import { SocialLinks, SOCIAL_CHANNELS } from './SocialLinks';
 import { trackContactFormSubmission } from '../utils/analytics';
 
 export type InfoPageType = 'about' | 'faq' | 'contact' | 'disclaimer' | 'privacy' | 'terms';
@@ -825,7 +825,7 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ currentPage, onNavigate })
                     <span>Official Social Channels</span>
                   </div>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
-                    7 Channels
+                    {SOCIAL_CHANNELS.length} Channels
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">

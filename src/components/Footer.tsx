@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { ThePrescriptionLogo } from './ThePrescriptionLogo';
 import { AppNavTab } from './Navbar';
-import { SocialLinks } from './SocialLinks';
+import { SocialLinks, SOCIAL_CHANNELS } from './SocialLinks';
 
 interface FooterProps {
   activeTab: AppNavTab;
@@ -184,7 +184,7 @@ export const Footer: React.FC<FooterProps> = ({ activeTab, setActiveTab, onOpenP
             <div className="pt-1">
               <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2 flex items-center gap-1.5">
                 <span>Connect With Us</span>
-                <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">7 Channels</span>
+                <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">{SOCIAL_CHANNELS.length} Channels</span>
               </span>
               <SocialLinks variant="icons-only" size="md" />
             </div>
