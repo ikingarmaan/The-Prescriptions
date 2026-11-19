@@ -89,6 +89,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState<boolean>(false);
   const [liveFeedback, setLiveFeedback] = useState<UserFeedback | null>(null);
+  const [isUnunderstoodPopupDismissed, setIsUnunderstoodPopupDismissed] = useState<boolean>(false);
 
   // Synchronize activeTab with URL hash (#blog, #lookup, #abbreviations, etc.)
   useEffect(() => {
@@ -125,7 +126,7 @@ export default function App() {
   }, []);
 
   // Helper to determine if prescription analysis resulted in completely ununderstood prescription
-  // ONLY show when completely unable to identify ANY medicine name or lab test on the prescription
+  // ONLY show when completely unable to identify ANY medicine name, lab test, or clinical diagnosis
   const hasRecognizedMedicines = Boolean(
     analysisResult?.medicines &&
       analysisResult.medicines.length > 0 &&
@@ -134,11 +135,9 @@ export default function App() {
         return (
           m.name &&
           m.name.trim().length > 1 &&
-          !n.includes('apologies') &&
-          !n.includes("didn't understand") &&
-          !n.includes('unclear') &&
-          !n.includes('illegible') &&
-          !n.includes('unidentified')
+          !n.startsWith('apologies') &&
+          !n.startsWith("didn't understand") &&
+          !n.startsWith('unidentified')
         );
       })
   );
@@ -147,11 +146,19 @@ export default function App() {
     analysisResult?.labTests && analysisResult.labTests.length > 0
   );
 
+  const hasClinicalExplanation = Boolean(
+    (analysisResult?.generalExplanation && analysisResult.generalExplanation.trim().length > 10) ||
+      (analysisResult?.suspectedCondition && analysisResult.suspectedCondition.trim().length > 3)
+  );
+
+  // Strict check: Only show ununderstood popup when there is truly ZERO recognized medical information
   const isPrescriptionUnunderstood = Boolean(
     analysisResult &&
+      !isUnunderstoodPopupDismissed &&
       !hasRecognizedMedicines &&
       !hasRecognizedLabTests &&
-      (analysisResult.unableToDecipher || (!analysisResult.generalExplanation && (!analysisResult.medicines || analysisResult.medicines.length === 0)))
+      !hasClinicalExplanation &&
+      analysisResult.unableToDecipher
   );
 
   const handleAnalyze = async (payload: {
@@ -164,6 +171,7 @@ export default function App() {
     setIsLoading(true);
     setAnalyzingImage(payload.imageBase64 || null);
     setError(null);
+    setIsUnunderstoodPopupDismissed(false);
 
     try {
       const learnedCorrections = getLearnedCorrections();
@@ -232,6 +240,7 @@ export default function App() {
 
   const handleSelectSample = (sample: SamplePrescription | number) => {
     setError(null);
+    setIsUnunderstoodPopupDismissed(false);
     const resolvedSample: SamplePrescription | undefined =
       typeof sample === 'number'
         ? SAMPLE_PRESCRIPTIONS[sample] || SAMPLE_PRESCRIPTIONS[0]
@@ -381,7 +390,9 @@ export default function App() {
 
   const handleReset = () => {
     setAnalysisResult(null);
+    setAnalyzingImage(null);
     setError(null);
+    setIsUnunderstoodPopupDismissed(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -438,14 +449,18 @@ export default function App() {
                   isLoading={isLoading}
                   error={error}
                 />
-                {isPrescriptionUnunderstood && (
+                {isPrescriptionUnunderstood && !isUnunderstoodPopupDismissed && (
                   <React.Suspense fallback={null}>
                     <UnunderstoodMedicinePopup
-                      onClose={handleReset}
+                      onClose={() => setIsUnunderstoodPopupDismissed(true)}
                       onUploadNew={handleReset}
-                      onSelectSample={handleSelectSample}
+                      onSelectSample={(sample) => {
+                        setIsUnunderstoodPopupDismissed(true);
+                        handleSelectSample(sample);
+                      }}
                       onConfirmMedicine={(newName, canonicalGeneric, extraDetails) => {
                         handleConfirmOrEditMedicine(0, newName, canonicalGeneric, extraDetails);
+                        setIsUnunderstoodPopupDismissed(true);
                       }}
                     />
                   </React.Suspense>

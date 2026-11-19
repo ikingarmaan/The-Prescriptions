@@ -49,16 +49,17 @@ export const UnunderstoodMedicinePopup: React.FC<UnunderstoodMedicinePopupProps>
             </div>
             <div>
               <h3 className="font-extrabold text-base sm:text-lg text-white">
-                Handwriting Could Not Be Deciphered
+                Unable to Read Prescription
               </h3>
               <p className="text-xs text-amber-100 font-medium">
-                Clinical Safety Rule: Never guess ambiguous pen strokes
+                No recognizable medicines, lab tests, or text found
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close unreadable alert"
             className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
@@ -68,9 +69,8 @@ export const UnunderstoodMedicinePopup: React.FC<UnunderstoodMedicinePopupProps>
         {/* Content Body */}
         <div className="p-5 sm:p-6 space-y-5">
           <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-            Our clinical models could not confirm the medicine names with 100% safety due to
-            faint ink, severe cursive pen strokes, or low photo contrast. For your safety, we
-            never invent or guess drug dosages.
+            Our clinical models were completely unable to detect any medicines or clinical orders in this upload.
+            This typically occurs if the photo is blurry, cropped, blank, or low-contrast.
           </p>
 
           {/* Option 1: Manual Name Input */}

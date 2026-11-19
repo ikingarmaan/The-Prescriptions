@@ -30,13 +30,13 @@ export function postProcessPrescriptionResultWithNLP(
     const isUnunderstood =
       !rawName ||
       rawName.length <= 1 ||
-      rawName.toLowerCase().includes('apologies') ||
-      rawName.toLowerCase().includes('unidentified') ||
-      rawName.toLowerCase().includes('pharmacist') ||
-      rawName.toLowerCase().includes('unclear') ||
-      rawName.toLowerCase().includes('illegible') ||
-      rawName.toLowerCase().includes('scribble') ||
-      rawName.toLowerCase().includes('unknown');
+      rawName.toLowerCase().startsWith('apologies') ||
+      rawName.toLowerCase().startsWith("didn't understand") ||
+      rawName.toLowerCase() === 'unidentified' ||
+      rawName.toLowerCase() === 'unidentified medication' ||
+      rawName.toLowerCase() === 'illegible' ||
+      rawName.toLowerCase() === 'scribble' ||
+      rawName.toLowerCase() === 'unknown';
 
     // Cross-reference with pharmacological catalog
     const catalogData = crossReferenceMedicine(rawName, rawGeneric);
@@ -340,11 +340,14 @@ export function postProcessPrescriptionResultWithNLP(
   }
 
   // Check if entire prescription is undecipherable
-  const allUnunderstood =
-    enriched.medicines.length === 0 ||
-    enriched.medicines.every((m) => (m.nlpResolution?.confidenceScore ?? 0) === 0);
+  const hasRecognizedMeds = enriched.medicines.some(
+    (m) => m.name && m.name.trim().length > 1 && !m.name.toLowerCase().startsWith('apologies')
+  );
+  const hasRecognizedLabTests = Boolean(enriched.labTests && enriched.labTests.length > 0);
+  const hasClinicalFindings = Boolean(enriched.generalExplanation || enriched.suspectedCondition);
 
-  if (allUnunderstood) {
+  // ONLY mark unableToDecipher if there are truly no medicines, no lab tests, and no clinical findings
+  if (!hasRecognizedMeds && !hasRecognizedLabTests && !hasClinicalFindings) {
     enriched.unableToDecipher = true;
     if (enriched.multiEngineEnsemble) {
       enriched.multiEngineEnsemble.overallConfidence = 0.0;
