@@ -67,6 +67,5 @@ export async function executeMultiEngineHandwritingRecognition(
   return {
     enhancedImage: enhancedDataUrl,
     preprocessingReport,
-    rawTesseractTokens: 'Clinical handwriting preprocessed for Gemini multimodal deciphering.',
   };
 }

@@ -196,11 +196,27 @@ export function crossReferenceMedicine(
   const normInput = cleanName(name);
   const normGeneric = cleanName(genericName || '');
 
+  // Guard against empty, trivial, or bogus placeholders
+  if (!normInput || normInput.length < 3) {
+    return {
+      prescribedAs: 'generic',
+      activeGenericSalt: genericName || name || '',
+      popularCompanyBrands: [],
+      therapeuticClass: 'Clinical Medication',
+    };
+  }
+
   for (const item of MEDICINE_CATALOG) {
     const itemBrand = cleanName(item.brandName);
     const itemGen = cleanName(item.genericSalt);
 
-    if (normInput.includes(itemBrand) || itemBrand.includes(normInput)) {
+    // Exact or significant substring matching (minimum 3 chars to prevent false positives)
+    if (
+      itemBrand.length >= 3 &&
+      (normInput === itemBrand ||
+        normInput.includes(itemBrand) ||
+        (normInput.length >= 4 && itemBrand.includes(normInput)))
+    ) {
       return {
         prescribedAs: 'brand',
         companyName: item.companyName,
@@ -210,7 +226,13 @@ export function crossReferenceMedicine(
       };
     }
 
-    if (normGeneric && (normGeneric.includes(itemGen) || itemGen.includes(normGeneric))) {
+    if (
+      normGeneric &&
+      itemGen.length >= 3 &&
+      (normGeneric === itemGen ||
+        normGeneric.includes(itemGen) ||
+        (normGeneric.length >= 4 && itemGen.includes(normGeneric)))
+    ) {
       return {
         prescribedAs: 'generic',
         companyName: item.companyName,

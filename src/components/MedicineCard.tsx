@@ -96,7 +96,9 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({
     medicine.name.toLowerCase().includes('apologies') ||
     medicine.name.toLowerCase().includes('unidentified') ||
     medicine.name.toLowerCase().includes('pharmacist') ||
-    medicine.name.toLowerCase().includes('unclear');
+    medicine.name.toLowerCase().includes('unclear') ||
+    medicine.name.toLowerCase().includes('not specified') ||
+    medicine.name.toLowerCase().includes('unspecified');
 
   const cardThemes = [
     'from-blue-600 via-indigo-600 to-sky-500',

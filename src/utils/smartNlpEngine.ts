@@ -20,6 +20,34 @@ export function postProcessPrescriptionResultWithNLP(
     enriched.medicines = [];
   }
 
+  // Filter out bogus placeholders where AI generated "Drug is not specified", "Not specified", etc.
+  const filteredMeds: MedicineDetail[] = [];
+  for (const med of enriched.medicines) {
+    const rawName = (med.name || '').trim().toLowerCase();
+    const isBogusPlaceholder =
+      !rawName ||
+      rawName === 'drug is not specified' ||
+      rawName === 'not specified' ||
+      rawName === 'unspecified' ||
+      rawName === 'unspecified drug' ||
+      rawName === 'no drug specified' ||
+      rawName === 'no medication specified' ||
+      rawName === 'none' ||
+      rawName === 'n/a';
+
+    if (isBogusPlaceholder) {
+      if (!enriched.unclearOrAmbiguousNotes) enriched.unclearOrAmbiguousNotes = [];
+      const note =
+        "Apologies, a handwritten line on the prescription was faint or unclear and could not be verified.";
+      if (!enriched.unclearOrAmbiguousNotes.includes(note)) {
+        enriched.unclearOrAmbiguousNotes.push(note);
+      }
+    } else {
+      filteredMeds.push(med);
+    }
+  }
+  enriched.medicines = filteredMeds;
+
   let totalScore = 0;
   let validCount = 0;
 

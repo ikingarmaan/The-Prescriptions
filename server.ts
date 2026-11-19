@@ -383,6 +383,38 @@ function cleanApiKey(raw?: string): string | null {
   return cleaned.length > 0 ? cleaned : null;
 }
 
+/**
+ * Safely extracts clean base64 data and MIME type from any data URL or base64 string,
+ * cleanly stripping duplicate headers, spaces, carriage returns, and newlines.
+ */
+function cleanAndExtractBase64(
+  rawInput?: string,
+  fallbackMime: string = "image/jpeg"
+): { base64: string; mimeType: string } {
+  if (!rawInput || typeof rawInput !== "string") {
+    return { base64: "", mimeType: fallbackMime };
+  }
+  let str = rawInput.trim();
+  let mimeType = fallbackMime;
+
+  while (str.startsWith("data:")) {
+    const commaIndex = str.indexOf(",");
+    if (commaIndex !== -1) {
+      const header = str.substring(5, commaIndex);
+      const mimeMatch = header.match(/^([^;]+)/);
+      if (mimeMatch && mimeMatch[1]) {
+        mimeType = mimeMatch[1].trim();
+      }
+      str = str.substring(commaIndex + 1).trim();
+    } else {
+      break;
+    }
+  }
+
+  const base64 = str.replace(/\s+/g, "");
+  return { base64, mimeType };
+}
+
 function getGeminiApiKeys(): string[] {
   const keys: string[] = [];
 
@@ -482,7 +514,7 @@ function getBackupProviders(): BackupProviderConfig[] {
     });
   }
 
-  // 2. Groq Cloud (Ultra-fast LLMs: qwen/qwen3.8-27b, llama-3.3-70b-versatile, etc.)
+  // 2. Groq Cloud (Ultra-fast LLMs & Vision models)
   if (groqKey) {
     if (!providers.some((p) => p.apiKey === groqKey)) {
       providers.push({
@@ -491,13 +523,13 @@ function getBackupProviders(): BackupProviderConfig[] {
         apiKey: groqKey,
         endpoint: "https://api.groq.com/openai/v1/chat/completions",
         models: [
+          "llama-3.2-11b-vision-preview",
+          "llama-3.2-90b-vision-preview",
+          "llama-3.3-70b-versatile",
           "qwen/qwen3.8-27b",
           "qwen/qwen3.6-27b",
-          "llama-3.3-70b-versatile",
-          "openai/gpt-oss-120b",
-          "groq/compound",
         ],
-        supportsVision: false,
+        supportsVision: true,
       });
     }
   }
@@ -655,7 +687,7 @@ const analysisSchema = {
         properties: {
           name: {
             type: Type.STRING,
-            description: "Brand name or medicine name as written (e.g., Augmentin 625, Pantocid 40). Use cursive stroke ligatures, clinical context, and standard pharmacopeial directories to deduce the most likely intended medicine.",
+            description: "Brand name or medicine name as written (e.g., Augmentin 625, Pantocid 40). Use cursive stroke ligatures, clinical context, and standard pharmacopeial directories to deduce the most likely intended medicine. STRICT RULE: You MUST decode genuine medicine names from the handwriting image. NEVER output 'Drug is not specified', 'Not specified', 'Unspecified drug', or 'None'.",
           },
           genericName: { type: Type.STRING, description: "Active chemical ingredient(s) and salt (e.g., Amoxicillin + Clavulanic Acid)" },
           form: { type: Type.STRING, description: "Tablet, Capsule, Syrup, Eye Drops, Inhaler, Ointment, Injection, etc." },
@@ -919,8 +951,8 @@ async function callGeminiWithRetry(params: {
 }): Promise<string> {
   const orderedKeys = getOrderedApiKeys();
   const modelsToTry = [
-    params.primaryModel || "gemini-2.5-flash",
-    "gemini-2.0-flash",
+    params.primaryModel || "gemini-2.0-flash",
+    "gemini-2.5-flash",
     "gemini-1.5-flash",
     "gemini-2.0-flash-lite",
     "gemini-2.5-pro",
@@ -944,10 +976,7 @@ async function callGeminiWithRetry(params: {
       for (let attempt = 1; attempt <= 2; attempt++) {
         try {
           const config = { ...params.config };
-          // For thinking models (like 2.5), set thinkingLevel to "low" to maintain rapid sub-second OCR responses
-          if (model.includes("2.5") && !config.thinkingConfig) {
-            config.thinkingConfig = { thinkingLevel: "low" };
-          }
+          // If thinkingConfig was passed, clean it up if model does not support it
           if (!model.includes("2.5") && config.thinkingConfig) {
             delete config.thinkingConfig;
           }
@@ -957,7 +986,10 @@ async function callGeminiWithRetry(params: {
             contents: params.contents,
             config,
           });
-          const text = response.text;
+          const text =
+            response.text ||
+            response.candidates?.[0]?.content?.parts?.map((p: any) => p.text).filter(Boolean).join("") ||
+            "";
           if (text) {
             return text;
           }
@@ -1070,8 +1102,14 @@ async function callSecondaryBackupWithRetry(params: {
     console.log(`[Backup Failover] Activating secondary backup provider: ${provider.name}...`);
 
     for (const model of provider.models) {
-      // If provider supports vision (e.g. xAI Grok grok-2-vision-1212) and image is present, try multimodal first
-      const attempts = provider.supportsVision && params.imageBase64 ? [true, false] : [false];
+      // If provider supports vision (e.g. xAI Grok or Groq Vision) and image is present, try multimodal
+      // Never fall back to text-only if the prompt has no written prescription notes (prevents hallucinating "Drug is not specified")
+      const hasPrescriptionNotes =
+        params.promptText.includes("Prescription Notes") || params.promptText.length > 150;
+      const attempts =
+        provider.supportsVision && params.imageBase64
+          ? (hasPrescriptionNotes ? [true, false] : [true])
+          : [false];
 
       for (const tryWithImage of attempts) {
         try {
@@ -1087,12 +1125,12 @@ async function callSecondaryBackupWithRetry(params: {
           }
 
           if (tryWithImage && params.imageBase64) {
-            let cleanBase64 = params.imageBase64;
-            let detectedMime = params.mimeType || "image/jpeg";
-            const match = cleanBase64.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
-            if (match) {
-              detectedMime = match[1];
-              cleanBase64 = match[2];
+            const { base64: cleanBase64, mimeType: detectedMime } = cleanAndExtractBase64(
+              params.imageBase64,
+              params.mimeType || "image/jpeg"
+            );
+            if (!cleanBase64) {
+              continue;
             }
             messages.push({
               role: "user",
@@ -1317,10 +1355,28 @@ async function startServer() {
   // 1. Trust reverse proxies (Render, Railway, Cloudflare, etc.) for correct x-forwarded-proto & client IP
   app.set("trust proxy", true);
 
-  // 2. Enterprise Security & CORS Middleware (Zscaler, corporate proxies, and modern browser standards)
+  // 2. Enterprise Cyber Defense & CORS Middleware (Host defense, Zscaler, corporate proxies, and modern browser standards)
   app.use((req: Request, res: Response, next) => {
     const rawHost = (req.headers.host || req.hostname || "").toLowerCase().replace(/:\d+$/, "");
     const forwardedProto = req.headers["x-forwarded-proto"];
+
+    // Host header spoofing & DNS rebinding defense
+    const allowedHosts = [
+      "theprescription.in",
+      "www.theprescription.in",
+      "theprescriptions.up.railway.app",
+      "localhost",
+      "127.0.0.1",
+    ];
+    const isHostValid =
+      allowedHosts.includes(rawHost) ||
+      rawHost.endsWith(".railway.app") ||
+      rawHost.endsWith(".up.railway.app") ||
+      rawHost.endsWith(".onrender.com");
+    if (rawHost && !isHostValid) {
+      console.warn(`[Cyber Defense] Blocked suspicious Host header attempt: ${rawHost}`);
+      return res.status(403).json({ error: "Host header rejected by cyber security policy." });
+    }
 
     // Canonical redirect for apex domain theprescription.in and legacy railway host to https://www.theprescription.in
     if (rawHost === "theprescription.in" || rawHost === "theprescriptions.up.railway.app") {
@@ -1377,6 +1433,20 @@ async function startServer() {
   app.use(express.json({ limit: "25mb" }));
   app.use(express.urlencoded({ limit: "25mb", extended: true }));
   app.use(prototypePollutionGuard);
+  app.use((req: Request, _res: Response, next) => {
+    // HTTP Parameter Pollution (HPP) & Path Traversal Guard
+    if (req.query) {
+      for (const key of Object.keys(req.query)) {
+        if (Array.isArray(req.query[key])) {
+          req.query[key] = (req.query[key] as string[])[0];
+        }
+        if (typeof req.query[key] === "string") {
+          req.query[key] = (req.query[key] as string).replace(/\.\.[\/\\]/g, "");
+        }
+      }
+    }
+    next();
+  });
 
   // Global baseline rate limiter (300 requests/minute per IP)
   app.use(
@@ -2066,32 +2136,36 @@ async function startServer() {
           return;
         }
 
-      let cleanBase64 = imageBase64;
-      let detectedMime = mimeType;
-      if (imageBase64) {
-        const match = imageBase64.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
-        if (match) {
-          detectedMime = match[1];
-          cleanBase64 = match[2];
-        }
-      }
+      const { base64: cleanBase64, mimeType: detectedMime } = cleanAndExtractBase64(
+        imageBase64,
+        mimeType || "image/jpeg"
+      );
 
       // --- 1. Instant Cache Check for repeat / same prescription analyses ---
       const cacheKey = computePrescriptionHash(cleanBase64, textNotes, patientContext);
       const cached = prescriptionAnalysisCache.get(cacheKey);
 
       if (cached && (Date.now() - cached.cachedAt) < PRESCRIPTION_CACHE_TTL_MS) {
-        const enrichedCached = postProcessPrescriptionResultWithNLP(cached.data);
-        const cachedResponse = {
-          ...enrichedCached,
-          servedFromCache: true,
-          cacheAgeSeconds: Math.floor((Date.now() - cached.cachedAt) / 1000),
-        };
-        if (preprocessingReport && !cachedResponse.imagePreprocessingReport) {
-          cachedResponse.imagePreprocessingReport = preprocessingReport;
+        // Double-check cached data does not contain corrupted/bogus "not specified" placeholders
+        const cachedMeds = cached.data?.medicines || [];
+        const hasBogus = cachedMeds.some((m: any) =>
+          (m.name || "").toLowerCase().includes("not specified")
+        );
+        if (hasBogus || (cachedMeds.length === 0 && !cached.data?.unableToDecipher)) {
+          prescriptionAnalysisCache.delete(cacheKey); // Evict bad cache entry!
+        } else {
+          const enrichedCached = postProcessPrescriptionResultWithNLP(cached.data);
+          const cachedResponse = {
+            ...enrichedCached,
+            servedFromCache: true,
+            cacheAgeSeconds: Math.floor((Date.now() - cached.cachedAt) / 1000),
+          };
+          if (preprocessingReport && !cachedResponse.imagePreprocessingReport) {
+            cachedResponse.imagePreprocessingReport = preprocessingReport;
+          }
+          res.json({ success: true, data: cachedResponse, cached: true });
+          return;
         }
-        res.json({ success: true, data: cachedResponse, cached: true });
-        return;
       }
 
       const systemPrompt = `You are a Senior Clinical Pharmacist and Medical Prescription Decryption Expert with advanced expertise in deciphering doctor handwriting, pharmacology, diagnostic investigations, and patient safety.
@@ -2112,6 +2186,13 @@ Even if doctor handwriting or OCR output is messy, illegible, or distorted, you 
 2. Brand → Generic mapping → For every detected brand name, automatically map to its exact generic active chemical salt combination (e.g., Augmentin → Amoxicillin + Clavulanic Acid, Pan-D → Pantoprazole + Domperidone, Dolo / Crocin → Paracetamol, Glycomet → Metformin, Telma → Telmisartan).
 3. Medicine dictionary integration → include short forms (e.g. "Amox", "PCM", "Azith", "Panto", "Cipro", "Metfor"), misspellings, and regional trade names.
 4. Confidence scoring → Always assess clarity as High / Medium / Low, noting any cursive ambiguity so patients are prompted to confirm when appropriate.
+
+ABSOLUTE MANDATE FOR MEDICINES EXTRACTION:
+You are directly reading the doctor prescription handwriting from the provided image.
+- Decipher every written medication brand, active pharmaceutical ingredient, dosage strength, formulation, frequency, and duration.
+- Under NO circumstance should you EVER output "Drug is not specified", "Not specified", "Unspecified drug", or "None" in the medicines list!
+- If an image has handwriting, you MUST deduce the genuine active chemical salts and clinical trade names using the cursive strokes and clinical indications.
+- If a specific cursive word or line cannot be determined even with clinical context, do NOT create a fake medicine item with name "Drug is not specified"; instead omit it from the medicines array and mention it politely in "unclearOrAmbiguousNotes" (e.g. "Apologies, we couldn't clearly decipher the handwritten medicine on line 2").
 
 CRITICAL DIRECTIVE - HANDLING UNCLEAR / UNREADABLE MEDICINES:
 - ONLY set "unableToDecipher": true if the uploaded file is completely blank, corrupted, or completely devoid of any readable medical words, medicine names, or diagnostic orders.
@@ -2209,7 +2290,12 @@ Scan the prescription thoroughly for any diagnostic workup written under "Adv:",
       }
 
       let userPrompt = "Please analyze this doctor prescription thoroughly.";
-      if (ocrPretext && ocrPretext.trim()) {
+      if (
+        ocrPretext &&
+        ocrPretext.trim() &&
+        !ocrPretext.includes("preprocessed for Gemini") &&
+        !ocrPretext.includes("Clinical handwriting")
+      ) {
         userPrompt += `\n\n[OCR Pre-Extracted Handwriting Tokens]:\n"""\n${ocrPretext.trim()}\n"""\n(Cross-reference these extracted OCR text tokens with the image strokes to ensure 100% handwriting accuracy).`;
       }
       if (textNotes && textNotes.trim()) {
@@ -2241,8 +2327,8 @@ Scan the prescription thoroughly for any diagnostic workup written under "Adv:",
       let responseText: string;
       try {
         responseText = await callGeminiWithRetry({
-          contents: { parts },
-          primaryModel: "gemini-2.5-flash",
+          contents: parts, // Pass parts directly as PartUnion[]
+          primaryModel: "gemini-2.0-flash",
           config: {
             systemInstruction: systemPrompt,
             responseMimeType: "application/json",
@@ -2263,7 +2349,7 @@ You MUST respond with a single valid JSON object strictly matching this schema:
   "generalExplanation": "Empathetic explanation of the prescription",
   "medicines": [
     {
-      "name": "Brand name as written (e.g. Augmentin 625, Pantocid 40)",
+      "name": "Brand name as written (e.g. Augmentin 625, Pantocid 40) - NEVER output 'Drug is not specified' or 'Not specified'",
       "genericName": "Active chemical salt (e.g. Amoxicillin + Clavulanic Acid)",
       "form": "Tablet | Capsule | Syrup | etc.",
       "strength": "e.g. 500mg, 40mg",
@@ -2346,6 +2432,33 @@ You MUST respond with a single valid JSON object strictly matching this schema:
         }
       }
 
+      // CRITICAL: Filter out any bogus placeholders where AI output "Drug is not specified" or "Not specified"
+      if (Array.isArray(parsedData.medicines)) {
+        parsedData.medicines = parsedData.medicines.filter((m: any) => {
+          const n = (m.name || "").trim().toLowerCase();
+          const isBogus =
+            !n ||
+            n === "drug is not specified" ||
+            n === "not specified" ||
+            n === "unspecified" ||
+            n === "unspecified drug" ||
+            n === "no drug specified" ||
+            n === "no medication specified" ||
+            n === "none" ||
+            n === "n/a";
+          if (isBogus) {
+            if (!parsedData.unclearOrAmbiguousNotes) parsedData.unclearOrAmbiguousNotes = [];
+            const note =
+              "Apologies, a handwritten line on the prescription was faint or unclear and could not be verified.";
+            if (!parsedData.unclearOrAmbiguousNotes.includes(note)) {
+              parsedData.unclearOrAmbiguousNotes.push(note);
+            }
+            return false;
+          }
+          return true;
+        });
+      }
+
       if (!parsedData.generalExplanation && parsedData.prescriptionSummary) {
         parsedData.generalExplanation = parsedData.prescriptionSummary;
       }
@@ -2362,8 +2475,19 @@ You MUST respond with a single valid JSON object strictly matching this schema:
         enrichedData.imagePreprocessingReport = preprocessingReport;
       }
 
-      // Save to in-memory cache for instant subsequent loading
-      if (enrichedData && enrichedData.medicines && enrichedData.medicines.length > 0 && !enrichedData.unableToDecipher) {
+      // Save to in-memory cache for instant subsequent loading ONLY IF there are genuine valid medicines
+      const hasGenuineMedicines =
+        Array.isArray(enrichedData?.medicines) &&
+        enrichedData.medicines.length > 0 &&
+        enrichedData.medicines.some(
+          (m: any) =>
+            m.name &&
+            m.name.trim().length > 1 &&
+            !m.name.toLowerCase().includes("not specified") &&
+            !m.name.toLowerCase().startsWith("apologies")
+        );
+
+      if (hasGenuineMedicines && !enrichedData.unableToDecipher) {
         if (prescriptionAnalysisCache.size >= MAX_PRESCRIPTION_CACHE_SIZE) {
           const oldest = prescriptionAnalysisCache.keys().next().value;
           if (oldest) prescriptionAnalysisCache.delete(oldest);
@@ -2623,6 +2747,17 @@ Include its generic name, primary uses, mechanism of action, typical dosage form
       res.sendFile(path.join(distPath, "index.html"));
     });
   }
+
+  // Global Secure Error Masking Handler (Prevents stack trace & internal file path disclosure)
+  app.use((err: any, _req: Request, res: Response, _next: any) => {
+    console.error("[Cyber Defense: Masked Error Handler]:", err?.message || err);
+    if (!res.headersSent) {
+      res.status(err.status || 500).json({
+        success: false,
+        error: "A secure server error occurred. Please verify your input and try again.",
+      });
+    }
+  });
 
   const server = app.listen(PORT, "0.0.0.0", () => {
     const keys = getGeminiApiKeys();
