@@ -514,7 +514,7 @@ function getBackupProviders(): BackupProviderConfig[] {
     });
   }
 
-  // 2. Groq Cloud (Ultra-fast LLMs & Vision models)
+  // 2. Groq Cloud (Ultra-fast LLMs: Llama 3.3 70B, Llama 3.1 8B, Mixtral, Gemma 2)
   if (groqKey) {
     if (!providers.some((p) => p.apiKey === groqKey)) {
       providers.push({
@@ -523,13 +523,12 @@ function getBackupProviders(): BackupProviderConfig[] {
         apiKey: groqKey,
         endpoint: "https://api.groq.com/openai/v1/chat/completions",
         models: [
-          "llama-3.2-11b-vision-preview",
-          "llama-3.2-90b-vision-preview",
           "llama-3.3-70b-versatile",
-          "qwen/qwen3.8-27b",
-          "qwen/qwen3.6-27b",
+          "llama-3.1-8b-instant",
+          "mixtral-8x7b-32768",
+          "gemma2-9b-it",
         ],
-        supportsVision: true,
+        supportsVision: false,
       });
     }
   }
@@ -1102,14 +1101,8 @@ async function callSecondaryBackupWithRetry(params: {
     console.log(`[Backup Failover] Activating secondary backup provider: ${provider.name}...`);
 
     for (const model of provider.models) {
-      // If provider supports vision (e.g. xAI Grok or Groq Vision) and image is present, try multimodal
-      // Never fall back to text-only if the prompt has no written prescription notes (prevents hallucinating "Drug is not specified")
-      const hasPrescriptionNotes =
-        params.promptText.includes("Prescription Notes") || params.promptText.length > 150;
-      const attempts =
-        provider.supportsVision && params.imageBase64
-          ? (hasPrescriptionNotes ? [true, false] : [true])
-          : [false];
+      // If provider supports vision and image is present, try multimodal first, then fallback to text
+      const attempts = provider.supportsVision && params.imageBase64 ? [true, false] : [false];
 
       for (const tryWithImage of attempts) {
         try {
@@ -1167,6 +1160,23 @@ async function callSecondaryBackupWithRetry(params: {
 
           if (!response.ok) {
             const errText = await response.text();
+            console.warn(
+              `[${provider.name}] Model ${model} returned HTTP ${response.status}: ${errText.slice(0, 100)}`
+            );
+
+            // 1. Model not found (404), decommissioned, or unauthorized - skip immediately to next model
+            if (
+              response.status === 404 ||
+              errText.includes("model_not_found") ||
+              errText.includes("does not exist") ||
+              errText.includes("do not have access") ||
+              errText.includes("decommissioned")
+            ) {
+              lastErr = new Error(`${provider.name} model ${model} unavailable: ${errText}`);
+              break; // Skip to next model in provider.models!
+            }
+
+            // 2. Multimodal image_url rejected by a text-only model - fallback to text mode
             if (
               tryWithImage &&
               (errText.includes("must be a string") ||
@@ -1175,11 +1185,13 @@ async function callSecondaryBackupWithRetry(params: {
                 errText.includes("vision"))
             ) {
               console.log(
-                `[${provider.name}] Model ${model} does not accept image_url (${errText.slice(0, 80)}...). Falling back to text-only mode...`
+                `[${provider.name}] Model ${model} does not accept image_url. Falling back to text mode...`
               );
               continue;
             }
-            throw new Error(`${provider.name} HTTP ${response.status}: ${errText}`);
+
+            lastErr = new Error(`${provider.name} HTTP ${response.status}: ${errText}`);
+            break;
           }
 
           const data = (await response.json()) as any;
@@ -2337,7 +2349,12 @@ Scan the prescription thoroughly for any diagnostic workup written under "Adv:",
           },
         });
       } catch (geminiErr: any) {
-        if (getGroqApiKey()) {
+        console.warn(
+          "[Gemini Primary Failed] Reason:",
+          geminiErr?.message || geminiErr
+        );
+        if (hasBackupProvider()) {
+          console.log("[Backup Failover] Activating secondary backup provider (Groq)...");
           const groqSystemPrompt =
             systemPrompt +
             `\n\nCRITICAL OUTPUT FORMAT REQUIREMENTS:
@@ -2501,10 +2518,18 @@ You MUST respond with a single valid JSON object strictly matching this schema:
 
       res.json({ success: true, data: enrichedData });
     } catch (err: any) {
-      console.error("Error analyzing prescription:", err);
+      console.error("[Prescription Analysis Error]:", err?.message || err);
+      let userFriendlyError = err?.message || "Failed to analyze prescription.";
+      if (userFriendlyError.includes("API_KEY") || userFriendlyError.includes("missing")) {
+        userFriendlyError = "Clinical AI service is currently initializing or updating. Please try again in a few moments.";
+      } else if (userFriendlyError.includes("404") || userFriendlyError.includes("model_not_found") || userFriendlyError.includes("does not exist")) {
+        userFriendlyError = "Clinical analysis engine is refreshing its model routing. Please retry in a few moments.";
+      } else if (userFriendlyError.includes("429") || userFriendlyError.includes("RESOURCE_EXHAUSTED")) {
+        userFriendlyError = "Our clinical servers are experiencing high patient traffic. Please retry in 30 seconds.";
+      }
       res.status(500).json({
         success: false,
-        error: err.message || "Failed to analyze prescription.",
+        error: userFriendlyError,
       });
     }
   });
