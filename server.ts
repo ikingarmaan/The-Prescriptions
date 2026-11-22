@@ -2516,15 +2516,8 @@ Scan the prescription thoroughly for any diagnostic workup written under "Adv:",
       if (patientContext && patientContext.trim()) {
         userPrompt += `\n\nPatient Context & Concerns:\n"""\n${patientContext.trim()}\n"""`;
       }
-      if (preprocessingReport) {
-        userPrompt += `\n\n[Advanced Image Preprocessing & Handwriting Segmentation Analysis]:\n` +
-          `- Noise reduction: Completed (3x3 spatial filter + speckle elimination)\n` +
-          `- Contrast enhancement: Boosted ink darkness by ${preprocessingReport.contrastEnhancementFactor || '1.6'}x\n` +
-          `- Deskewing: Straightened tilted text lines by ${preprocessingReport.skewAngle || 0}°\n` +
-          `- Adaptive thresholding: Bradley-Roth integral binarization computed\n` +
-          `- Line & Word Segmentation: ${preprocessingReport.totalLinesDetected || preprocessingReport.lines?.length || 0} distinct text lines and ${preprocessingReport.totalWordsDetected || 0} word spans detected.\n` +
-          `Carefully review the prescription line-by-line across all segmented sections to capture every medication, dosage strength, Latin abbreviation, and diagnostic investigation.`;
-      }
+
+      userPrompt += `\n\nCarefully examine the entire prescription image from top to bottom across all handwritten sections, Rx lines, and doctor notes. Read and transcribe every single medication brand name, active generic chemical salt, dosage strength (e.g. mg, mcg, ml), frequency timing (e.g. 1-0-1, OD, BD, TDS, SOS), and meal instructions.`;
 
       if (learnedCorrections && Array.isArray(learnedCorrections) && learnedCorrections.length > 0) {
         userPrompt += `\n\n[Human-in-the-Loop Learned Doctor Handwriting Patterns (Site Trained Memory)]:`;
