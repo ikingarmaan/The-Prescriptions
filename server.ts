@@ -514,7 +514,7 @@ function getBackupProviders(): BackupProviderConfig[] {
     });
   }
 
-  // 2. Groq Cloud (Ultra-fast LLMs: Llama 3.3 70B, Llama 3.1 8B, Mixtral, Gemma 2)
+  // 2. Groq Cloud (Ultra-fast LLMs: Qwen 3.8 Multimodal, OpenAI GPT-OSS 120B/20B, Llama 3.1)
   if (groqKey) {
     if (!providers.some((p) => p.apiKey === groqKey)) {
       providers.push({
@@ -523,17 +523,158 @@ function getBackupProviders(): BackupProviderConfig[] {
         apiKey: groqKey,
         endpoint: "https://api.groq.com/openai/v1/chat/completions",
         models: [
-          "llama-3.3-70b-versatile",
+          "qwen/qwen3.8-27b",
+          "openai/gpt-oss-120b",
+          "openai/gpt-oss-20b",
           "llama-3.1-8b-instant",
-          "mixtral-8x7b-32768",
-          "gemma2-9b-it",
         ],
-        supportsVision: false,
+        supportsVision: true,
       });
     }
   }
 
   return providers;
+}
+
+interface LiveGroqModelsResult {
+  visionModels: string[];
+  textModels: string[];
+  allModels: string[];
+  discoveredCount: number;
+}
+
+const groqModelsCache = new Map<string, { data: LiveGroqModelsResult; expiresAt: number }>();
+const blacklistedGroqModels = new Set<string>();
+
+async function getLiveGroqModels(apiKey: string): Promise<LiveGroqModelsResult> {
+  const cached = groqModelsCache.get(apiKey);
+  if (cached && Date.now() < cached.expiresAt) {
+    const activeVision = cached.data.visionModels.filter((m) => !blacklistedGroqModels.has(m));
+    const activeText = cached.data.textModels.filter((m) => !blacklistedGroqModels.has(m));
+    const activeAll = cached.data.allModels.filter((m) => !blacklistedGroqModels.has(m));
+    if (activeAll.length > 0) {
+      return {
+        visionModels: activeVision,
+        textModels: activeText,
+        allModels: activeAll,
+        discoveredCount: cached.data.discoveredCount,
+      };
+    }
+  }
+
+  const fallbackDefaults: LiveGroqModelsResult = {
+    visionModels: ["qwen/qwen3.8-27b"].filter((m) => !blacklistedGroqModels.has(m)),
+    textModels: ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "llama-3.1-8b-instant"].filter(
+      (m) => !blacklistedGroqModels.has(m)
+    ),
+    allModels: [
+      "qwen/qwen3.8-27b",
+      "openai/gpt-oss-120b",
+      "openai/gpt-oss-20b",
+      "llama-3.1-8b-instant",
+    ].filter((m) => !blacklistedGroqModels.has(m)),
+    discoveredCount: 0,
+  };
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
+    const res = await fetch("https://api.groq.com/openai/v1/models", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (!res.ok) {
+      console.warn(`[Groq Live Models] /v1/models returned HTTP ${res.status}. Using fallback model list.`);
+      return fallbackDefaults;
+    }
+
+    const json = (await res.json()) as any;
+    const data: any[] = Array.isArray(json?.data) ? json.data : [];
+
+    const activeModelIds = data
+      .filter((item) => {
+        if (!item || !item.id) return false;
+        if (item.active === false) return false;
+        const id = item.id.toLowerCase();
+        // Exclude audio/whisper, speech, embeddings, and moderation guard models
+        if (
+          id.includes("whisper") ||
+          id.includes("guard") ||
+          id.includes("tts") ||
+          id.includes("embedding") ||
+          id.includes("distil")
+        ) {
+          return false;
+        }
+        // Exclude known decommissioned models
+        if (
+          id.includes("gemma2-9b") ||
+          id.includes("mixtral-8x7b") ||
+          id.includes("qwen3.6") ||
+          id.includes("compound") ||
+          id.includes("llama-3.3-70b-versatile")
+        ) {
+          return false;
+        }
+        return !blacklistedGroqModels.has(item.id);
+      })
+      .map((item) => item.id);
+
+    console.log(`[Groq Live Models] Discovered ${activeModelIds.length} active models for key:`, activeModelIds);
+
+    // Classify vision models (e.g. qwen3.8-27b or models with vision/vl in id)
+    const visionModels: string[] = [];
+    const textModels: string[] = [];
+
+    for (const id of activeModelIds) {
+      const lower = id.toLowerCase();
+      if (lower.includes("qwen") || lower.includes("vision") || lower.includes("vl")) {
+        visionModels.push(id);
+      } else {
+        textModels.push(id);
+      }
+    }
+
+    // Prioritize top text models
+    const preferredTextOrder = [
+      "openai/gpt-oss-120b",
+      "openai/gpt-oss-20b",
+      "llama-3.1-8b-instant",
+    ];
+
+    textModels.sort((a, b) => {
+      const idxA = preferredTextOrder.indexOf(a);
+      const idxB = preferredTextOrder.indexOf(b);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      if (idxA !== -1) return -1;
+      if (idxB !== -1) return 1;
+      return 0;
+    });
+
+    const combinedAll = [...visionModels, ...textModels];
+    const result: LiveGroqModelsResult = {
+      visionModels: visionModels.length > 0 ? visionModels : ["qwen/qwen3.8-27b"],
+      textModels: textModels.length > 0 ? textModels : ["openai/gpt-oss-120b", "openai/gpt-oss-20b"],
+      allModels: combinedAll.length > 0 ? combinedAll : fallbackDefaults.allModels,
+      discoveredCount: activeModelIds.length,
+    };
+
+    groqModelsCache.set(apiKey, {
+      data: result,
+      expiresAt: Date.now() + 60 * 60 * 1000,
+    });
+
+    return result;
+  } catch (err: any) {
+    console.warn("[Groq Live Models] Failed to query /v1/models:", err?.message || err);
+    return fallbackDefaults;
+  }
 }
 
 function hasBackupProvider(): boolean {
@@ -641,9 +782,10 @@ function cleanAndParseJson(raw: string): any {
     throw new Error("Empty response received from AI model.");
   }
   let cleaned = raw.trim();
-  // Strip <think>...</think> reasoning blocks from Qwen / deepseek reasoning models
+  // Strip <think>...</think> reasoning blocks from Qwen / Deepseek / OpenAI OSS reasoning models
   if (cleaned.includes("<think>")) {
     cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+    cleaned = cleaned.replace(/<think>[\s\S]*/gi, "").trim();
   }
   if (cleaned.startsWith("```")) {
     cleaned = cleaned.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
@@ -654,10 +796,21 @@ function cleanAndParseJson(raw: string): any {
     try {
       return JSON.parse(jsonMatch[1]);
     } catch {
-      // fallback to normal parse
+      // Remove trailing commas before closing braces/brackets and retry
+      try {
+        const withoutTrailingCommas = jsonMatch[1].replace(/,\s*([}\]])/g, "$1");
+        return JSON.parse(withoutTrailingCommas);
+      } catch {
+        // fallback to normal parse
+      }
     }
   }
-  return JSON.parse(cleaned);
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    const withoutTrailingCommas = cleaned.replace(/,\s*([}\]])/g, "$1");
+    return JSON.parse(withoutTrailingCommas);
+  }
 }
 
 const analysisSchema = {
@@ -950,12 +1103,14 @@ async function callGeminiWithRetry(params: {
 }): Promise<string> {
   const orderedKeys = getOrderedApiKeys();
   const modelsToTry = [
-    params.primaryModel || "gemini-2.0-flash",
+    params.primaryModel || "gemini-2.5-flash",
     "gemini-2.5-flash",
-    "gemini-1.5-flash",
-    "gemini-2.0-flash-lite",
+    "gemini-flash-latest",
+    "gemini-2.5-flash-lite",
+    "gemini-flash-lite-latest",
+    "gemini-2.0-flash",
     "gemini-2.5-pro",
-    "gemini-1.5-pro",
+    "gemini-pro-latest",
   ];
   let lastError: any = null;
   const invalidKeys = new Set<string>();
@@ -1100,9 +1255,34 @@ async function callSecondaryBackupWithRetry(params: {
   for (const provider of providers) {
     console.log(`[Backup Failover] Activating secondary backup provider: ${provider.name}...`);
 
-    for (const model of provider.models) {
-      // If provider supports vision and image is present, try multimodal first, then fallback to text
-      const attempts = provider.supportsVision && params.imageBase64 ? [true, false] : [false];
+    let modelsToTry = provider.models;
+    let providerSupportsVision = provider.supportsVision;
+
+    if (provider.type === "groq") {
+      const live = await getLiveGroqModels(provider.apiKey);
+      if (params.imageBase64 && live.visionModels.length > 0) {
+        modelsToTry = [...live.visionModels, ...live.textModels];
+        providerSupportsVision = true;
+      } else {
+        modelsToTry = live.allModels.length > 0 ? live.allModels : provider.models;
+      }
+    }
+
+    for (const model of modelsToTry) {
+      if (blacklistedGroqModels.has(model)) {
+        continue;
+      }
+
+      const isModelVision =
+        providerSupportsVision &&
+        Boolean(params.imageBase64) &&
+        (model.toLowerCase().includes("vision") ||
+          model.toLowerCase().includes("qwen") ||
+          model.toLowerCase().includes("vl") ||
+          provider.type === "xai");
+
+      // If model supports vision and image is present, try multimodal first, then fallback to text
+      const attempts = isModelVision ? [true, false] : [false];
 
       for (const tryWithImage of attempts) {
         try {
@@ -1148,7 +1328,7 @@ async function callSecondaryBackupWithRetry(params: {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "Authorization": `Bearer ${provider.apiKey}`,
+              Authorization: `Bearer ${provider.apiKey}`,
             },
             body: JSON.stringify({
               model,
@@ -1161,10 +1341,10 @@ async function callSecondaryBackupWithRetry(params: {
           if (!response.ok) {
             const errText = await response.text();
             console.warn(
-              `[${provider.name}] Model ${model} returned HTTP ${response.status}: ${errText.slice(0, 100)}`
+              `[${provider.name}] Model ${model} returned HTTP ${response.status}: ${errText.slice(0, 150)}`
             );
 
-            // 1. Model not found (404), decommissioned, or unauthorized - skip immediately to next model
+            // 1. Model not found (404), decommissioned, or unauthorized - blacklist model & skip immediately to next model
             if (
               response.status === 404 ||
               errText.includes("model_not_found") ||
@@ -1172,8 +1352,10 @@ async function callSecondaryBackupWithRetry(params: {
               errText.includes("do not have access") ||
               errText.includes("decommissioned")
             ) {
+              blacklistedGroqModels.add(model);
+              console.warn(`[${provider.name}] Added unviable model ${model} to blacklist. Moving to next candidate.`);
               lastErr = new Error(`${provider.name} model ${model} unavailable: ${errText}`);
-              break; // Skip to next model in provider.models!
+              break; // Skip to next model in modelsToTry!
             }
 
             // 2. Multimodal image_url rejected by a text-only model - fallback to text mode
@@ -2019,13 +2201,27 @@ async function startServer() {
 
     for (const provider of backupProviders) {
       const backupStart = Date.now();
-      const testModel = provider.models[0];
+      let testModel = provider.models[0];
+      let discoveredModels: string[] = [];
+
+      if (provider.type === "groq") {
+        try {
+          const live = await getLiveGroqModels(provider.apiKey);
+          discoveredModels = live.allModels;
+          if (live.allModels.length > 0) {
+            testModel = live.allModels[0];
+          }
+        } catch {
+          // fallback to default model
+        }
+      }
+
       try {
         const testRes = await fetch(provider.endpoint, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${provider.apiKey}`,
+            Authorization: `Bearer ${provider.apiKey}`,
           },
           body: JSON.stringify({
             model: testModel,
@@ -2045,6 +2241,7 @@ async function startServer() {
             latencyMs: Date.now() - backupStart,
             model: testModel,
             supportsVision: provider.supportsVision,
+            discoveredModels: discoveredModels.slice(0, 15),
             preview: testData?.choices?.[0]?.message?.content?.trim() || "OK",
           });
         } else {
@@ -2058,6 +2255,7 @@ async function startServer() {
             latencyMs: Date.now() - backupStart,
             model: testModel,
             supportsVision: provider.supportsVision,
+            discoveredModels: discoveredModels.slice(0, 15),
             error: errText.slice(0, 200),
           });
         }
@@ -2071,6 +2269,7 @@ async function startServer() {
           latencyMs: Date.now() - backupStart,
           model: testModel,
           supportsVision: provider.supportsVision,
+          discoveredModels: discoveredModels.slice(0, 15),
           error: backupErr?.message || String(backupErr),
         });
       }
@@ -2340,7 +2539,7 @@ Scan the prescription thoroughly for any diagnostic workup written under "Adv:",
       try {
         responseText = await callGeminiWithRetry({
           contents: parts, // Pass parts directly as PartUnion[]
-          primaryModel: "gemini-2.0-flash",
+          primaryModel: "gemini-2.5-flash",
           config: {
             systemInstruction: systemPrompt,
             responseMimeType: "application/json",
@@ -2520,12 +2719,33 @@ You MUST respond with a single valid JSON object strictly matching this schema:
     } catch (err: any) {
       console.error("[Prescription Analysis Error]:", err?.message || err);
       let userFriendlyError = err?.message || "Failed to analyze prescription.";
-      if (userFriendlyError.includes("API_KEY") || userFriendlyError.includes("missing")) {
+      if (
+        userFriendlyError.includes("API_KEY") ||
+        userFriendlyError.includes("missing")
+      ) {
         userFriendlyError = "Clinical AI service is currently initializing or updating. Please try again in a few moments.";
-      } else if (userFriendlyError.includes("404") || userFriendlyError.includes("model_not_found") || userFriendlyError.includes("does not exist")) {
-        userFriendlyError = "Clinical analysis engine is refreshing its model routing. Please retry in a few moments.";
-      } else if (userFriendlyError.includes("429") || userFriendlyError.includes("RESOURCE_EXHAUSTED")) {
+      } else if (
+        userFriendlyError.includes("404") ||
+        userFriendlyError.includes("model_not_found") ||
+        userFriendlyError.includes("does not exist") ||
+        userFriendlyError.includes("decommissioned") ||
+        userFriendlyError.includes("gemma2") ||
+        userFriendlyError.includes("mixtral") ||
+        userFriendlyError.includes("llama") ||
+        userFriendlyError.includes("qwen") ||
+        userFriendlyError.includes("Groq Cloud")
+      ) {
+        userFriendlyError = "The prescription image could not be clearly transcribed. Please ensure bright lighting without glare, or enter the written medicine names directly.";
+      } else if (
+        userFriendlyError.includes("429") ||
+        userFriendlyError.includes("RESOURCE_EXHAUSTED")
+      ) {
         userFriendlyError = "Our clinical servers are experiencing high patient traffic. Please retry in 30 seconds.";
+      } else if (
+        userFriendlyError.includes("free tier is not available") ||
+        userFriendlyError.includes("PERMISSION_DENIED")
+      ) {
+        userFriendlyError = "Clinical AI service capacity is currently updating. Please enter the written medicine names directly or retry in a few moments.";
       }
       res.status(500).json({
         success: false,
@@ -2603,9 +2823,19 @@ Include its generic name, primary uses, mechanism of action, typical dosage form
       res.json({ success: true, data: parsedData });
     } catch (err: any) {
       console.error("Error checking medicine:", err);
+      let userFriendlyError = err?.message || "Failed to retrieve medicine details.";
+      if (
+        userFriendlyError.includes("404") ||
+        userFriendlyError.includes("model_not_found") ||
+        userFriendlyError.includes("does not exist") ||
+        userFriendlyError.includes("decommissioned") ||
+        userFriendlyError.includes("Groq Cloud")
+      ) {
+        userFriendlyError = "Clinical medicine reference is updating its index. Please retry in a few moments.";
+      }
       res.status(500).json({
         success: false,
-        error: err.message || "Failed to retrieve medicine details.",
+        error: userFriendlyError,
       });
     }
   });
