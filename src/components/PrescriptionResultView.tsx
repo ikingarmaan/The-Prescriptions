@@ -102,20 +102,28 @@ ${
                   <Stethoscope className="w-3.5 h-3.5 text-emerald-400" />
                   Prescription Deciphered Successfully
                 </span>
-                {result.doctorSpecialtyOrClinic && (
-                  <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-white/10 text-emerald-100 border border-white/10">
-                    {result.doctorSpecialtyOrClinic}
-                  </span>
+                {result.doctorSpecialtyOrClinic &&
+                  !result.doctorSpecialtyOrClinic.toLowerCase().includes('not specified') &&
+                  !result.doctorSpecialtyOrClinic.toLowerCase().includes('unspecified') && (
+                    <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-white/10 text-emerald-100 border border-white/10">
+                      {result.doctorSpecialtyOrClinic}
+                    </span>
                 )}
-                {result.prescriptionDate && result.prescriptionDate !== 'Not specified' && (
-                  <span className="text-xs text-emerald-200/70 flex items-center gap-1">
-                    <Calendar className="w-3 h-3" /> {result.prescriptionDate}
-                  </span>
+                {result.prescriptionDate &&
+                  !result.prescriptionDate.toLowerCase().includes('not specified') &&
+                  !result.prescriptionDate.toLowerCase().includes('unspecified') && (
+                    <span className="text-xs text-emerald-200/70 flex items-center gap-1">
+                      <Calendar className="w-3 h-3" /> {result.prescriptionDate}
+                    </span>
                 )}
               </div>
 
               <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight">
-                {result.suspectedCondition || 'Prescription Analysis & Medicine Guide'}
+                {result.suspectedCondition &&
+                !result.suspectedCondition.toLowerCase().includes('not specified') &&
+                !result.suspectedCondition.toLowerCase().includes('unspecified')
+                  ? result.suspectedCondition
+                  : 'Prescription Analysis & Medicine Guide'}
               </h1>
 
               <p className="text-xs sm:text-sm text-emerald-100/80 leading-relaxed">
@@ -392,14 +400,28 @@ ${
         </div>
 
         <div className="space-y-4">
-          {result.medicines.map((med, idx) => (
-            <MedicineCard
-              key={idx}
-              medicine={med}
-              index={idx}
-              onConfirmOrEdit={onConfirmOrEditMedicine}
-            />
-          ))}
+          {result.medicines.length === 0 ? (
+            <div className="p-6 sm:p-8 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 text-center space-y-3">
+              <div className="w-12 h-12 mx-auto rounded-full bg-amber-100 dark:bg-amber-900/60 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                <AlertTriangle className="w-6 h-6" />
+              </div>
+              <h3 className="text-sm sm:text-base font-bold text-amber-950 dark:text-amber-200">
+                No Individual Medications Could Be Confirmed
+              </h3>
+              <p className="text-xs text-amber-800 dark:text-amber-300 max-w-md mx-auto leading-relaxed">
+                The handwriting strokes on this prescription were faint or blurry. For your clinical safety, unverified guesses were not displayed. Please upload a high-contrast photo in good lighting, or enter the medicine names directly in the text tab.
+              </p>
+            </div>
+          ) : (
+            result.medicines.map((med, idx) => (
+              <MedicineCard
+                key={idx}
+                medicine={med}
+                index={idx}
+                onConfirmOrEdit={onConfirmOrEditMedicine}
+              />
+            ))
+          )}
         </div>
       </div>
 

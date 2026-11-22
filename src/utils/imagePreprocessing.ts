@@ -138,10 +138,10 @@ export async function preprocessPrescriptionCanvas(
 
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Adjust contrast and ink density
+        // Adjust contrast and ink density gently without clipping faint doctor handwriting
         const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const d = imgData.data;
-        const contrast = 25; // boost factor
+        const contrast = 12; // gentle contrast factor to avoid over-saturation of delicate pen strokes
         const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
 
         for (let i = 0; i < d.length; i += 4) {

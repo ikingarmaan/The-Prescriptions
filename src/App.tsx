@@ -126,7 +126,7 @@ export default function App() {
   }, []);
 
   // Helper to determine if prescription analysis resulted in completely ununderstood prescription
-  // ONLY show when completely unable to identify ANY medicine name, lab test, or clinical diagnosis
+  // ONLY show when completely unable to identify ANY medicine name or lab test
   const hasRecognizedMedicines = Boolean(
     analysisResult?.medicines &&
       analysisResult.medicines.length > 0 &&
@@ -135,6 +135,8 @@ export default function App() {
         return (
           m.name &&
           m.name.trim().length > 1 &&
+          !n.includes('not specified') &&
+          !n.includes('unspecified') &&
           !n.startsWith('apologies') &&
           !n.startsWith("didn't understand") &&
           !n.startsWith('unidentified')
@@ -146,19 +148,12 @@ export default function App() {
     analysisResult?.labTests && analysisResult.labTests.length > 0
   );
 
-  const hasClinicalExplanation = Boolean(
-    (analysisResult?.generalExplanation && analysisResult.generalExplanation.trim().length > 10) ||
-      (analysisResult?.suspectedCondition && analysisResult.suspectedCondition.trim().length > 3)
-  );
-
-  // Strict check: Only show ununderstood popup when there is truly ZERO recognized medical information
+  // If there are truly zero recognized medicines and zero recognized lab tests, the prescription is ununderstood
   const isPrescriptionUnunderstood = Boolean(
     analysisResult &&
       !isUnunderstoodPopupDismissed &&
       !hasRecognizedMedicines &&
-      !hasRecognizedLabTests &&
-      !hasClinicalExplanation &&
-      analysisResult.unableToDecipher
+      !hasRecognizedLabTests
   );
 
   const handleAnalyze = async (payload: {

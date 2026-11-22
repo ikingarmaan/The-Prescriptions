@@ -1335,6 +1335,7 @@ async function callSecondaryBackupWithRetry(params: {
               messages,
               response_format: { type: "json_object" },
               temperature: 0.1,
+              max_tokens: 4096,
             }),
           });
 
@@ -2556,16 +2557,25 @@ Scan the prescription thoroughly for any diagnostic workup written under "Adv:",
           console.log("[Backup Failover] Activating secondary backup provider (Groq)...");
           const groqSystemPrompt =
             systemPrompt +
-            `\n\nCRITICAL OUTPUT FORMAT REQUIREMENTS:
+            `\n\nCRITICAL PRESCRIPTION TRANSCRIBING DIRECTIVE:
+You are directly reading an uploaded photo of a doctor's handwritten prescription.
+Your essential task is to carefully transcribe EVERY medication line written on the paper:
+1. Examine each written line in the Rx body. Look for the medicine trade name or chemical brand (e.g., Augmentin, Pantocid, Dolo, Pan-D, Azithral, Montair-LC, Glycomet, Telma, Metformin, Amoxicillin, Paracetamol, etc.).
+2. Extract the dosage strength (e.g., 625mg, 40mg, 500mg, 650mg, 10mg) and frequency timing code (e.g., 1-0-1, OD, BD, TDS, SOS).
+3. If handwriting is cursive or partially abbreviated, use standard pharmacology to identify the most likely intended medication.
+4. Populate the "medicines" array with all identified medications.
+5. If the uploaded image is completely blank or truly contains no readable medical words, set "unableToDecipher": true and leave "medicines": [].
+
+CRITICAL OUTPUT FORMAT REQUIREMENTS:
 You MUST respond with a single valid JSON object strictly matching this schema:
 {
   "doctorSpecialtyOrClinic": "General Practice or identified specialty",
-  "prescriptionDate": "Date or Not specified",
-  "suspectedCondition": "Condition being treated",
+  "prescriptionDate": "Date or leave empty if not visible",
+  "suspectedCondition": "Condition being treated (e.g. Bacterial Infection, Acid Reflux, Fever)",
   "generalExplanation": "Empathetic explanation of the prescription",
   "medicines": [
     {
-      "name": "Brand name as written (e.g. Augmentin 625, Pantocid 40) - NEVER output 'Drug is not specified' or 'Not specified'",
+      "name": "Brand name as written (e.g. Augmentin 625, Pantocid 40)",
       "genericName": "Active chemical salt (e.g. Amoxicillin + Clavulanic Acid)",
       "form": "Tablet | Capsule | Syrup | etc.",
       "strength": "e.g. 500mg, 40mg",
@@ -2702,6 +2712,30 @@ You MUST respond with a single valid JSON object strictly matching this schema:
             !m.name.toLowerCase().includes("not specified") &&
             !m.name.toLowerCase().startsWith("apologies")
         );
+
+      // If zero genuine medicines and zero lab tests were found, mark as unableToDecipher
+      if (!hasGenuineMedicines && (!enrichedData.labTests || enrichedData.labTests.length === 0)) {
+        enrichedData.unableToDecipher = true;
+      }
+
+      // Sanitize suspectedCondition and doctorSpecialtyOrClinic so "Not specified" is never returned
+      if (
+        !enrichedData.suspectedCondition ||
+        enrichedData.suspectedCondition.toLowerCase().includes("not specified") ||
+        enrichedData.suspectedCondition.toLowerCase().includes("unspecified")
+      ) {
+        enrichedData.suspectedCondition = hasGenuineMedicines
+          ? "Prescription Analysis & Medication Regimen"
+          : "Unverified Prescription Scan";
+      }
+
+      if (
+        enrichedData.doctorSpecialtyOrClinic &&
+        (enrichedData.doctorSpecialtyOrClinic.toLowerCase().includes("not specified") ||
+          enrichedData.doctorSpecialtyOrClinic.toLowerCase().includes("unspecified"))
+      ) {
+        enrichedData.doctorSpecialtyOrClinic = "General Practice";
+      }
 
       if (hasGenuineMedicines && !enrichedData.unableToDecipher) {
         if (prescriptionAnalysisCache.size >= MAX_PRESCRIPTION_CACHE_SIZE) {
