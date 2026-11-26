@@ -544,6 +544,7 @@ interface LiveGroqModelsResult {
 
 const groqModelsCache = new Map<string, { data: LiveGroqModelsResult; expiresAt: number }>();
 const blacklistedGroqModels = new Set<string>();
+let lastBackupDiagnostic: { timestamp: string; reason: string } | null = null;
 
 async function getLiveGroqModels(apiKey: string): Promise<LiveGroqModelsResult> {
   const cached = groqModelsCache.get(apiKey);
@@ -1458,7 +1459,12 @@ async function callSecondaryBackupWithRetry(params: {
     }
   }
 
-  throw lastErr || new Error("Failed to generate content from secondary backup models.");
+  const finalErr = lastErr || new Error("Failed to generate content from secondary backup models.");
+  lastBackupDiagnostic = {
+    timestamp: new Date().toISOString(),
+    reason: String(finalErr?.message || finalErr).slice(0, 350),
+  };
+  throw finalErr;
 }
 
 // Backward-compatible alias for existing call sites
@@ -2166,6 +2172,7 @@ async function startServer() {
       "gemini-2.0-flash",
       "gemini-1.5-flash",
       "gemini-2.0-flash-lite",
+      "gemma-4-31b-it",
     ];
 
     for (let i = 0; i < keys.length; i++) {
@@ -2296,7 +2303,7 @@ async function startServer() {
                   {
                     type: "image_url",
                     image_url: {
-                      url: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
+                      url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
                     },
                   },
                 ],
@@ -2313,7 +2320,10 @@ async function startServer() {
           body: JSON.stringify({
             model: testModel,
             messages: probeMessages,
-            max_completion_tokens: isVisionProbe ? 512 : 10,
+            max_completion_tokens: isVisionProbe ? 2048 : 10,
+            ...(provider.type === "groq" && testModel.toLowerCase().includes("qwen")
+              ? { reasoning_effort: "none" }
+              : {}),
           }),
         });
 
@@ -2392,6 +2402,7 @@ async function startServer() {
       keys: results,
       secondaryBackup: primaryBackup,
       allSecondaryBackups: backupChecks,
+      lastBackupDiagnostic,
       summary:
         workingCount >= 3
           ? `All ${workingCount} Gemini API keys are active & verified! Ultra-fast load balancing is active across all 3 keys (Failover: Key 1 -> Key 2 -> Key 3${hasWorkingBackup ? ` -> ${backupChecks.map((b) => b.name).join(', ')}` : ''}).`
