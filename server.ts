@@ -2287,108 +2287,116 @@ async function startServer() {
       return;
     }
 
-    const results = [];
     const testModels = [
       "gemini-3-flash-preview",
       "gemini-flash-latest",
       "gemini-3.1-flash-lite",
-      "gemini-2.5-flash",
       "gemini-3.8-flash",
+      "gemini-2.5-flash",
     ];
 
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i];
-      const client = getClientForKey(key);
-      const modelChecks = [];
-      const discoveredModels: string[] = [];
+    const results = await Promise.all(
+      keys.map(async (key, i) => {
+        const client = getClientForKey(key);
+        const discoveredModels: string[] = [];
 
-      try {
-        const pager = await client.models.list({ config: { pageSize: 50 } });
-        for await (const m of pager) {
-          if (m.name) {
-            const cleanName = m.name.replace(/^models\//, "");
-            discoveredModels.push(cleanName);
-          }
-        }
-      } catch (listErr: any) {
-        console.warn(`[test-keys] Could not list models for Key #${i + 1}:`, listErr?.message || listErr);
-      }
-
-      for (const m of testModels) {
-        const start = Date.now();
-        try {
-          const response = await client.models.generateContent({
-            model: m,
-            contents: "Respond with only the single word: OK",
-          });
-          modelChecks.push({
-            model: m,
-            status: "ACTIVE & WORKING",
-            latencyMs: Date.now() - start,
-            preview: response.text?.trim() || "OK",
-          });
-        } catch (err: any) {
-          const errStr = err?.message || String(err);
-          // If SDK failed with ACCESS_TOKEN_TYPE_UNSUPPORTED, test if direct REST with ?key= and x-goog-api-key works
-          if (errStr.includes("ACCESS_TOKEN_TYPE_UNSUPPORTED")) {
-            try {
-              const restRes = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(key)}`,
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                    "x-goog-api-key": key,
-                  },
-                  body: JSON.stringify({
-                    contents: [{ parts: [{ text: "Respond with only the single word: OK" }] }],
-                  }),
-                }
-              );
-              if (restRes.ok) {
-                const restData = (await restRes.json()) as any;
-                const outText = restData?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "OK";
-                modelChecks.push({
-                  model: m,
-                  status: "ACTIVE & WORKING",
-                  latencyMs: Date.now() - start,
-                  preview: outText,
-                });
-                continue;
-              } else {
-                const restErr = await restRes.text();
-                modelChecks.push({
-                  model: m,
-                  status: "FAILED / QUOTA EXHAUSTED",
-                  latencyMs: Date.now() - start,
-                  error: `REST HTTP ${restRes.status}: ${restErr}`,
-                });
-                continue;
+        const listPromise = (async () => {
+          try {
+            const pager = await client.models.list({ config: { pageSize: 50 } });
+            for await (const m of pager) {
+              if (m.name) {
+                discoveredModels.push(m.name.replace(/^models\//, ""));
               }
-            } catch {
-              // fallback to standard error logging below
             }
+          } catch (listErr: any) {
+            console.warn(`[test-keys] Could not list models for Key #${i + 1}:`, listErr?.message || listErr);
           }
-          modelChecks.push({
-            model: m,
-            status: "FAILED / QUOTA EXHAUSTED",
-            latencyMs: Date.now() - start,
-            error: errStr,
-          });
-        }
-      }
+        })();
 
-      const isWorking = modelChecks.some((c) => c.status.startsWith("ACTIVE"));
-      results.push({
-        keyNumber: i + 1,
-        maskedKey: `${key.slice(0, 4)}...${key.slice(-4)}`,
-        keyLength: key.length,
-        overallStatus: isWorking ? "ACTIVE & WORKING" : "EXHAUSTED / FAILED",
-        cooldownRemainingSec: Math.max(0, Math.ceil(((keyUnhealthyUntil.get(key) || 0) - Date.now()) / 1000)),
-        models: modelChecks,
-        discoveredModels: discoveredModels.slice(0, 20),
-      });
-    }
+        const modelChecksPromise = Promise.all(
+          testModels.map(async (m) => {
+            const start = Date.now();
+            try {
+              const cfg = applyOptimalThinkingConfig(m, {}, "minimal");
+              const preview = await generateContentWithTimeout(
+                client,
+                m,
+                "Respond with only the single word: OK",
+                cfg,
+                8000
+              );
+              return {
+                model: m,
+                status: "ACTIVE & WORKING",
+                latencyMs: Date.now() - start,
+                preview: preview.trim() || "OK",
+              };
+            } catch (err: any) {
+              const errStr = err?.message || String(err);
+              if (errStr.includes("ACCESS_TOKEN_TYPE_UNSUPPORTED")) {
+                try {
+                  const restRes = await fetch(
+                    `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(key)}`,
+                    {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        "x-goog-api-key": key,
+                      },
+                      signal: AbortSignal.timeout(8000),
+                      body: JSON.stringify({
+                        contents: [{ parts: [{ text: "Respond with only the single word: OK" }] }],
+                      }),
+                    }
+                  );
+                  if (restRes.ok) {
+                    const restData = (await restRes.json()) as any;
+                    const outText = restData?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "OK";
+                    return {
+                      model: m,
+                      status: "ACTIVE & WORKING",
+                      latencyMs: Date.now() - start,
+                      preview: outText,
+                    };
+                  }
+                  const restErr = await restRes.text();
+                  return {
+                    model: m,
+                    status: "FAILED / QUOTA EXHAUSTED",
+                    latencyMs: Date.now() - start,
+                    error: `REST HTTP ${restRes.status}: ${restErr}`,
+                  };
+                } catch {
+                  // fallback to standard error logging below
+                }
+              }
+              return {
+                model: m,
+                status: "FAILED / QUOTA EXHAUSTED",
+                latencyMs: Date.now() - start,
+                error: errStr,
+              };
+            }
+          })
+        );
+
+        const [, modelChecks] = await Promise.all([
+          Promise.race([listPromise, new Promise<void>((r) => setTimeout(r, 5000))]),
+          modelChecksPromise,
+        ]);
+
+        const isWorking = modelChecks.some((c) => c.status.startsWith("ACTIVE"));
+        return {
+          keyNumber: i + 1,
+          maskedKey: `${key.slice(0, 4)}...${key.slice(-4)}`,
+          keyLength: key.length,
+          overallStatus: isWorking ? "ACTIVE & WORKING" : "EXHAUSTED / FAILED",
+          cooldownRemainingSec: Math.max(0, Math.ceil(((keyUnhealthyUntil.get(key) || 0) - Date.now()) / 1000)),
+          models: modelChecks,
+          discoveredModels: discoveredModels.slice(0, 20),
+        };
+      })
+    );
 
     const workingCount = results.filter((r) => r.overallStatus.startsWith("ACTIVE")).length;
 
@@ -2765,8 +2773,8 @@ Scan the prescription thoroughly for any diagnostic workup written under "Adv:",
           contents: parts, // Pass parts directly as PartUnion[]
           primaryModel: "gemini-3-flash-preview",
           thinkingMode: hasImagePart ? "low" : "minimal",
-          perAttemptTimeoutMs: hasImagePart ? 22000 : 15000,
-          totalDeadlineMs: 44000,
+          perAttemptTimeoutMs: hasImagePart ? 28000 : 18000,
+          totalDeadlineMs: 48000,
           config: {
             systemInstruction: systemPrompt,
             responseMimeType: "application/json",
