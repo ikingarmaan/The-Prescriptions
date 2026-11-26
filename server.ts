@@ -1180,7 +1180,9 @@ async function generateContentWithTimeout(
     abortSignal: controller.signal,
     httpOptions: {
       ...(config.httpOptions || {}),
-      timeout: timeoutMs,
+      // Google Gemini API rejects RPC deadlines under 10s (400 INVALID_ARGUMENT);
+      // local AbortController + Promise.race still enforce the tighter timeoutMs.
+      timeout: Math.max(10500, timeoutMs),
     },
   };
 
@@ -2323,7 +2325,7 @@ async function startServer() {
                 m,
                 "Respond with only the single word: OK",
                 cfg,
-                8000
+                12000
               );
               return {
                 model: m,
