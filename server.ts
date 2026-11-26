@@ -2286,6 +2286,24 @@ async function startServer() {
       }
 
       try {
+        const isVisionProbe = _req.query?.vision === "1";
+        const probeMessages = isVisionProbe
+          ? [
+              {
+                role: "user",
+                content: [
+                  { type: "text", text: "Reply with only OK" },
+                  {
+                    type: "image_url",
+                    image_url: {
+                      url: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
+                    },
+                  },
+                ],
+              },
+            ]
+          : [{ role: "user", content: "Respond with only the single word: OK" }];
+
         const testRes = await fetch(provider.endpoint, {
           method: "POST",
           headers: {
@@ -2294,10 +2312,19 @@ async function startServer() {
           },
           body: JSON.stringify({
             model: testModel,
-            messages: [{ role: "user", content: "Respond with only the single word: OK" }],
-            max_tokens: 10,
+            messages: probeMessages,
+            max_completion_tokens: isVisionProbe ? 512 : 10,
           }),
         });
+
+        const rateLimits = {
+          limitTokens: testRes.headers.get("x-ratelimit-limit-tokens"),
+          remainingTokens: testRes.headers.get("x-ratelimit-remaining-tokens"),
+          resetTokens: testRes.headers.get("x-ratelimit-reset-tokens"),
+          limitRequests: testRes.headers.get("x-ratelimit-limit-requests"),
+          remainingRequests: testRes.headers.get("x-ratelimit-remaining-requests"),
+          retryAfter: testRes.headers.get("retry-after"),
+        };
 
         if (testRes.ok) {
           const testData = (await testRes.json()) as any;
@@ -2311,6 +2338,7 @@ async function startServer() {
             model: testModel,
             supportsVision: provider.supportsVision,
             discoveredModels: discoveredModels.slice(0, 15),
+            rateLimits,
             preview: testData?.choices?.[0]?.message?.content?.trim() || "OK",
           });
         } else {
@@ -2319,13 +2347,14 @@ async function startServer() {
             name: provider.name,
             type: provider.type,
             configured: true,
-            status: "FAILED",
+            status: `FAILED (HTTP ${testRes.status})`,
             maskedKey: `...${provider.apiKey.slice(-4)}`,
             latencyMs: Date.now() - backupStart,
             model: testModel,
             supportsVision: provider.supportsVision,
             discoveredModels: discoveredModels.slice(0, 15),
-            error: errText.slice(0, 200),
+            rateLimits,
+            error: errText.slice(0, 300),
           });
         }
       } catch (backupErr: any) {
