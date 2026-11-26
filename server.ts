@@ -1355,7 +1355,7 @@ async function callSecondaryBackupWithRetry(params: {
               model,
               messages,
               temperature: 0.1,
-              max_completion_tokens: 2048,
+              max_completion_tokens: tryWithImage ? 1536 : 2048,
             };
             if (useJsonMode) {
               payload.response_format = { type: "json_object" };
@@ -1411,11 +1411,13 @@ async function callSecondaryBackupWithRetry(params: {
                 continue;
               }
 
-              // 3. Rate limit (429) -> wait briefly and retry once before failing over
-              if (response.status === 429 && retry === 0) {
-                const retryAfterHeader = parseFloat(response.headers.get("retry-after") || "2.5");
+              // 3. Rate limit (429) -> retry once ONLY for short per-minute (TPM) cooldowns (<= 15s); fail fast for daily TPD caps
+              const isDailyTpdCap =
+                errText.toLowerCase().includes("tokens per day") || errText.includes("(TPD)");
+              const retryAfterHeader = parseFloat(response.headers.get("retry-after") || "2.5");
+              if (response.status === 429 && retry === 0 && !isDailyTpdCap && retryAfterHeader <= 15) {
                 const waitMs = Math.min(4500, Math.max(1500, Math.round(retryAfterHeader * 1000)));
-                console.warn(`[${provider.name}] Rate limited (429) on ${model}. Waiting ${waitMs}ms...`);
+                console.warn(`[${provider.name}] Rate limited (429 TPM) on ${model}. Waiting ${waitMs}ms...`);
                 lastErr = new Error(`${provider.name} HTTP 429: ${errText}`);
                 await new Promise((r) => setTimeout(r, waitMs));
                 continue;
@@ -2890,7 +2892,9 @@ Respond with a single valid JSON object matching this schema:
       const rawErr = err?.message || "Failed to analyze prescription.";
       const lowerErr = rawErr.toLowerCase();
       let userFriendlyError = rawErr;
-      if (lowerErr.includes("429") || lowerErr.includes("resource_exhausted") || lowerErr.includes("rate limit") || lowerErr.includes("tokens per minute")) {
+      if (lowerErr.includes("tokens per day") || lowerErr.includes("(tpd)")) {
+        userFriendlyError = "Daily image scanning capacity is temporarily saturated. Please use the 'Written Notes / Text' tab for instant results, or retry photo scanning in a few minutes.";
+      } else if (lowerErr.includes("429") || lowerErr.includes("resource_exhausted") || lowerErr.includes("rate limit") || lowerErr.includes("tokens per minute")) {
         userFriendlyError = "Our clinical servers are experiencing high traffic right now. Please wait 20–30 seconds and retry, or enter the medicine names directly.";
       } else if (lowerErr.includes("413") || lowerErr.includes("too large")) {
         userFriendlyError = "The prescription image is too large to process. Please crop closer to the medication list or enter the medicine names directly.";
