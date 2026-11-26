@@ -1099,139 +1099,247 @@ const singleMedicineSchema = {
   ],
 };
 
+// Cache per-key dead/deprecated models (404 NOT_FOUND) for 1 hour so scans skip them in 0ms
+const deadModelsByKey = new Map<string, Map<string, number>>();
+const DEAD_MODEL_TTL_MS = 60 * 60 * 1000;
+
+function isModelMarkedDead(apiKey: string, model: string): boolean {
+  const keyMap = deadModelsByKey.get(apiKey);
+  if (!keyMap) return false;
+  const expiresAt = keyMap.get(model);
+  if (!expiresAt) return false;
+  if (Date.now() > expiresAt) {
+    keyMap.delete(model);
+    return false;
+  }
+  return true;
+}
+
+function markModelDead(apiKey: string, model: string): void {
+  let keyMap = deadModelsByKey.get(apiKey);
+  if (!keyMap) {
+    keyMap = new Map<string, number>();
+    deadModelsByKey.set(apiKey, keyMap);
+  }
+  keyMap.set(model, Date.now() + DEAD_MODEL_TTL_MS);
+}
+
+/**
+ * Applies fast, model-appropriate thinking settings so Gemini 3 / 2.5 models
+ * do not burn 20-60s of hidden reasoning before returning structured JSON.
+ */
+function applyOptimalThinkingConfig(
+  model: string,
+  baseConfig: any,
+  thinkingMode: "minimal" | "low"
+): any {
+  const config = { ...baseConfig };
+  if (config.thinkingConfig) return config;
+
+  const isGemini3OrLatest =
+    model.includes("gemini-3") || model.endsWith("-latest");
+  if (isGemini3OrLatest) {
+    const level =
+      model.includes("pro") || thinkingMode === "low"
+        ? ThinkingLevel.LOW
+        : ThinkingLevel.MINIMAL;
+    config.thinkingConfig = { thinkingLevel: level };
+    return config;
+  }
+
+  if (model.includes("2.5")) {
+    config.thinkingConfig = {
+      thinkingBudget: model.includes("pro") ? 128 : 0,
+    };
+    return config;
+  }
+
+  delete config.thinkingConfig;
+  return config;
+}
+
+async function generateContentWithTimeout(
+  ai: GoogleGenAI,
+  model: string,
+  contents: any,
+  config: any,
+  timeoutMs: number
+): Promise<string> {
+  const controller = new AbortController();
+  let timerId: ReturnType<typeof setTimeout> | undefined;
+
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timerId = setTimeout(() => {
+      controller.abort();
+      reject(new Error(`Gemini request timeout after ${timeoutMs}ms (${model})`));
+    }, timeoutMs);
+  });
+
+  const requestConfig = {
+    ...config,
+    abortSignal: controller.signal,
+    httpOptions: {
+      ...(config.httpOptions || {}),
+      timeout: timeoutMs,
+    },
+  };
+
+  try {
+    const response: any = await Promise.race([
+      ai.models.generateContent({
+        model,
+        contents,
+        config: requestConfig,
+      }),
+      timeoutPromise,
+    ]);
+
+    return (
+      response?.text ||
+      response?.candidates?.[0]?.content?.parts
+        ?.map((p: any) => p.text)
+        .filter(Boolean)
+        .join("") ||
+      ""
+    );
+  } finally {
+    if (timerId !== undefined) clearTimeout(timerId);
+  }
+}
+
 async function callGeminiWithRetry(params: {
   contents: any;
   config: any;
   primaryModel?: string;
+  thinkingMode?: "minimal" | "low";
+  perAttemptTimeoutMs?: number;
+  totalDeadlineMs?: number;
 }): Promise<string> {
   const orderedKeys = getOrderedApiKeys();
-  const modelsToTry = [
-    params.primaryModel || "gemini-2.5-flash",
-    "gemini-2.5-flash",
-    "gemini-flash-latest",
-    "gemini-2.5-flash-lite",
-    "gemini-flash-lite-latest",
-    "gemini-2.0-flash",
-    "gemini-2.5-pro",
-    "gemini-pro-latest",
-  ];
+  const modelsToTry = Array.from(
+    new Set([
+      ...(params.primaryModel ? [params.primaryModel] : []),
+      "gemini-3-flash-preview",
+      "gemini-flash-latest",
+      "gemini-3.8-flash",
+      "gemini-3.1-flash-lite",
+      "gemini-flash-lite-latest",
+      "gemini-2.5-flash",
+      "gemini-2.5-flash-lite",
+      "gemini-3.1-pro-preview",
+      "gemini-pro-latest",
+    ])
+  );
+  const thinkingMode = params.thinkingMode ?? "minimal";
+  const perAttemptTimeoutMs = params.perAttemptTimeoutMs ?? 18000;
+  const totalDeadlineMs = params.totalDeadlineMs ?? 44000;
+  const deadlineAt = Date.now() + totalDeadlineMs;
+
   let lastError: any = null;
   const invalidKeys = new Set<string>();
 
-  // Pass: Try primary (fastest) model across all healthy keys first.
-  // If Key 1 hits 429 quota exhaustion, instantly failover to Key 2, then Key 3!
   for (const model of modelsToTry) {
-    let modelNotFound = false;
+    if (Date.now() + 2500 >= deadlineAt) break;
+
     for (let keyIdx = 0; keyIdx < orderedKeys.length; keyIdx++) {
-      if (modelNotFound) break;
+      const remainingMs = deadlineAt - Date.now();
+      if (remainingMs < 2500) break;
+
       const apiKey = orderedKeys[keyIdx];
-      if (invalidKeys.has(apiKey)) continue;
+      if (invalidKeys.has(apiKey) || isModelMarkedDead(apiKey, model)) continue;
 
       const ai = getClientForKey(apiKey);
       const keyLabel = `Key #${keyIdx + 1} (…${apiKey.slice(-4)})`;
+      const attemptTimeoutMs = Math.min(perAttemptTimeoutMs, remainingMs);
 
-      for (let attempt = 1; attempt <= 2; attempt++) {
-        try {
-          const config = { ...params.config };
-          // If thinkingConfig was passed, clean it up if model does not support it
-          if (!model.includes("2.5") && config.thinkingConfig) {
-            delete config.thinkingConfig;
-          }
+      try {
+        const config = applyOptimalThinkingConfig(model, params.config, thinkingMode);
+        const text = await generateContentWithTimeout(
+          ai,
+          model,
+          params.contents,
+          config,
+          attemptTimeoutMs
+        );
+        if (text) return text;
+      } catch (err: any) {
+        lastError = err;
+        const errMsg = err?.message || String(err);
 
-          const response = await ai.models.generateContent({
-            model,
-            contents: params.contents,
-            config,
-          });
-          const text =
-            response.text ||
-            response.candidates?.[0]?.content?.parts?.map((p: any) => p.text).filter(Boolean).join("") ||
-            "";
-          if (text) {
-            return text;
-          }
-        } catch (err: any) {
-          lastError = err;
-          const errMsg = err?.message || String(err);
-
-          // If thinking config caused an error, retry immediately without it
-          if (errMsg.toLowerCase().includes("thinking") && params.config?.thinkingConfig) {
+        // If thinkingConfig parameter isn't accepted by this model/alias, fall back cleanly
+        if (errMsg.toLowerCase().includes("thinking")) {
+          const fallbackRemaining = deadlineAt - Date.now();
+          if (fallbackRemaining >= 3000) {
             try {
-              const fallbackConfig = { ...params.config };
-              delete fallbackConfig.thinkingConfig;
-              const fallbackResponse = await ai.models.generateContent({
+              const noThinkingConfig = { ...params.config };
+              delete noThinkingConfig.thinkingConfig;
+              const fallbackText = await generateContentWithTimeout(
+                ai,
                 model,
-                contents: params.contents,
-                config: fallbackConfig,
-              });
-              if (fallbackResponse.text) {
-                return fallbackResponse.text;
-              }
+                params.contents,
+                noThinkingConfig,
+                Math.min(perAttemptTimeoutMs, fallbackRemaining)
+              );
+              if (fallbackText) return fallbackText;
             } catch (retryErr: any) {
               lastError = retryErr;
             }
           }
+        }
 
-          // Check if error is an invalid API key / authentication denial
-          const isAuthError =
-            errMsg.includes("API_KEY_INVALID") ||
-            errMsg.includes("PERMISSION_DENIED") ||
-            errMsg.includes("Forbidden") ||
-            errMsg.includes("401") ||
-            errMsg.includes("403");
+        const isAuthError =
+          errMsg.includes("API_KEY_INVALID") ||
+          errMsg.includes("PERMISSION_DENIED") ||
+          errMsg.includes("Forbidden") ||
+          errMsg.includes("401") ||
+          errMsg.includes("403");
 
-          if (isAuthError) {
-            console.warn(`[Gemini API] ${keyLabel} is unauthorized or invalid: ${errMsg.slice(0, 100)}`);
-            invalidKeys.add(apiKey);
-            break; // Skip to next key immediately!
+        if (isAuthError) {
+          console.warn(`[Gemini API] ${keyLabel} unauthorized/invalid: ${errMsg.slice(0, 100)}`);
+          invalidKeys.add(apiKey);
+          continue;
+        }
+
+        if (
+          errMsg.includes("404") ||
+          errMsg.includes("NOT_FOUND") ||
+          errMsg.includes("not found") ||
+          errMsg.includes("no longer available")
+        ) {
+          console.warn(`[Gemini API] ${keyLabel} -> model ${model} unavailable (404). Caching & advancing.`);
+          markModelDead(apiKey, model);
+          continue;
+        }
+
+        const isRateLimit =
+          errMsg.includes("429") ||
+          errMsg.includes("RESOURCE_EXHAUSTED") ||
+          errMsg.includes("quota") ||
+          errMsg.includes("rate limit") ||
+          errMsg.includes("RateLimitError");
+
+        if (isRateLimit) {
+          let cooldownSec = 60;
+          const retryMatch = errMsg.match(/retry in ([\d.]+)s/i) || errMsg.match(/retryDelay":"(\d+)s/i);
+          if (retryMatch && retryMatch[1]) {
+            cooldownSec = Math.ceil(parseFloat(retryMatch[1])) + 2;
           }
+          keyUnhealthyUntil.set(apiKey, Date.now() + cooldownSec * 1000);
+          console.warn(`[Gemini API] ${keyLabel} rate-limited (429) on ${model}. Failing over to next key...`);
+          continue;
+        }
 
-          // If model is 404 / NOT_FOUND / not available, break immediately across ALL keys
-          if (
-            errMsg.includes("404") ||
-            errMsg.includes("NOT_FOUND") ||
-            errMsg.includes("not found") ||
-            errMsg.includes("no longer available")
-          ) {
-            console.warn(`[Gemini API] Model ${model} is not available on this endpoint. Skipping to next model.`);
-            modelNotFound = true;
-            break;
-          }
+        const isTransientOrTimeout =
+          errMsg.includes("503") ||
+          errMsg.includes("UNAVAILABLE") ||
+          errMsg.includes("high demand") ||
+          errMsg.includes("overloaded") ||
+          errMsg.includes("timeout") ||
+          errMsg.includes("AbortError");
 
-          // Check if error is quota exhaustion / rate limit
-          const isRateLimit =
-            errMsg.includes("429") ||
-            errMsg.includes("RESOURCE_EXHAUSTED") ||
-            errMsg.includes("quota") ||
-            errMsg.includes("rate limit") ||
-            errMsg.includes("RateLimitError");
-
-          if (isRateLimit) {
-            let cooldownSec = 60;
-            const retryMatch = errMsg.match(/retry in ([\d.]+)s/i) || errMsg.match(/retryDelay":"(\d+)s/i);
-            if (retryMatch && retryMatch[1]) {
-              cooldownSec = Math.ceil(parseFloat(retryMatch[1])) + 2;
-            }
-            keyUnhealthyUntil.set(apiKey, Date.now() + cooldownSec * 1000);
-            console.warn(
-              `[Gemini API] ${keyLabel} rate-limited (429) on ${model}. Cooldown ${cooldownSec}s. Instantly failing over to next available key...`
-            );
-            // If other keys exist, failover to next key immediately!
-            if (orderedKeys.length > 1) {
-              break;
-            }
-          }
-
-          const isTransient =
-            errMsg.includes("503") ||
-            errMsg.includes("UNAVAILABLE") ||
-            errMsg.includes("high demand") ||
-            errMsg.includes("overloaded");
-
-          if (isTransient) {
-            console.warn(`[Gemini API] Model ${model} is experiencing high demand (503). Switching model...`);
-            break;
-          }
+        if (isTransientOrTimeout) {
+          console.warn(`[Gemini API] ${keyLabel} transient/timeout on ${model}: ${errMsg.slice(0, 100)}`);
+          continue;
         }
       }
     }
@@ -2181,11 +2289,11 @@ async function startServer() {
 
     const results = [];
     const testModels = [
+      "gemini-3-flash-preview",
+      "gemini-flash-latest",
+      "gemini-3.1-flash-lite",
       "gemini-2.5-flash",
-      "gemini-2.0-flash",
-      "gemini-1.5-flash",
-      "gemini-2.0-flash-lite",
-      "gemma-4-31b-it",
+      "gemini-3.8-flash",
     ];
 
     for (let i = 0; i < keys.length; i++) {
@@ -2652,9 +2760,13 @@ Scan the prescription thoroughly for any diagnostic workup written under "Adv:",
 
       let responseText: string;
       try {
+        const hasImagePart = Array.isArray(parts) && parts.some((p: any) => Boolean(p?.inlineData));
         responseText = await callGeminiWithRetry({
           contents: parts, // Pass parts directly as PartUnion[]
-          primaryModel: "gemini-2.5-flash",
+          primaryModel: "gemini-3-flash-preview",
+          thinkingMode: hasImagePart ? "low" : "minimal",
+          perAttemptTimeoutMs: hasImagePart ? 22000 : 15000,
+          totalDeadlineMs: 44000,
           config: {
             systemInstruction: systemPrompt,
             responseMimeType: "application/json",
@@ -3035,7 +3147,10 @@ Include its generic name, primary uses, mechanism of action, typical dosage form
       try {
         responseText = await callGeminiWithRetry({
           contents: prompt,
-          primaryModel: "gemini-2.5-flash",
+          primaryModel: "gemini-3-flash-preview",
+          thinkingMode: "minimal",
+          perAttemptTimeoutMs: 15000,
+          totalDeadlineMs: 38000,
           config: {
             systemInstruction: "You are an expert pharmacist creating patient education guides for medications.",
             responseMimeType: "application/json",
@@ -3275,7 +3390,7 @@ Include its generic name, primary uses, mechanism of action, typical dosage form
 
   // Cyber Defense: Anti-Slowloris & Connection-Holding Timeout Hardening
   server.headersTimeout = 35000;
-  server.requestTimeout = 65000;
+  server.requestTimeout = 90000;
   server.keepAliveTimeout = 5000;
 
   // Graceful shutdown for container environments (Railway, Docker, etc.)

@@ -188,21 +188,42 @@ export default function App() {
         };
       }
 
-      const response = await fetch('/api/analyze-prescription', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          imageBase64: payload.imageBase64,
-          textNotes: payload.textNotes,
-          patientContext: payload.patientContext,
-          ocrPretext: payload.ocrPretext,
-          preprocessingReport: leanPreprocessingReport,
-          learnedCorrections,
-        }),
-      });
+      const controller = new AbortController();
+      const timeoutId = window.setTimeout(() => controller.abort(), 62000);
 
-      const data = await response.json();
-      if (!response.ok || !data.success) {
+      let response: Response;
+      try {
+        response = await fetch('/api/analyze-prescription', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+          body: JSON.stringify({
+            imageBase64: payload.imageBase64,
+            textNotes: payload.textNotes,
+            patientContext: payload.patientContext,
+            ocrPretext: payload.ocrPretext,
+            preprocessingReport: leanPreprocessingReport,
+            learnedCorrections,
+          }),
+        });
+      } finally {
+        window.clearTimeout(timeoutId);
+      }
+
+      const rawText = await response.text();
+      let data: any = null;
+      try {
+        data = rawText ? JSON.parse(rawText) : null;
+      } catch {
+        data = null;
+      }
+
+      if (!response.ok || !data?.success) {
+        if (response.status === 502 || response.status === 504 || !data) {
+          throw new Error(
+            'The analysis server took too long to respond. Please retry with a clearer photo or type the medicine names directly.'
+          );
+        }
         throw new Error(data.error || 'Failed to analyze prescription.');
       }
 
@@ -224,9 +245,12 @@ export default function App() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: any) {
       console.error('Analysis error:', err);
+      const isTimeout = err?.name === 'AbortError' || /abort|timed out|timeout/i.test(err?.message || '');
       setError(
-        err.message ||
-          'Failed to decipher prescription. Please ensure the image is clear or enter the written medicine names directly.'
+        isTimeout
+          ? 'Prescription scan timed out under heavy load. Please try again or enter the medicine names directly.'
+          : err.message ||
+              'Failed to decipher prescription. Please ensure the image is clear or enter the written medicine names directly.'
       );
     } finally {
       setIsLoading(false);
