@@ -113,8 +113,8 @@ export async function preprocessPrescriptionCanvas(
     img.crossOrigin = 'anonymous';
     img.onload = () => {
       try {
-        // Downscale large camera photos (e.g. 48MP/12MP) to max 1600px to prevent mobile OOM crashes and payload explosion
-        const MAX_DIM = 1600;
+        // Downscale large camera photos (e.g. 48MP/12MP) to max 1280px to fit vision model token limits cleanly while keeping handwriting sharp
+        const MAX_DIM = 1280;
         let width = img.naturalWidth || img.width;
         let height = img.naturalHeight || img.height;
         if (width > MAX_DIM || height > MAX_DIM) {
@@ -151,7 +151,7 @@ export async function preprocessPrescriptionCanvas(
         }
 
         ctx.putImageData(imgData, 0, 0);
-        resolve({ enhancedDataUrl: canvas.toDataURL('image/jpeg', 0.88), skewAngle: 0.0 });
+        resolve({ enhancedDataUrl: canvas.toDataURL('image/jpeg', 0.85), skewAngle: 0.0 });
       } catch {
         resolve({ enhancedDataUrl: dataUrl, skewAngle: 0.0 });
       }

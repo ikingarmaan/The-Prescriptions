@@ -36,7 +36,9 @@ export const PrescriptionMasterBox: React.FC<PrescriptionMasterBoxProps> = ({
             <h3 className="text-lg sm:text-xl font-extrabold text-white tracking-tight">
               Prescribed Medicines Master Roster ({medicines.length})
             </h3>
-            {suspectedCondition && (
+            {suspectedCondition &&
+              !suspectedCondition.toLowerCase().includes('not specified') &&
+              !suspectedCondition.toLowerCase().includes('unspecified') && (
               <p className="text-xs text-emerald-200/80 mt-0.5">
                 Clinical Indication:{' '}
                 <span className="text-white font-semibold">{suspectedCondition}</span>

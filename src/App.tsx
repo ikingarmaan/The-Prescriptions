@@ -294,6 +294,13 @@ export default function App() {
         companyName: extraDetails?.companyName,
         popularCompanyBrands: extraDetails?.popularCompanyBrands,
         activeGenericSalt: newGeneric || extraDetails?.activeGenericSalt,
+        scheduleTimes: extraDetails?.scheduleTimes || {
+          morning: true,
+          afternoon: false,
+          evening: false,
+          bedtime: false,
+          asNeeded: false,
+        },
         commonSideEffects: extraDetails?.commonSideEffects || [],
         precautions: extraDetails?.precautions || [],
         ...extraDetails,
@@ -447,7 +454,7 @@ export default function App() {
                 {isPrescriptionUnunderstood && !isUnunderstoodPopupDismissed && (
                   <React.Suspense fallback={null}>
                     <UnunderstoodMedicinePopup
-                      onClose={() => setIsUnunderstoodPopupDismissed(true)}
+                      onClose={handleReset}
                       onUploadNew={handleReset}
                       onSelectSample={(sample) => {
                         setIsUnunderstoodPopupDismissed(true);

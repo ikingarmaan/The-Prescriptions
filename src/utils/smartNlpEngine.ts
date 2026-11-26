@@ -20,20 +20,38 @@ export function postProcessPrescriptionResultWithNLP(
     enriched.medicines = [];
   }
 
+  const cleanField = (val: unknown, fallback = ''): string => {
+    if (typeof val !== 'string') return fallback;
+    const trimmed = val.trim();
+    const lower = trimmed.toLowerCase();
+    if (!lower || lower.includes('not specified') || lower.includes('unspecified') || lower === 'n/a' || lower === 'none') {
+      return fallback;
+    }
+    return trimmed;
+  };
+
+  // Sanitize top-level string fields against bogus "Not specified" strings
+  enriched.suspectedCondition = cleanField(enriched.suspectedCondition, '');
+  enriched.doctorSpecialtyOrClinic = cleanField(enriched.doctorSpecialtyOrClinic, '');
+  enriched.prescriptionDate = cleanField(enriched.prescriptionDate, '');
+  enriched.generalExplanation = cleanField(enriched.generalExplanation, '');
+
   // Filter out bogus placeholders where AI generated "Drug is not specified", "Not specified", etc.
   const filteredMeds: MedicineDetail[] = [];
   for (const med of enriched.medicines) {
     const rawName = (med.name || '').trim().toLowerCase();
     const isBogusPlaceholder =
       !rawName ||
-      rawName === 'drug is not specified' ||
-      rawName === 'not specified' ||
-      rawName === 'unspecified' ||
-      rawName === 'unspecified drug' ||
-      rawName === 'no drug specified' ||
-      rawName === 'no medication specified' ||
+      rawName.length <= 1 ||
+      rawName.includes('not specified') ||
+      rawName.includes('unspecified') ||
+      rawName.includes('no drug') ||
+      rawName.includes('no medication') ||
+      rawName === 'identified medication' ||
       rawName === 'none' ||
-      rawName === 'n/a';
+      rawName === 'n/a' ||
+      rawName.startsWith('sorry') ||
+      rawName.startsWith('unable to');
 
     if (isBogusPlaceholder) {
       if (!enriched.unclearOrAmbiguousNotes) enriched.unclearOrAmbiguousNotes = [];
@@ -43,7 +61,15 @@ export function postProcessPrescriptionResultWithNLP(
         enriched.unclearOrAmbiguousNotes.push(note);
       }
     } else {
-      filteredMeds.push(med);
+      filteredMeds.push({
+        ...med,
+        genericName: cleanField(med.genericName, ''),
+        strength: cleanField(med.strength, ''),
+        dosage: cleanField(med.dosage, '1 dose'),
+        frequency: cleanField(med.frequency, 'As prescribed'),
+        timingCode: cleanField(med.timingCode, ''),
+        duration: cleanField(med.duration, 'As directed'),
+      });
     }
   }
   enriched.medicines = filteredMeds;
@@ -367,15 +393,13 @@ export function postProcessPrescriptionResultWithNLP(
     }
   }
 
-  // Check if entire prescription is undecipherable
+  // Check if entire prescription is undecipherable (zero recognized medicines and zero recognized lab tests)
   const hasRecognizedMeds = enriched.medicines.some(
     (m) => m.name && m.name.trim().length > 1 && !m.name.toLowerCase().startsWith('apologies')
   );
   const hasRecognizedLabTests = Boolean(enriched.labTests && enriched.labTests.length > 0);
-  const hasClinicalFindings = Boolean(enriched.generalExplanation || enriched.suspectedCondition);
 
-  // ONLY mark unableToDecipher if there are truly no medicines, no lab tests, and no clinical findings
-  if (!hasRecognizedMeds && !hasRecognizedLabTests && !hasClinicalFindings) {
+  if (!hasRecognizedMeds && !hasRecognizedLabTests) {
     enriched.unableToDecipher = true;
     if (enriched.multiEngineEnsemble) {
       enriched.multiEngineEnsemble.overallConfidence = 0.0;

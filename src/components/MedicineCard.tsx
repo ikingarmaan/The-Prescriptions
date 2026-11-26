@@ -297,7 +297,7 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({
           <div className="flex items-center gap-1">
             <span
               className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                medicine.scheduleTimes.morning
+                medicine.scheduleTimes?.morning
                   ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-800'
                   : 'bg-slate-100 dark:bg-slate-800/60 text-slate-300 dark:text-slate-600'
               }`}
@@ -306,7 +306,7 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({
             </span>
             <span
               className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                medicine.scheduleTimes.afternoon
+                medicine.scheduleTimes?.afternoon
                   ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-800'
                   : 'bg-slate-100 dark:bg-slate-800/60 text-slate-300 dark:text-slate-600'
               }`}
@@ -315,7 +315,7 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({
             </span>
             <span
               className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                medicine.scheduleTimes.evening
+                medicine.scheduleTimes?.evening
                   ? 'bg-indigo-100 dark:bg-indigo-950/60 text-indigo-900 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-800'
                   : 'bg-slate-100 dark:bg-slate-800/60 text-slate-300 dark:text-slate-600'
               }`}
@@ -324,14 +324,14 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({
             </span>
             <span
               className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                medicine.scheduleTimes.bedtime
+                medicine.scheduleTimes?.bedtime
                   ? 'bg-purple-100 dark:bg-purple-950/60 text-purple-900 dark:text-purple-300 border border-purple-300 dark:border-purple-800'
                   : 'bg-slate-100 dark:bg-slate-800/60 text-slate-300 dark:text-slate-600'
               }`}
             >
               Bedtime
             </span>
-            {medicine.scheduleTimes.asNeeded && (
+            {medicine.scheduleTimes?.asNeeded && (
               <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
                 As Needed (SOS)
               </span>
