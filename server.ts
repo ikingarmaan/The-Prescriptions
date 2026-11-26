@@ -1139,10 +1139,14 @@ function applyOptimalThinkingConfig(
   const isGemini3OrLatest =
     model.includes("gemini-3") || model.endsWith("-latest");
   if (isGemini3OrLatest) {
+    const supportsMinimal =
+      model.includes("3-flash-preview") ||
+      model.includes("3.1-flash-lite") ||
+      model.includes("3.5-flash-lite");
     const level =
-      model.includes("pro") || thinkingMode === "low"
-        ? ThinkingLevel.LOW
-        : ThinkingLevel.MINIMAL;
+      supportsMinimal && thinkingMode === "minimal"
+        ? ThinkingLevel.MINIMAL
+        : ThinkingLevel.LOW;
     config.thinkingConfig = { thinkingLevel: level };
     return config;
   }
@@ -1268,18 +1272,22 @@ async function callGeminiWithRetry(params: {
         lastError = err;
         const errMsg = err?.message || String(err);
 
-        // If thinkingConfig parameter isn't accepted by this model/alias, fall back cleanly
+        // If thinkingConfig parameter isn't accepted by this model/alias, downgrade MINIMAL -> LOW first, then strip
         if (errMsg.toLowerCase().includes("thinking")) {
           const fallbackRemaining = deadlineAt - Date.now();
           if (fallbackRemaining >= 3000) {
             try {
-              const noThinkingConfig = { ...params.config };
-              delete noThinkingConfig.thinkingConfig;
+              const fallbackConfig = { ...params.config };
+              if (errMsg.includes("MINIMAL") && (model.includes("gemini-3") || model.endsWith("-latest"))) {
+                fallbackConfig.thinkingConfig = { thinkingLevel: ThinkingLevel.LOW };
+              } else {
+                delete fallbackConfig.thinkingConfig;
+              }
               const fallbackText = await generateContentWithTimeout(
                 ai,
                 model,
                 params.contents,
-                noThinkingConfig,
+                fallbackConfig,
                 Math.min(perAttemptTimeoutMs, fallbackRemaining)
               );
               if (fallbackText) return fallbackText;
